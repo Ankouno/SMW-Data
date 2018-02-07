@@ -1,6 +1,6 @@
 # Physics-Related Glitches  
-<strong>(Mario and controls)</strong>  
-69 recorded glitches, 63 of which are useful  
+__(Mario and controls)__  
+_69 recorded glitches, 63 of which are useful_
 * If Mario becomes surrounded by blocks and touches the ground, he will be crushed and die. However, avoiding touching the ground can be done in a number of ways, such as by flying before Mario gets surrounded, or swimming upwards. [Video](https://www.youtube.com/watch?v=oxUGDQCccF4)
 * If Mario is far enough inside a solid tile, he will be pushed leftward by it. Oddly, Layer 2 does will not do this, and instead Mario will be able to freely walk around (though unable to jump).
 * If Mario is big and stands up or jumps in a one-tile space, he may be pushed through the floor. Also works if Mario lands on Yoshi, and can even occur while Mario is small if he gets stuck in a turnblock during the jump.
@@ -19,6 +19,7 @@
 * If Mario is ducking when he enters certain states (climbing, balloon), then he will still retain his reduced hitbox size, despite what the graphics for these states suggest. He'll also still be ducking once he exits those states.
 * If Mario grows from a powerup while in certain phases (climbing, Lakitu cloud) and his head ends up inside a ceiling, he'll be pushed leftward, even through solid blocks.
 * If Mario has 99 lives and he gets a life through any means, his life counter will briefly increase past 99 for a frame. Exiting a level on that frame (via start+select or a screen side exit) will then display a glitched value for his life counter on the overworld. Entering a new level will fix it, however.
+* It's possible to completely prevent any sprite from spawning so long as the spawn region of the screen can be passed over it (a distance of just over 16 pixels). Because the spawn routine only runs every other frame, this means that you can have up to three frames to do this (the last frame of which can be gotten from pausing the game breifly to realign the frame counter). Two verified methods of doing so are using a rope mechanism to drag Mario during those frame, and using a fast-spinning revolving platform. If moving fast enough, it may also be possible without the use of any sprites. [More info](http://tasvideos.org/forum/viewtopic.php?p=464958#464958)
 * If vertical scrolling is enabled in a level, you can prevent the screen from scrolling by jumping off of the ground the frame that Mario lands on it.
 * While being "stuck" by a noteblock, Mario can enter solid blocks, though he'll be crushed. [Fix](http://www.smwcentral.net/?p=section&a=details&id=8815)
 * Mario can stick to a row of noteblocks without bouncing off of them if he runs across them at the right speed.
@@ -75,8 +76,8 @@
 ---
 ---
 # Yoshi-Related Glitches
-<strong>(things requiring Yoshi)</strong>  
-146 recorded glitches, 126 of which are useful
+__(things requiring Yoshi)__  
+_146 recorded glitches, 126 of which are useful_
 * After mounting Yoshi, Mario can not be hit by enemies for a few frames. Only works with certain sprites, however. [More info](http://smwc.me/649544)
 * Keys and P-switches can still hit blocks while stuck to Yoshi's tongue.
 * Shells, throwblocks, and Goombas can still hit other sprites while stuck to Yoshi's tongue, so long as the sprite it's hitting is in a lower slot.
@@ -93,7 +94,9 @@
 * Landing on Yoshi at the right angle next to a solid block may clip Mario inside the block.
 * Landing on Yoshi while he's inside a springboard and immediately dismounting him will allow Mario to pick up the springboard.
 * Jumping at the right angle onto a message box or light switch while riding Yoshi will "suck" Mario on top of the box, even if there is a solid block on top of it. He also won't be able to be crushed while on top of it, though you won't be able to get out otherwise.
-* If Yoshi ends up inside a block, you will be unable to move out of the block without jumping.
+* If Yoshi ends up inside a block while Mario is riding him, you will be unable to move out of the block without jumping.
+* If Yoshi ends up inside a block without Mario riding him, he will "climb" the blocks upward until he reaches an empty block. This can occur as a result of growing Baby Yoshi inside the block, spawning a block on top of Yoshi, or clipping four pixels into the block and dismounting. [Video](https://youtu.be/5Nwcggojnds)
+* If Mario is riding Yoshi, on the ground, and inside a solid tile, then for a few frames after jumping off Yoshi, Mario can jump a second time as if he were on the ground. This will not cancel a spinjump, instead just making the jump go higher.
 * Yoshi's swallow timer while he has a sprite in his mouth normally decreases once every frame. Freezing the game (via $9D) on one of the decrementing frames, however, will cause the timer to decrease every frame while the game is frozen.
 * After eating enough berries, you can delay Yoshi's "laying" animation by not touching the ground for more than a frame. If you throw Yoshi in a hole before he lays it, the next-spawned Yoshi will lay it instead.
 * The egg Yoshi lays can be used to hit blocks.
@@ -190,7 +193,6 @@
 * Berries don't work correctly in vertical levels. Yoshi will be unable to eat them most of the time, and when he can, they won't disappear; instead, an empty green bush tile will appear a screen below the berry's actual position, and the berry itself can be eaten an unlimited number of times.
 * When Yoshi eats a berry by running into it, the game will adjust Mario and Yoshi's position slightly during the freeeze to center him on the block. If the berry is placed close enough to a slope, this can be used to clip them into the slope.
 * Dismounting Yoshi while he's eating a berry will cause Mario to normal jump off instead of spinjump, despite still giving an X and Y speed as if he spinjumped.
-* If Yoshi ends inside a block without Mario riding him, he will "climb" the blocks upward until he reaches an empty block. This can occur as a result of growing Baby Yoshi inside the block, spawning a block on top of Yoshi, or clipping four pixels into the block and dismounting. [Video](https://youtu.be/5Nwcggojnds)
 * In the Japanese version of SMW, Yoshi is able to eat the jumping dolphins. This is not possible in any other release.
 * If a Baby Yoshi and adult Yoshi are spawned in the same level, Yoshi's head graphics will glitch and the game will have some strange effects. One effect in particular is that berries will not actually be eaten when Yoshi's head touches them; the game will keep registering him as eating it, but it will never disappear, letting you get an infinite number of berries.
 * If both Baby Yoshi and Yoshi eat the same item, Yoshi can still spit out the item, but it will have glitched properties. Strange effects can also occur from two Baby Yoshis eating the same items. This can additionally be used to create a null sprite.
@@ -210,6 +212,7 @@
 * While turning on Yoshi, one of Mario's feet is non-existant and can be seen through.
 * Mario can still be knocked off of Yoshi by a Boo ceiling even when he has a star.
 * While Yoshi is laying an egg, you can press X or Y repeatedly while riding him to play his tongue sound.
+* Attempting to spinjump off Yoshi on the frame he lays an egg will cause the spinjump sound to play, but Mario won't actually dismount.
 * If you stick out Yoshi's tongue before Mario hits a goal tape, you can duck or stand up during the walk animation as long as it's out.
 * Yoshi can still duck or even spit out sprites during any period where the game is temporarily frozen from $9D (including keyholes).
 * When spawning multiple Yoshis, the newest Yoshi will hatch twice as fast as the last-hatched Yoshi.
@@ -228,8 +231,8 @@
 ---
 ---
 # Item and Object Glitches
-<strong>(Carryables and blocks)</strong>  
-117 recorded glitches, 103 of which are useful
+__(Carryables and blocks)__  
+_117 recorded glitches, 103 of which are useful_
 * Items can get stuck in walls, and will spasm while inside.
 * Items stuck in walls can be moved around by scrolling the screen on the right frames.
 * Items can be forced through solid blocks by entering it far enough before releasing. [Video](https://www.youtube.com/watch?v=YkyZZiAAR2o)
@@ -328,7 +331,8 @@
 * Mario can pass through invisible coinblocks or noteblocks without hitting them as long as he is being pushed upward by anything other than a jump, including keys, platform sprites, ropes, or another layer.
 * Bonus game coinblocks will always register a correct hit if a shell, Goomba, or Bob-omb is knocked into it by a capespin or bounced by another block.
 * In a bonus game room, hitting a coinblock that isn't in one of the positions used by the original bonus game may cause additional brown blocks to spawn.
-* If a coinblock is placed too high in a bonus room, it will cause Mario to immitate a P-balloon when hit, except the P-balloon neither wears off nor can be controlled; Mario will only move with whatever inertia he had when the block was hit.
+* If a coinblock is placed within the top 4 rows of the bonus room, it will cause Mario to immitate a P-balloon when hit, except the P-balloon neither wears off nor can be controlled; Mario will only move with whatever inertia he had when the block was hit.
+* If a coinblock is placed within the bottom 4 rows of a bonus room, it will cause Mario's graphics to severely mess up when hit, as well as make him lose interaction with sprites.
 * All multi-coinblocks function using the same timer to determine whether they continue giving coins or turn into a used block. This means hitting one, waiting a bit, and then hitting another will immediately turn it into a used block; the original one, meanwhile, will restart the timer when hit again rather than doing the same. Notably, double-hitting a single block can cause that timer to reset without turning any blocks into brown blocks.
 * Releasing an item from the item box will cause it to continue cycling vertically throughout the level until Mario collects it. Its interaction will even loop every two horizontal screens as well, so you can grab even if you can't see it.
 * In vertical levels, permanent sprites will loop around vertically around the level. It takes about 400 in-game seconds for the sprite to make a complete loop, though. They can potentially also loop horizontally in horizontal levels, too, but only if they don't fall off the bottom of the screen.
@@ -352,8 +356,8 @@
 ---
 ---
 # Miscellaneous Glitches
-<strong>(Sprites, objects, and levels in-of themselves)</strong>  
-278 recorded glitches, 179 of which are useful.
+__(Sprites, objects, and levels in-of themselves)__ 
+_278 recorded glitches, 179 of which are useful._
 * Sprites will "slide" with inertia across tiles 1D8-1FF. It should be noted that this means if the sprite hits 0 speed while on one of the blocks, it will be unable to move at all unless Mario causes it to. Because the bottom tile of tileset-specific lava is also included in the range mentioned above, sprites can pass through it without being destroyed; only the top of the lava will actually kill it.
 * If enough sprites are close enough together, they can push each other off of or through blocks.
 * Quake sprites can be overwritten by spawning more than 4 within a very short time. Because they don't actually destroy sprites until a few frames after spawning, this can actually prevent them from interacting entirely. As an alternative, spitting out a null sprite will also overwrite slot 2.
@@ -388,7 +392,7 @@
 * Mario can land on the right corner of a message box or light switch for a frame in manner similar to walljumping, but without the speed requirement.
 * Being pushed inside a solid sprite (e.g. message box, turnblock bridge, Hammer Bro platform, Bowser statue...) will cause Mario to warp to the nearest side, even through solid blocks. If the camera moves sharply, this may also cause the newly loaded columns of Map16 to have glitched graphics until they're reloaded. Possible ways of doing this include being pushed in by another sprite, jumping fast enough, or wall running via a purple triangle.
 * When being 'warped' by a solid sprite, it's possible to completely pass the screen's spawn region over a sprite, preventing that sprite from spawning at all.
-* Hitting a message box that isn't set to contain a message box will cause it to instead load the Yellow Switch Palace message. If $1DF5 is non-zero, the level will automatically end and activate the Yellow Switch shortly after the message box appears; else, exiting the level by any other means (dying, goal tape, start+select, etc.) will achieve the same effect, although this will not count as beating the level. This is fixed by default by Lunar Magic.
+* Hitting a message box that isn't set to contain a message box will cause it to instead load the Yellow Switch Palace message. If $1DF5 is non-zero, the level will automatically end and activate the Yellow Switch shortly after the message box appears; else, exiting the level by any other means (dying, goal tape, start+select, etc.) will achieve the same effect, although this will not count as beating the level. This is fixed by default by Lunar Magic. [Video](https://www.youtube.com/watch?v=EFjXb-xhWAg)
 * For a brief period of time after hitting a flying ? block (even if it's been already "hit"), sprites can pass through it.
 * If Mario touches the bottom of a solid sprite while the sprite is either touching the top border of the visible screen from above or crossing it, he will be warped to its nearest side, with the same effects as the above. This glitch works even if the screen is scrolling.
 * As an exception to the above glitch, if a turnblock bridge is crossing the top of the visible screen and Mario's body is onscreen, he will not interact with the bottom or sides of the bridge rather than being warped to its side. In addition, if he is moving downward while touching the bridge, he will be warped on top of it; this effect can be used with vertically extending turnblock bridges to warp Mario upward, even through solid blocks.
@@ -526,7 +530,7 @@
 * The long sideways Layer 2 scroll sprite has some odd effects when used in horizontal levels. Placing it at Y=0 will cause it to act like a leftward conveyor. Y=1 to Y=3 will cause Mario to shake when standing on layer 2, and Y=4 will cause both Layer 1 and Mario to constantly shake. Y=5 and below will for the most part either crash or hardlock the game.
 * Any of the Layer 2 scroll sprites intended for vertical levels will kill Mario upon spawning if Mario isn't already spawning on the same screen they are.
 * Wrong warp: Taking a screen exit 256 times will reload the level from the overworld. The issue with this, however, is that the space of RAM meant for overworld data gets overwritten by level data during level load. This cause the game to try to loading the tile in the level data where the level would be in the overworld data as the translevel number to spawn Mario into. Not only does this potentially allow you to warp to any level in the game (even unused ones), it also can cause some strange effects, such the level getting used as a No-Yoshi entrance in places not meant for one. It should be noted, however, that the No-Yoshi entrance prevents a level from being warped to, as it will load the correct level after being run. [Fix](http://www.smwcentral.net/?p=section&a=details&id=4254) - [Video](https://www.youtube.com/watch?v=v_iv_9QJ6lQ) - [Diagram](http://i.imgur.com/ZcNDrAA.png)
-* When placed next to a screen border, both the screen exit on that screen and the one the door is touching can be accessed depending on Mario's position.
+* When placed next to a screen border, both the screen exit on that screen and the one the door is touching can be accessed depending on Mario's position. Similarly for pipes.
 * Screen exits are inherited from the previous sublevel, meaning that a door will send you to whatever the last loaded exit on a screen was; it only sends Mario to level 0 if no exit has been loaded yet. This means a room can technically have multiple screen exits on the same screen in vanilla SMW, depending on what level you enter the room from.
 * Layer 3 tide interaction with most floating platforms is broken and may cause them to float infinitely upward. [Fix](http://www.smwcentral.net/?p=section&a=details&id=8773)
 * If a level has Layer 3 tides active and is less than 3 screens long, then sprites anywhere on the screen can occasionally register themselves as being in water. In 1- or 2-screen rooms, the effect will occur longer and more often the further left the screen is; in 3-screen rooms, it will only occur right of the screen when the screen is all the way at the left edge of the level.
@@ -542,6 +546,7 @@
 * Bouncing off Wigglers enough will start giving Mario glitched score sprites. [Video](https://youtu.be/7nwktrDawdM) - [Fix](http://www.smwcentral.net/?p=section&a=details&id=4441)
 * Generating enough score sprites in a short enough time can cause early ones to get overwritten, preventing the value for it from actually being added.
 * Despawning a score sprite offscreen before it's processed will cause the value for it to not actually be added.
+* Most score sprites don't set whether they were on Layer 1 or 2, but score sprites spawned from the spinning coin sprites do. As a result, if that score sprite is spawned on Layer 2, almost any score sprites that later take the same slot will also be considered to be on Layer 2 (causing the sprite to spawn offset on that layer).
 * Freezing the game (via $9D) on the frame a Koopa shell turns into a normal Koopa will cause its graphics to glitch during Mario's shrinking animation.
 * Two shell-less Koopas can enter the same Koopa shell if timed correctly, but only the last one to enter before the Koopa emerges will actually have an effect on what spawns.
 * Bullet Bills make no sound when spawning directly into the level, even though Banzai Bills do. [Fix](http://www.smwcentral.net/?p=section&a=details&id=8755)
@@ -620,14 +625,14 @@
 * When the On/Off-switch-controlled Layer 2 sprite hits its lowest level, all sound effects that use $7E1DFC (including spinjumps, coins, and fireballs) will be replaced by the "smash" sound. [Fix](http://www.smwcentral.net/?p=section&a=details&id=11314)
 * When an autoscrolling level passes the screen limit for the level, its graphics (but not interaction) will loop.
 * If Mario finishes a level with more than 400 seconds left, the end-of-level score counter won't add correctly. [Fix](http://www.smwcentral.net/?p=section&a=details&id=8894)
-* If the timer goes above/is set above 999, then it will use hexadecimal numbers until it decreases below 999 again. [Fix](http://www.smwcentral.net/?p=section&a=details&id=4435)
+* If the timer goes above 999 (by way of green berries or just directly setting that way), then it will use letters (or other unintended tiles) until it goes below 999 again. [Fix](http://www.smwcentral.net/?p=section&a=details&id=4435)
 * If the exit counter goes above 99, additional numbers will be in hexadecimal. In vanilla SMW, this can only be done in the Japanese version; any other version stops counting when the star appears. [Fix](http://www.smwcentral.net/?p=section&a=details&id=4697)
 * Sprites other than standard powerup sprites will have glitched graphics when in the item box. [Fix](http://www.smwcentral.net/?p=section&a=details&id=4199) - [More info](https://docs.google.com/spreadsheets/d/1XGzqHuZUoSqhyDk3QcSC0X7mGsA5af7HyQKFYc-busM/edit#gid=0)
 * If you pause the game on the overworld while passing a jumping fish, the fish will repeatedly jump in place until you unpause.
 * Entering a level while an overworld fish is mid-jump will have the fish wait and resume its fall after you exit the level.
 * Obtaining the secret exit in a level set to activate event 77 will cause garbage event data to be loaded on the overworld.
 * If an overworld sprite is placed in the Yoshi's Island or lower Donut Plains area on the main map, then the title screen will have some extra garbage tiles. [Diagram](http://media.smwcentral.net/Diagrams/TitleScreenGarbageImage.png) - [Fix](http://www.smwcentral.net/?p=section&a=details&id=8975)
-* The S in the _____ START! message uses palette 8 instead of palette A like the other letters. [Fix](http://www.smwcentral.net/?p=section&a=details&id=4168)
+* The S in the ______ START! message uses palette 8 instead of palette A like the other letters. [Fix](http://www.smwcentral.net/?p=section&a=details&id=4168)
 * Loading a level that has a No-Yoshi entrance (by way of the 256 exit glitch or otherwise) when the entrance has already been run will prevent the cutscene from displaying, but will still function as normal, preventing both Yoshi and warps.
 * Loading a No-Yoshi entrance from a pipe (via the 256 exit glitch will cause Mario to not animate correctly. Additionally, bringing an item will cause it to stick to a bush during the walk, and bringing a Yoshi will cause the timing of Mario's movement to get offset due to him being unable to spinjump off, causing him to walk straight through the gate (though you don't keep Yoshi, unfortunately).
 * Collecting a star or dying on the title screen will cause the music to change to the special world's theme. [Fix (for death)](http://www.smwcentral.net/?p=section&a=details&id=4528)
@@ -636,8 +641,8 @@
 ---
 ---
 # Locks and Crashes
-<strong>(Things that break things)</strong>  
-13 recorded glitches
+__(Things that break things)__ 
+_13 recorded glitches_
 * Transforming into caped Mario while offscreen in an autoscrolling level will softlock the game. [Fix](http://www.smwcentral.net/?p=section&a=details&id=5780)
 * Screen scrolling an autoscroller sprite onto the screen will softlock the game. [Fix](https://www.smwcentral.net/?p=section&a=details&id=15711)
 * Swallowing a berry on the same frame Mario collects a powerup or takes damage will softlock the game while giving Mario an infinite supply of coins. [Fix](http://www.smwcentral.net/?p=section&a=details&id=8770)
