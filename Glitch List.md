@@ -1,6 +1,6 @@
 # Physics-Related Glitches  
 __(Mario and controls)__  
-_69 recorded glitches, 63 of which are useful_
+_70 recorded glitches, 64 of which are useful_
 * If Mario becomes surrounded by blocks and touches the ground, he will be crushed and die. However, avoiding touching the ground can be done in a number of ways, such as by flying before Mario gets surrounded, or swimming upwards. [Video](https://www.youtube.com/watch?v=oxUGDQCccF4)
 * If Mario is far enough inside a solid tile, he will be pushed leftward by it. Oddly, Layer 2 does will not do this, and instead Mario will be able to freely walk around (though unable to jump).
 * If Mario is big and stands up or jumps in a one-tile space, he may be pushed through the floor. Also works if Mario lands on Yoshi, and can even occur while Mario is small if he gets stuck in a turnblock during the jump.
@@ -77,7 +77,7 @@ _69 recorded glitches, 63 of which are useful_
 ---
 # Yoshi-Related Glitches
 __(things requiring Yoshi)__  
-_146 recorded glitches, 126 of which are useful_
+_148 recorded glitches, 127 of which are useful_
 * After mounting Yoshi, Mario can not be hit by enemies for a few frames. Only works with certain sprites, however. [More info](http://smwc.me/649544)
 * Keys and P-switches can still hit blocks while stuck to Yoshi's tongue.
 * Shells, throwblocks, and Goombas can still hit other sprites while stuck to Yoshi's tongue, so long as the sprite it's hitting is in a lower slot.
@@ -232,7 +232,7 @@ _146 recorded glitches, 126 of which are useful_
 ---
 # Item and Object Glitches
 __(Carryables and blocks)__  
-_117 recorded glitches, 103 of which are useful_
+_118 recorded glitches, 104 of which are useful_
 * Items can get stuck in walls, and will spasm while inside.
 * Items stuck in walls can be moved around by scrolling the screen on the right frames.
 * Items can be forced through solid blocks by entering it far enough before releasing. [Video](https://www.youtube.com/watch?v=YkyZZiAAR2o)
@@ -357,7 +357,7 @@ _117 recorded glitches, 103 of which are useful_
 ---
 # Miscellaneous Glitches
 __(Sprites, objects, and levels in-of themselves)__ 
-_278 recorded glitches, 179 of which are useful._
+_278 recorded glitches, 180 of which are useful._
 * Sprites will "slide" with inertia across tiles 1D8-1FF. It should be noted that this means if the sprite hits 0 speed while on one of the blocks, it will be unable to move at all unless Mario causes it to. Because the bottom tile of tileset-specific lava is also included in the range mentioned above, sprites can pass through it without being destroyed; only the top of the lava will actually kill it.
 * If enough sprites are close enough together, they can push each other off of or through blocks.
 * Quake sprites can be overwritten by spawning more than 4 within a very short time. Because they don't actually destroy sprites until a few frames after spawning, this can actually prevent them from interacting entirely. As an alternative, spitting out a null sprite will also overwrite slot 2.
