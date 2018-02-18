@@ -425,6 +425,7 @@ _278 recorded glitches, 180 of which are useful._
 * Mushroom scales will "lock" their position every 8 tiles.
 * Flying red coins can be burned.
 * Burning a Lakitu with a fireball rather than jumping on him will cause its cloud to never disappear.
+* If a priority swap replaces Lakitu, its cloud will never disappear.
 * Pressing both A and B at the same time while riding in a Lakitu cloud will cause Mario to spinjump out of it.
 * Pressing both up and down at the same time while in a Lakitu cloud will cause Mario to duck while moving upward. If you press up against a ceiling and then release down, Mario will get his head stuck in the ceiling and be pushed leftward.
 * Landing in a Lakitu cloud on the same frame that Mario would enter a wall far enough to walljump will push Mario inside and through the wall.
