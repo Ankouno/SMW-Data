@@ -310,7 +310,7 @@ _118 recorded glitches, 104 of which are useful_
 * Mario can spinjump off of throwblocks on the frame they turn into a cloud puff from their timer running out.
 * Carrying a throwblock, Goomba, or Bob-omb through a pipe will make it never run out of time. However, if you double grab the sprite with another sprite in a higher slot, this glitch will not take effect.
 * Horizontally kicking a Goomba, Bob-omb, or Mechakoopa will reset their stun timer; this can also cause the Bob-omb to change palettes if you kick it while it's flashing.
-* Releasing a Bob-omb, or kicking it upward, at the last frame before exploding will alo reset its stun time, but to a lower value of 0x40; it also triggers the explosion sound.
+* Releasing a Bob-omb, or kicking it upward, at the last frame before exploding will also reset its stun time, but to a lower value of 0x40; it also triggers the explosion sound.
 * It's possible to bounce off Bob-ombs, Goombs, and Mechakoopas a frame before their stun timers run out. This is most notable with Bob-ombs, since you can't normally bounce off them again after they're stunned for the first time.
 * When Mario grabs a sprite, its X and Y speed doesn't get reset; this instead happens when he throws or drops it. However, sprites that hop out of Mario's hands on their own, such as Goombas, Buzzy Beetles, or MechaKoopas, don't get their speeds reset. One use of this is allowing Mario to bounce off the sprite in mid-air without needing to let go of it.
 * For a few frames after being thrown, a Goomba will destroy other sprites without being destroyed as well.
