@@ -652,17 +652,18 @@ _278 recorded glitches, 180 of which are useful._
 ---
 # Locks and Crashes
 __(Things that break things)__ 
-_13 recorded glitches_
+_14 recorded glitches_
 * Transforming into caped Mario while offscreen in an autoscrolling level will softlock the game. [Fix](http://www.smwcentral.net/?p=section&a=details&id=5780)
 * Screen scrolling an autoscroller sprite onto the screen will softlock the game. [Fix](https://www.smwcentral.net/?p=section&a=details&id=15711)
 * Swallowing a berry on the same frame Mario collects a powerup or takes damage will softlock the game while giving Mario an infinite supply of coins. [Fix](http://www.smwcentral.net/?p=section&a=details&id=8770)
 * Swallowing a berry while dying will hardlock the game. [Fix](http://www.smwcentral.net/?p=section&a=details&id=8770)
 * Spawning a Podoboo without sprite buoyancy enabled will hardlock the game.
 * Transforming on the same frame that Mario does his victory pose at the end of a bonus game will hardlock the game.
-* Eating certain sprites via item swap may crash the game.
+* Eating certain sprites via item swap may crash the game. [Data Table](http://smwspeedruns.com/index.php/Unintended_Sprite_Spawning)
 * Spitting out a null sprite while on a brown revolving platform may cause the game to crash.
-* Collecting powerups with a powerup status greater than the fireflower may cause the game to crash.
-* Some stunned sprites may crash the game when attempting to spawn an invalid sprite.
+* Collecting powerups with a powerup status greater than the fireflower may cause the game to crash. [Data Table](http://smwspeedruns.com/index.php/Unintended_Sprite_Spawning)
+* Taking carryable items thru the goal tape with an unintended powerup status may cause the game to crash due the wrong initialization of some sprite or the spawning of unused ones. [Data Table](http://smwspeedruns.com/index.php/Unintended_Sprite_Spawning)
+* Some stunned sprites may crash the game when attempting to spawn an invalid sprite. [Data Table](http://smwspeedruns.com/index.php/Unintended_Sprite_Spawning)
 * Sending a directional coin sprite off the left side of a level with Layer 3 may crash the game.
 * Increasing the high bit of the mushroom scale sprite's Y position in a vertical level will crash the game.
 * Spawning more than one Big Boo Boss will cause the game to crash or, at the very least, noticeably glitch the screen.
