@@ -87,7 +87,7 @@ _148 recorded glitches, 127 of which are useful_
 * If Mario is running in the same direction as a shell while riding Yoshi, he can pass slightly inside the shell from behind without taking damage from it, until either the shell turns around or he passes far enough inside that he's considered to be in front of the shell.
 * Yoshi's fireballs can be destroyed by a capespin mostly regardless of the vertical between them and Mario; the only thing that generally matters is his horizontal distance from them.
 * Yoshi has an unusual hitbox that makes all standard clipping glitches have a significantly lower speed requirement. [More info](http://smwc.me/1025243)
-* If Mario clips far enough into a wall and dismounts Yoshi there, the game may consider Yoshi to actually be inside the wall, causing him to climb up it.
+* If Mario clips far enough into a wall and dismounts Yoshi there, the game may consider Yoshi to actually be inside the wall, causing him to climb up it. [Video](https://www.youtube.com/watch?v=5Nwcggojnds)
 * If Mario is riding Yoshi in water while big, you can clip into the right side of blocks occasionally by just swimming into them.
 * While riding Yoshi, Mario can clip upwards through solid blocks by landing on an item near it.
 * If a Yoshi is one tile below the top of a ledge, Mario can land on him if he clips far enough into the top of the block while Yoshi is bouncing upward.
