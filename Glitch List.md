@@ -327,6 +327,7 @@ _118 recorded glitches, 104 of which are useful_
 * Block factory: Items can be forced into corners or walls and get stuck inside. If one of the blocks it's stuck between happens to be a hittable block, it's possible that it will create a situation in which the block is rapidly duplicated until the sprite despawns or is removed.
 * The above can have a few strange effects on other hittable blocks; bounce sprites may get overwritten so that the blocks turn into an invisible solid block, or they won't spawn for a frame and will dispense two items at once, or won't spawn at all and can dispense an item without being registered as hit. If a noteblock's bounce sprite gets overwritten while you're bouncing on it, Mario will also fall through it. These effects can also be created without block factory by spawning more than four bounce sprites before any of their animations finish.
 * Mario can fall through the top of block factories regardless of the block being duplicated, and can pass through it in either direction.
+* When throwing a carryable sprite upwards, if the sprite registers itself as hitting both the bottom of one block and the side of another at the same time, neither will actually be activated by the hit. This can be done not only at the inner corner between two blocks, but even on an entirely flat ceiling (by throwing the sprite so it enters the ceiling enough to touch the side of an adjacent block).
 * Tile 125's shell will only actually come out if an adjacent block knocks it upward.
 * Mario can still hit blocks while moving downward, so long as he enters the lower corner of the block enough.
 * If a block overwrites a rotating turnblock (e.g. by vine, duplication, etc.), then the turnblock will reappear once it stops rotating.
@@ -425,6 +426,7 @@ _278 recorded glitches, 180 of which are useful._
 * Wigglers can't be killed by a Bob-omb being bumped into them, but will still turn around when touching one. This can be used to push a Wiggler off the edge of a ledge or into walls.
 * If a Wiggler gets pushed inside a block, it will either be pushed into the ground (if on top of a ledge) or shot 33 tiles into the air (if on top of a solid block), ignoring all solid tiles in the way.
 * Certain sprites will hurt Mario directly even if he's riding Yoshi, rather than knocking him off. These include Wigglers, Dino Torch flames, Fishin Boo's flame, and Mega Moles.
+* Mario can still be hurt by a Wiggler's segments or a Dino Torch's flames even while the corresponding sprite is on Yoshi's tongue. In fact, combined with the above glitch, Mario can be hurt by the sprite on Yoshi's tongue even while he's still riding Yoshi.
 * While on the backside of a fence, Mario will still interact with: wall springboards, the Fishin' Boo's flame, the Dino Torch's flame, and Wigglers.
 * If a sprite is on top of a growing/shrinking pipe as it is expanding, the sprite will end up stuck inside.
 * Killing a growing/shrinking pipe (by using a null sprite to mess with its properties) will cause it to act strangely; it will still try to act like normal and spawn pipe tiles, but it'll move horizontally at the same time. If Mario strays too far from it, it'll stop its normal functionality and fall off the bottom of the screen.
@@ -444,6 +446,7 @@ _278 recorded glitches, 180 of which are useful._
 * Lakitus will run into issues if there is more than one cloud spawned at a time. Both clouds will end up spawning spinies, while the Lakitu will only actually be present in the one with a higher slot. Killing the Lakitu will only destroy the cloud he was originally meant to spawn in, rather than the one he's actually in. [Video](https://twitter.com/Kaizoman666/status/824102759377104896)
 * Hammer Bros. will run into issues if there is more than one flying platform spawned at a time. The hammers and sprite hitbox will remain attached to the original platform, but the Bro's graphics will end up on the platform with the lowest sprite slot. Hitting any platform will kill the Hammer Bro, regardless of whether he is on it or not.
 * Hammer Bros will start throwing hammers while they are sinking in lava. [Fix](http://www.smwcentral.net/?p=nmap&m=smwrom#02DA60)
+* Hitting a Hammer Bro. platform and then moving it (via sprite slot storage and spitting it out) before the hit animation finishes will cause its movement pattern to change, potentially making it travel extremely high upwards at a very high speed. [Video](https://www.youtube.com/watch?v=N7u-WvMZDv4)
 * If a Podoboo's spawn position is exactly 22 tiles above the lava it ends up in, when the Podoboo jumps out, it will end up jumping significantly higher than it should (approximately 34 tiles above the spawn position).
 * Freezing the game (via $9D) while the Falling Spike is falling will cause its Y speed to reset.
 * The Falling Spike sprite doesn't actually interact with Mario until it starts to fall.
@@ -610,6 +613,7 @@ _278 recorded glitches, 180 of which are useful._
 * Getting hurt will reset the bonus coin game cloud's collection counter, meaning taking any damage will make getting the 1-up impossible.
 * Having too many extended sprites onscreen can produce some strange graphics effects, particularly on Mario. A few examples of these are displacing his cape several tiles away or erasing parts of hit animations that don't fit into the standard graphical area.
 * Enemies killed so that they fall downward will still interact with very steep slopes on their way down. This glitch can be combined with the Torpedo Ted to get an interesting use out of it, though.
+* Playing a sound effect which uses the $1DF9 channel (such as the swim, Yoshi gulp, or powerup noise) on the same frame the "time is running out!" sound plays will cause it to get overwritten, with the music never speeding up as a result.
 * Pausing the game on the frame the game's music would normally change will cause it to continue playing the song (e.g. right before touching the goal tape)
 * Taking damage on the frame Mario enters a pipe will cause the shrinking animation to be skipped.
 * Dying on the frame Mario takes a screen exit will cause the next room's music to be replaced by the death theme. Can also be done in the intro level on the frame the message appears.
