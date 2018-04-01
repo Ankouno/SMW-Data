@@ -1,5 +1,5 @@
 ;; This ASM file reads a ROM and outputs the locations of all level-related data tables,
-;;  including any hijacked by Lunar Magic.
+;;  including any hijacked by Lunar Magic. This list is complete as of LM v2.53.
 ;;
 ;; May be useful for helping understand how Lunar Magic moves them,
 ;;  as well as checking whether or not a relevant hijack has been applied yet.
@@ -13,9 +13,13 @@ org $05E600
 	print "Layer 2 pointer table: ",pc
 org $05EC00
 	print "Sprite pointer table: ",pc
-if read1($05D8F5) == $22
+if read1($0EF100) != $00
 	org $0EF100
 		print "Sprite pointer table, bank bytes: ",pc
+endif
+if read1($0EF30F) == $42
+	org read3($0EF30C)
+		print "Sprite data sizes: ",pc
 endif
 	print ""
 
@@ -95,7 +99,8 @@ if read1($0583AD) == $22
 		print "Level ExAnimation pointers: ",pc
 		
 	if read2(read3($0583AE)+$5B) != 0
-		org read3(read2(read3($0583AE)+$5B)<<8 | (read2($0583AE)+$65))
+		org read1(read3($0583AE)+$5C)<<16|read2(read3($0583AE)+$65)
+			
 			print "Global ExAnimation data: ",pc
 	else
 		print "No global level ExAnimation data found."
