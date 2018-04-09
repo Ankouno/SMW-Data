@@ -358,7 +358,7 @@ _118 recorded glitches, 104 of which are useful_
 * Turning while holding a Mechakoopa will cause Mario's head to disappear briefly.
 * Hitting a block above the screen will cause it to dispense whatever is inside and stop giving items like usual, but its graphics won't change.
 * Hitting a block off the sides of the screen will cause it to not register being hit.
-* Collecting a powerup on the frame a Yoshi egg lands on a block will cause its graphics to glitch briefly.
+* Freezing the game (via $9D) on the frame a Yoshi egg lands on solid ground will cause its graphics to glitch briefly. [Gifs](https://imgur.com/a/R4lOF)
 * Bringing a carryable sprite into a Mode 7 boss room will cause the graphics to glitch.
 
 ---
