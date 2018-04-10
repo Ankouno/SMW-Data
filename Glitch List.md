@@ -5,14 +5,14 @@ _70 recorded glitches, 64 of which are useful_
 * If Mario is far enough inside a solid tile, he will be pushed leftward by it. Oddly, Layer 2 does will not do this, and instead Mario will be able to freely walk around (though unable to jump).
 * If Mario is big and stands up or jumps in a one-tile space, he may be pushed through the floor. Also works if Mario lands on Yoshi, and can even occur while Mario is small if he gets stuck in a turnblock during the jump.
 * If Layer 2 or Layer 3 are active in a level, standing Mario up in a one-tile space with blocks on the same layer both above and below him will cause him to sink slightly into the block, as opposed to being pushed left like normal. Often this will cause him to fall through the ground without the need to jump.
-* Smashola: Doing the above through turnblocks while caped and spinjumping may cause Mario to "warp" his way downward very quickly.
+* Smashola: Doing the above through turnblocks while caped and spinjumping may cause Mario to "warp" his way downward very quickly. [Video](https://youtu.be/oyJ7ZTz3HMw)
 * Walljump: With enough speed, Mario can land on the corners of blocks for a frame - even if they're part of a wall - and jump off of it. As an alternative, this frame can also be used to enter doors or pipes, even if they don't normally have ground. [More info](http://smwc.me/617858) - [Video](https://www.youtube.com/watch?v=yp3Z6d81sX4) - [Fix](http://www.smwcentral.net/?p=section&a=details&id=8815)
 * Mario can enter a pipe even if his head is the only part touching it.
 * Jumping on the first frame after coming out of an upwards pipe will let Mario jump without triggering the effects of the block he came out on top of (including Munchers).
 * Slope clip: Mario can pass through the corners of slope tiles so long as he is moving upward as he crosses it. [More info](http://smwc.me/617858) - [Video](https://www.youtube.com/watch?v=OmU8Vd5-QYM) - [Fix](http://www.smwcentral.net/?p=section&a=details&id=8816)
-* Clipping into an upside-down slope will force Mario on top of it. This can also force him inside blocks, killing him.
+* Clipping into an upside-down slope will force Mario on top of it. This can also force him inside blocks, killing him. [Video](https://youtu.be/GxBuYS_DQfc?t=10m50s)
 * Clipping into the bottom corner of a block that is on a ledge may cause Mario to be forced on top of the ledge, killing him inside the block.
-* If Mario hits the vertical screen barrier while walking up a slope, he will fall through the slope.
+* If Mario hits the vertical screen barrier while walking up a slope, he will fall through the slope. [Video](https://youtu.be/MySZ8yYvb-w?t=38s)
 * Mario will "stick" to the vertical screen barrier when jumping; he won't fall down until his speed actually becomes positive, but he can't rise higher either. [Video](https://twitter.com/Kaizoman666/status/905846914674982912)
 * Corner clip: With enough speed, Mario can "enter" the corner of a block in order to pass through it. If he's small or ducking, though, he may be crushed. [Mo](http://smwc.me/617858)[re](http://www.smwcentral.net/?p=viewthread&t=72714) [info](http://tasvideos.org/GameResources/SNES/SuperMarioWorld.html#CornerClip)
 * If Mario is big, you can also force him into inner corners where a leftside wall and ceiling meet. If the corner is non-solid, he can go through without dying.
@@ -23,7 +23,7 @@ _70 recorded glitches, 64 of which are useful_
 * If vertical scrolling is enabled in a level, you can prevent the screen from scrolling by jumping off of the ground the frame that Mario lands on it.
 * While being "stuck" by a noteblock, Mario can enter solid blocks, though he'll be crushed. [Fix](http://www.smwcentral.net/?p=section&a=details&id=8815)
 * Mario can stick to a row of noteblocks without bouncing off of them if he runs across them at the right speed.
-* If Mario is moving fast enough (x-speed of 64-80), then Mario will be unable to jump. Any faster and his jump height will also be significantly higher than usual.
+* If Mario is moving fast enough (x-speed of 64-80), then Mario will be unable to jump. Any faster and his jump height will also be significantly higher than usual. [Gif](https://imgur.com/VrqY93y) - [Video](https://youtu.be/SYTSgrhPsgg?t=26m43s)
 * Mario can spinjump off of noteblocks if you press A on the frame that he actually bounces off.
 * The top tile of tileset-specific lava can be used to push Mario into blocks. Interestingly, if Mario is big, it can also be used send him all the way through solid walls or solid floors without being crushed.
 * The left and right edges of tileset-specific lava are solid.
