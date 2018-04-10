@@ -365,7 +365,7 @@ _118 recorded glitches, 104 of which are useful_
 ---
 # Miscellaneous Glitches
 __(Sprites, objects, and levels in-of themselves)__ 
-_279 recorded glitches, 180 of which are useful._
+_280 recorded glitches, 180 of which are useful._
 * Sprites will "slide" with inertia across tiles 1D8-1FF. It should be noted that this means if the sprite hits 0 speed while on one of the blocks, it will be unable to move at all unless Mario causes it to. Because the bottom tile of tileset-specific lava is also included in the range mentioned above, sprites can pass through it without being destroyed; only the top of the lava will actually kill it.
 * If enough sprites are close enough together, they can push each other off of or through blocks.
 * Quake sprites can be overwritten by spawning more than 4 within a very short time. Because they don't actually destroy sprites until a few frames after spawning, this can actually prevent them from interacting entirely. As an alternative, spitting out a null sprite will also overwrite slot 2.
@@ -556,6 +556,7 @@ _279 recorded glitches, 180 of which are useful._
 * If Mario enters a room too far to the right, the level will display past the screen borders for a bit before snapping back and glitching some of the Map16 graphics until they are reloaded. [Fix](http://www.smwcentral.net/?p=section&a=details&id=8752)
 * Collecting enough silver coins produced by a silver P-switch will start giving Mario glitched 5-up and coin score sprites. [Fix (for 5-up)](http://www.smwcentral.net/?p=section&a=details&id=4418)
 * Collecting enough 1-ups from hitting/bouncing off of enough enemies will eventually cause the point counter to loop back to 100 points. [Fix](http://www.smwcentral.net/?p=section&a=details&id=4254)
+* A byproduct of the above is right when the consecutive enemies stomped counter ([$7E1697](https://www.smwcentral.net/?p=nmap&m=smwram&u=0#7E1697)) loops, a glitched sound effect occurs ($60, since the game tries to read a RTS instruction as a sound fx pointer), and depending on the emulator it keeps playing glitched sounds indefinitely until another sound replaces it or you exit the level. [Video](https://youtu.be/6j9zBwQgmWU)
 * Bouncing off Wigglers enough will start giving Mario glitched score sprites. [Video](https://youtu.be/7nwktrDawdM) - [Fix](http://www.smwcentral.net/?p=section&a=details&id=4441)
 * Generating enough score sprites in a short enough time can cause early ones to get overwritten, preventing the value for it from actually being added.
 * Despawning a score sprite offscreen before it's processed will cause the value for it to not actually be added.
