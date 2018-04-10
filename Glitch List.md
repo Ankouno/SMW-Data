@@ -365,7 +365,7 @@ _118 recorded glitches, 104 of which are useful_
 ---
 # Miscellaneous Glitches
 __(Sprites, objects, and levels in-of themselves)__ 
-_278 recorded glitches, 180 of which are useful._
+_279 recorded glitches, 180 of which are useful._
 * Sprites will "slide" with inertia across tiles 1D8-1FF. It should be noted that this means if the sprite hits 0 speed while on one of the blocks, it will be unable to move at all unless Mario causes it to. Because the bottom tile of tileset-specific lava is also included in the range mentioned above, sprites can pass through it without being destroyed; only the top of the lava will actually kill it.
 * If enough sprites are close enough together, they can push each other off of or through blocks.
 * Quake sprites can be overwritten by spawning more than 4 within a very short time. Because they don't actually destroy sprites until a few frames after spawning, this can actually prevent them from interacting entirely. As an alternative, spitting out a null sprite will also overwrite slot 2.
