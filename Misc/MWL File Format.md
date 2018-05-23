@@ -2,7 +2,7 @@
 The MWL file format is developed by FuSoYa for extracting and inserting individual Super Mario World levels in a hack.
 This file is intended for documenting its format, since FuSoYa himself provides none (and also apparently doesn't remember most of the format anyway).
 
-Note that this file is only intended to document the general format; for more-specific details on level data, see [this page](http://speedrunsmw.com/index.php/Level_Data_Format).
+Note that this file is only intended to document the general format; for more-specific details on level data, see [this page](https://smwspeedruns.com/Level_Data_Format).
 
 This format is accurate as of Lunar Magic v2.43.
 
@@ -86,7 +86,7 @@ The first two bytes of the data is the secondary entrance's ID (16-bit, little e
 ### ExAnimation Data
 The data starts with an 8-byte header. Byte 0 of this header contains the value for $03FE00, while the rest of the bytes seem unused.
 
-The format of the general and individual ExAnimation data can be found [here](http://speedrunsmw.com/index.php/Level_Data_Format#ExAnimation_Data).
+The format of the general and individual ExAnimation data can be found [here](https://smwspeedruns.com/Level_Data_Format#ExAnimation_Data).
 
 
 
@@ -99,4 +99,4 @@ BG3, BG2, FG3, BG1, FG2, FG1,
 SP4, SP3, SP2, SP1,
 LG4, LG3, LG2, LG1
 ```
-Some of the files also have additional information associated with them for various bypass-related information. See [here](http://speedrunsmw.com/index.php/Level_Data_Format#ExGFX_Files) for details.
+Some of the files also have additional information associated with them for various bypass-related information. See [here](https://smwspeedruns.com/Level_Data_Format#ExGFX_Files) for details.
