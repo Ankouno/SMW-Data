@@ -2,7 +2,7 @@
 The MWL file format is developed by FuSoYa for extracting and inserting individual Super Mario World levels in a hack.
 This file is intended for documenting its format, since FuSoYa himself provides none (and also apparently doesn't remember most of the format anyway).
 
-Note that this file is only intended to document the general format; for more-specific details on level data, see [this page](http://speedrunsmw.com/index.php/Level_Data_Format).
+Note that this file is only intended to document the general format; for more-specific details on level data, see [this page](https://smwspeedruns.com/Level_Data_Format).
 
 This format is accurate as of Lunar Magic v2.43.
 
@@ -63,10 +63,11 @@ Layer 1/2 data and sprite data are all preceded by an 8-byte header.
 &nbsp;&nbsp;Byte 0 of Layer 1 has the first bit set if a custom palette is in use.  
 &nbsp;&nbsp;Byte 0 of Layer 2 contains the value stored to $0EF310.
 
-Following the header is the raw data directly from the ROM. When Layer 2 is being used as a BG, it is written in its raw, uncompressed tilemap form (unlike in the ROM, where it is compressed in LC_LZ2/LC_LZ3 format).
+Following the header is the raw data directly from the ROM.
+
+When Layer 2 is being used as a BG, it is written as a list of Map16 tiles (low byte first, then high byte). This is unlike in the ROM, where the high and low bytes are stored separately. Also, the data is compressed in the RLE1 format in the ROM, while in the MWL it's uncompressed. Note that the left half of the background coming before the right half is still present in the MWL.
 
 It should be noted that, for sprite data, the extension data size is not stored anywhere in the MWL, which means any sprite can potentially use anywhere between 3 and 7 bytes of data. If the source ROM is available, check the byte at $0EF30F; if equal to 0x42, you can determine each sprite's data size from a table pointed to by $0EF30C. Otherwise, I recommend just assuming 3 bytes per sprite.
-
 
 
 ### Palette Data
@@ -85,7 +86,7 @@ The first two bytes of the data is the secondary entrance's ID (16-bit, little e
 ### ExAnimation Data
 The data starts with an 8-byte header. Byte 0 of this header contains the value for $03FE00, while the rest of the bytes seem unused.
 
-The format of the general and individual ExAnimation data can be found [here](http://speedrunsmw.com/index.php/Level_Data_Format#ExAnimation_Data).
+The format of the general and individual ExAnimation data can be found [here](https://smwspeedruns.com/Level_Data_Format#ExAnimation_Data).
 
 
 
@@ -98,4 +99,4 @@ BG3, BG2, FG3, BG1, FG2, FG1,
 SP4, SP3, SP2, SP1,
 LG4, LG3, LG2, LG1
 ```
-Some of the files also have additional information associated with them for various bypass-related information. See [here](http://speedrunsmw.com/index.php/Level_Data_Format#ExGFX_Files) for details.
+Some of the files also have additional information associated with them for various bypass-related information. See [here](https://smwspeedruns.com/Level_Data_Format#ExGFX_Files) for details.
