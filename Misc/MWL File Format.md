@@ -63,10 +63,11 @@ Layer 1/2 data and sprite data are all preceded by an 8-byte header.
 &nbsp;&nbsp;Byte 0 of Layer 1 has the first bit set if a custom palette is in use.  
 &nbsp;&nbsp;Byte 0 of Layer 2 contains the value stored to $0EF310.
 
-Following the header is the raw data directly from the ROM. When Layer 2 is being used as a BG, it is written in its raw, uncompressed tilemap form (unlike in the ROM, where it is compressed in LC_LZ2/LC_LZ3 format).
+Following the header is the raw data directly from the ROM.
+
+When Layer 2 is being used as a BG, it is written as a list of Map16 tiles (low byte first, then high byte). This is unlike in the ROM, where the high and low bytes are stored separately. Also, the data is compressed in the RLE1 format in the ROM, while in the MWL it's uncompressed. Note that the left half of the background coming before the right half is still present in the MWL.
 
 It should be noted that, for sprite data, the extension data size is not stored anywhere in the MWL, which means any sprite can potentially use anywhere between 3 and 7 bytes of data. If the source ROM is available, check the byte at $0EF30F; if equal to 0x42, you can determine each sprite's data size from a table pointed to by $0EF30C. Otherwise, I recommend just assuming 3 bytes per sprite.
-
 
 
 ### Palette Data
