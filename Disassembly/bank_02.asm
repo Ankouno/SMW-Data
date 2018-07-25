@@ -280,7 +280,7 @@ CODE_02827D:                    ;-----------| Routine to handle the sprite BG ti
     STA.w $188D                 ;$0282A1    |/
     REP #$10                    ;$0282A4    |
     LDY.w #$0164                ;$0282A6    |
-    LDA.b #$66                  ;$0282A9    |\\ OAM index for offscreen tiles in Ludwig's room.
+    LDA.b #$66                  ;$0282A9    |\\ OAM index (from $0200) for offscreen tiles in Ludwig's room.
     STY $03                     ;$0282AB    |/
     LDA.b #$F0                  ;$0282AD    |\ 
 CODE_0282AF:                    ;           ||
@@ -1211,7 +1211,7 @@ CODE_0288EA:                    ;           ||
     BEQ GenSpriteFromBlk        ;$0288F5    || Then find an empty sprite slot, using the standard sprite memory limits.
     BNE CODE_0288FD             ;$0288F7    || Return if none can be found.
 CODE_0288F9:                    ;           ||
-    CPY.b #$0C                  ;$0288F9    ||
+    CPY.b #$0C                  ;$0288F9    || Otherwise, start from slot #$0B and look down.
     BNE GenSpriteFromBlk        ;$0288FB    ||
 CODE_0288FD:                    ;           ||
     JSL FindFreeSprSlot         ;$0288FD    ||
@@ -1471,7 +1471,7 @@ CODE_028A7D:                    ;           |
 DATA_028AA9:                    ;$028AA9    | Frames between spawning sparkles, as star power runs out (first byte = about to run out).
     db $07,$03,$03,$01,$01,$01,$01,$01
 
-CODE_028AB1:                    ;-----------| Routine to handle various other sprite routines.
+CODE_028AB1:                    ;-----------| Routine to handle various other sprite types, as well as loading sprites.
     PHB                         ;$028AB1    |
     PHK                         ;$028AB2    |
     PLB                         ;$028AB3    |
@@ -2802,7 +2802,7 @@ CODE_0293D8:                    ;           ||
     LDA $0E                     ;$0293E2    |\ 
     BEQ CODE_0293EB             ;$0293E4    ||
     JSR CODE_029696             ;$0293E6    || Get appropriate interaction values for the quake/capespin/net punch.
-    BRA CODE_0293EE             ;$0293E9    ||
+    BRA CODE_0293EE             ;$0293E9    ||  ($0E is 0 for quake sprites, 1 for capespin/net punch).
 CODE_0293EB:                    ;           ||
     JSR CODE_029663             ;$0293EB    |/
 CODE_0293EE:                    ;           |
@@ -2983,7 +2983,7 @@ CODE_02950B:                    ;-----------| Subroutine to handle capespin inte
     LDA.w $13EC                 ;$029530    ||
     ADC $29                     ;$029533    ||
     STA.w $13EC                 ;$029535    |/
-    JSR CODE_029540             ;$029538    | Process capsepin interaction with Layer 2.
+    JSR CODE_029540             ;$029538    | Process capespin interaction with Layer 2.
 Return02953B:                   ;           |
     RTS                         ;$02953B    |
 
@@ -3375,14 +3375,14 @@ CODE_0297A3:                    ;           |
     JMP CODE_029838             ;$0297AF    |/
 
 CODE_0297B2:                    ;```````````| Not in Reznor/Morton/Roy's room.
-    LDY.b #$F0                  ;$0297B2    |] OAM index for the contact sprite in normal levels.
+    LDY.b #$F0                  ;$0297B2    |] OAM index (from $0200) for the contact sprite in normal levels.
     LDA.w $17C8,X               ;$0297B4    |\ 
     SEC                         ;$0297B7    ||
     SBC $1A                     ;$0297B8    ||
     CMP.b #$F0                  ;$0297BA    ||
-    BCS CODE_029793             ;$0297BC    ||
-    STA.w $0200,Y               ;$0297BE    || Store X positions to OAM.
-    STA.w $0208,Y               ;$0297C1    ||  Erase if horizontally offscreen.
+    BCS CODE_029793             ;$0297BC    || Store X positions to OAM.
+    STA.w $0200,Y               ;$0297BE    ||  Erase if horizontally offscreen.
+    STA.w $0208,Y               ;$0297C1    ||
     CLC                         ;$0297C4    ||
     ADC.b #$08                  ;$0297C5    ||
     STA.w $0204,Y               ;$0297C7    ||
@@ -3440,7 +3440,7 @@ CODE_029825:                    ;           |
 
 
 CODE_029838:                    ;```````````| Contact sprite in Reznor/Morton/Roy's rooms (use $0300 range instead of $0200).
-    LDY.b #$90                  ;$029838    |] OAM index for the contact sprite in Reznor/Morton'Roy's rooms.
+    LDY.b #$90                  ;$029838    |] OAM index (from $0300) for the contact sprite in Reznor/Morton'Roy's rooms.
     LDA.w $17C8,X               ;$02983A    |\ 
     SEC                         ;$02983D    ||
     SBC $1A                     ;$02983E    ||
@@ -3860,7 +3860,7 @@ CODE_029B16:
 CODE_029B27:                    ;           |
     JSL ExecutePtr              ;$029B27    |
 
-ExtendedSpritePtrs:             ;$029B2B    | Extended sprite pointers
+ExtendedSpritePtrs:             ;$029B2B    | Extended sprite pointers.
     dw Return029B15                         ; 00 - Nothing
     dw SmokePuff                            ; 01 - Smoke puff
     dw ReznorFireball                       ; 02 - Reznor fireball
@@ -4448,6 +4448,7 @@ DATA_029EEA:                    ;$029EEA    |
 
     ; Water bubble misc RAM:
     ; $1765 - Frame counter for timing Y speed movement.
+    ; $176F - Unused? Cleared when spawned by Mario.
     
 WaterBubble:                    ;-----------| Underwater bubble MAIN
     LDA $9D                     ;$029EEE    |\ Branch if game frozen.
@@ -4455,8 +4456,8 @@ WaterBubble:                    ;-----------| Underwater bubble MAIN
     INC.w $1765,X               ;$029EF2    |\ 
     LDA.w $1765,X               ;$029EF5    ||
     AND.b #$30                  ;$029EF8    ||
-    BEQ CODE_029F08             ;$029EFA    ||
-    DEC.w $1715,X               ;$029EFC    || Decrease Y position (move upwards).
+    BEQ CODE_029F08             ;$029EFA    || For 48 frames out of 64, move upwards at 1 pixel per frame.
+    DEC.w $1715,X               ;$029EFC    ||  For the remaining 16, freeze the bubble in place vertically.
     LDY.w $1715,X               ;$029EFF    ||
     INY                         ;$029F02    ||
     BNE CODE_029F08             ;$029F03    ||
@@ -5252,7 +5253,7 @@ CODE_02A473:                    ;```````````| Riding Yoshi and hitting an extend
     PHX                         ;$02A473    |
     LDX.w $18DF                 ;$02A474    |
     LDA.b #$10                  ;$02A477    |\ Temporarily disable damage from other sprites for Yoshi.
-    STA.w $163D,X               ;$02A479    |/
+    STA.w $163E-1,X             ;$02A479    |/
     LDA.b #$03                  ;$02A47C    |\ Turning off Yoshi drums.
     STA.w $1DFA                 ;$02A47E    |/
     LDA.b #$13                  ;$02A481    |\ SFX for losing Yoshi.
@@ -5264,11 +5265,11 @@ CODE_02A473:                    ;```````````| Riding Yoshi and hitting an extend
     LDA.b #$C0                  ;$02A490    |\\ Y speed to give Mario when knocked off Yoshi by an extended sprite. 
     STA $7D                     ;$02A492    ||
     STZ $7B                     ;$02A494    |/
-    LDY.w $157B,X               ;$02A496    |\ 
+    LDY.w $157C-1,X             ;$02A496    |\ 
     LDA.w DATA_02A4B3,Y         ;$02A499    || Give Yoshi a running X speed.
-    STA $B5,X                   ;$02A49C    |/
-    STZ.w $1593,X               ;$02A49E    |\ 
-    STZ.w $151B,X               ;$02A4A1    || Reset Yoshi's tongue.
+    STA $B6-1,X                 ;$02A49C    |/
+    STZ.w $1594-1,X             ;$02A49E    |\ 
+    STZ.w $151C-1,X             ;$02A4A1    || Reset Yoshi's tongue.
     STZ.w $18AE                 ;$02A4A4    |/
     LDA.b #$30                  ;$02A4A7    |\\ How long Mario is invincible for after being knocked off Yoshi by an extended sprite.
     STA.w $1497                 ;$02A4A9    |/
@@ -5835,7 +5836,7 @@ CODE_02A89C:
     PHX                         ;$02A8A1    |
     DEY                         ;$02A8A2    |
     STY $03                     ;$02A8A3    |
-    JSR Load3Platforms          ;$02A8A5    | Load 3 platforms.
+    JSR Load3Platforms          ;$02A8A5    | Spawn 3 platforms.
     PLX                         ;$02A8A8    |
     PLY                         ;$02A8A9    |
     BRA CODE_02A89A             ;$02A8AA    |
@@ -6768,7 +6769,7 @@ Return02AEFB:                   ;           |
     RTS                         ;$02AEFB    |
 
 ADDR_02AEFC:                    ;```````````| Score sprite is adding coins, so add the coin icon to it.
-    LDY.b #$4C                  ;$02AEFC    |] OAM index for the coin icon on score sprites.
+    LDY.b #$4C                  ;$02AEFC    |] OAM index (from $0200) for the coin icon on score sprites.
     LDA.w $16ED,X               ;$02AEFE    |\ 
     SEC                         ;$02AF01    ||
     SBC $04                     ;$02AF02    || Set X position.
@@ -8632,7 +8633,7 @@ CODE_02BB23:                    ;-----------| GFX routine to draw wings on Yoshi
     STA $04                     ;$02BB31    ||
     LDA $D8,X                   ;$02BB33    ||
     STA $01                     ;$02BB35    ||
-    LDY.b #$F8                  ;$02BB37    ||| OAM index for Yoshi's wings.
+    LDY.b #$F8                  ;$02BB37    ||| OAM index (from $0200) for Yoshi's wings.
     PHX                         ;$02BB39    ||
     LDA.w $157C,X               ;$02BB3A    ||
     ASL                         ;$02BB3D    || Get X/Y position offsets.
@@ -9386,7 +9387,7 @@ RipVanFishPtrs:                 ;$02C02A    | Rip Van Fish phase pointers.
 
 
 CODE_02C02E:                    ;-----------| Rip Van Fish phase 0 - Sleeping
-    LDA.b #$02                  ;$02C02E    |\\ Sining Y speed for the Rip Van Fish when sleeping.
+    LDA.b #$02                  ;$02C02E    |\\ Sinking Y speed for the Rip Van Fish when sleeping.
     STA $AA,X                   ;$02C030    |/
     LDA $13                     ;$02C032    |\ 
     AND.b #$03                  ;$02C034    ||
@@ -9837,7 +9838,7 @@ CODE_02C2A6:                    ;```````````| Chuck is breaking a block.
     JSL GenerateTile            ;$02C2DE    |/
     BRA CODE_02C2F4             ;$02C2E2    |
 
-CODE_02C2E4:                    ;```````````| Chuck is not blocked but not able to break; make him jump instead.
+CODE_02C2E4:                    ;```````````| Chuck is blocked but not able to break; make him jump instead.
     LDA.w $1588,X               ;$02C2E4    |\ 
     AND.b #$04                  ;$02C2E7    || Branch if not on the ground.
     BEQ CODE_02C2F7             ;$02C2E9    |/
@@ -13270,7 +13271,7 @@ CODE_02DA5A:                    ;-----------| Actual Hammer Bro. MAIN
     STZ.w $157C,X               ;$02DA5A    |
     LDA.w $14C8,X               ;$02DA5D    |\ 
     CMP.b #$02                  ;$02DA60    || If falling offscreen from being killed, just draw his graphics.
-    BNE CODE_02DA6E             ;$02DA62    ||
+    BNE CODE_02DA6E             ;$02DA62    ||  (note that only status #$02 is checked; all others are not)
     JMP HammerBroGfx            ;$02DA64    |/
 
 HammerFreq:                     ;$02DA67    | Rates at which the Hammer Bro. throws hammers on each submap.
@@ -15152,7 +15153,7 @@ CODE_02E67A:
     JSL CODE_00F388             ;$02E6E7    |/
 CODE_02E6EB:                    ;           |
     PHX                         ;$02E6EB    |
-    LDA.b #$38                  ;$02E6EC    |\\ OAM index of the rope for Lakitu's fishing rod.
+    LDA.b #$38                  ;$02E6EC    |\\ OAM index (from $0300) of the rope for Lakitu's fishing rod.
     STA.w $15EA,X               ;$02E6EE    |/
     TAY                         ;$02E6F1    |
     LDX.b #$07                  ;$02E6F2    || Number of rope tiles to draw. Also change $02E719.
@@ -17468,7 +17469,7 @@ CODE_02F5D0:                    ;-----------| Ghost House exit door MAIN
     CMP.b #$46                  ;$02F5D2    || Don't draw if scrolled offscreen.
     BCS Return02F618            ;$02F5D4    |/
     LDX.b #$09                  ;$02F5D6    |
-    LDY.b #$A0                  ;$02F5D8    | OAM index to use for the Ghost House exit.
+    LDY.b #$A0                  ;$02F5D8    | OAM index (from $0300) to use for the Ghost House exit.
 CODE_02F5DA:                    ;           |
     STZ $02                     ;$02F5DA    |\ 
     LDA.w DATA_02F59E,X         ;$02F5DC    ||
@@ -17522,7 +17523,7 @@ DATA_02F631:                    ;$02F631    | YXPPCCCT for each tile in the No-Y
 
 ADDR_02F639:                    ;-----------| No Yoshi sign MAIN, for the rope entrance.
     LDX.b #$07                  ;$02F639    |
-    LDY.b #$B0                  ;$02F63B    | OAM index to use for the rope No-Yoshi sign.
+    LDY.b #$B0                  ;$02F63B    | OAM index (from $0300) to use for the rope No-Yoshi sign.
 ADDR_02F63D:                    ;           |
     LDA.b #$C0                  ;$02F63D    |\ 
     CLC                         ;$02F63F    || Set X position.
@@ -17605,7 +17606,7 @@ DATA_02F6AC:                    ;$02F6AC    | Y position offsets for each tile o
 
 CODE_02F6B8:                    ;-----------| Castle door GFX routine.
     LDX.b #$0B                  ;$02F6B8    |
-    LDY.b #$B0                  ;$02F6BA    |] OAM index for the castle door sprite.
+    LDY.b #$B0                  ;$02F6BA    |] OAM index (from $0200) for the castle door sprite.
 CODE_02F6BC:                    ;           |
     LDA.b #$B8                  ;$02F6BC    |\ 
     CLC                         ;$02F6BE    || Set X position of the tile.
@@ -17661,7 +17662,7 @@ DATA_02F721:                    ;$02F721    | Tile numbers for each of the Ghost
     db $A2,$B2,$B2,$A2,$A2,$B2,$B2,$A2      ; 2 - Mostly open
     db $A3,$B3,$B3,$A3,$A3,$B3,$B3,$A3      ; 3 - Fully open
 
-DATA_02F741:                    ;$02F741    | OAM indices for each tile of the castle door.
+DATA_02F741:                    ;$02F741    | OAM indices (from $0300) for each tile of the castle door.
     db $40,$44,$48,$4C,$F0,$F4,$F8,$FC
 
 DATA_02F749:                    ;$02F749    | Frames for the door's animation.
@@ -18092,7 +18093,7 @@ CODE_02F9FF:
 DATA_02FA02:                    ;$02FA02    | AND values used as part of determining when to switch animation frames for the castle flame.
     db $03,$07,$07,$07,$0F,$07,$07,$0F
 
-DATA_02FA0A:                    ;$02FA0A    | OAM indices for the castle flames.
+DATA_02FA0A:                    ;$02FA0A    | OAM indices (from $0300) for the castle flames.
     db $F0,$F4,$F8,$FC
 
 CastleFlameTiles:               ;$02FA0E    | Tile numbers for the castle flame's animation.
@@ -18104,7 +18105,7 @@ CastleFlameGfxProp:             ;$02FA12    | YXPPCCCT for the castle flame's an
     ; Castle flame misc RAM:
     ; $0F4A - Counter for the flame's current animation frame (mod 4).
     
-CODE_02FA16:                    ;-----------| Castle flame MAIN
+CODE_02FA16:                    ;-----------| Castle candle flames MAIN
     LDA $9D                     ;$02FA16    |\ 
     BNE CODE_02FA2B             ;$02FA18    ||
     JSL GetRand                 ;$02FA1A    ||
@@ -18146,7 +18147,7 @@ CODE_02FA2B:                    ;           |
     BCC Return02FA83            ;$02FA64    ||
     LDA.w $0300,Y               ;$02FA66    ||
     STA.w $03EC                 ;$02FA69    ||
-    LDA.w $0301,Y               ;$02FA6C    || If the sprite isn't offscreen, duplicate the flame
+    LDA.w $0301,Y               ;$02FA6C    || If the sprite is offscreen, duplicate the flame
     STA.w $03ED                 ;$02FA6F    ||  to another OAM slot with the high X bit set.
     LDA.w $0302,Y               ;$02FA72    || (for smooth looping)
     STA.w $03EE                 ;$02FA75    ||
@@ -18846,7 +18847,7 @@ ADDR_02FF4A:                    ;           ||
 
 
 
-DATA_02FF50:                    ;$02FF50    | Cluster sprite OAM indices.
+DATA_02FF50:                    ;$02FF50    | Cluster sprite OAM indices (from $0300).
     db $E0,$E4,$E8,$EC,$F0,$F4,$F8,$FC
     db $5C,$58,$54,$50,$4C,$48,$44,$40
     db $3C,$38,$34,$30
