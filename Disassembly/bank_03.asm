@@ -891,7 +891,7 @@ CODE_038660:                    ;           ||
 CODE_03866C:                    ;           ||  (note that any more platforms will immediately reverse direction).
     DEY                         ;$03866C    ||
     BPL CODE_038660             ;$03866D    ||
-    INY                         ;$03866F    ||
+    INY                         ;$03866F    ||] Note: this line should probably be changed to an RTS.
 CODE_038670:                    ;           ||
     LDA.b #$7F                  ;$038670    ||
     STA.w $1602,Y               ;$038672    |/
@@ -5335,7 +5335,7 @@ CODE_03A3E2:                    ;-----------| Subroutine to draw the cloud puffs
     ASL                         ;$03A3ED    || $02 = animation frame, x8
     ASL                         ;$03A3EE    ||
     STA $02                     ;$03A3EF    |/
-    LDA.b #$70                  ;$03A3F1    |\\ OAM index for Bowser's death clouds.
+    LDA.b #$70                  ;$03A3F1    |\\ OAM index (from $0300) for Bowser's death clouds.
     STA.w $15EA,X               ;$03A3F3    |/
     TAY                         ;$03A3F6    |
     PHX                         ;$03A3F7    |
@@ -6221,7 +6221,7 @@ CODE_03AA6E:                    ;-----------| Peach GFX routine, when in Bowser'
     STA.w $0448                 ;$03AAC0    || Store size to OAM as 16x16.
     STA.w $0449                 ;$03AAC3    |/
 CODE_03AAC6:                    ;           |
-    LDY.b #$70                  ;$03AAC6    |] OAM index for Peach when in Bowser's clown car.
+    LDY.b #$70                  ;$03AAC6    |] OAM index (from $0300) for Peach when in Bowser's clown car.
 CODE_03AAC8:                    ;```````````| Peach GFX routine (even when out of Bowser's clown car). Note that Y, $00, $01, and $03 must be set up beforehand.
     LDA $03                     ;$03AAC8    |\ 
     ASL                         ;$03AACA    || $04 = animation frame, x4
@@ -6554,7 +6554,7 @@ CODE_03ACC1:                    ;           || Get animation frame.
     TAY                         ;$03ACCA    |/
 CODE_03ACCB:                    ;           |
     STY $03                     ;$03ACCB    |
-    LDA.b #$D0                  ;$03ACCD    |\\ OAM index for Peach when out of Bowser's car.
+    LDA.b #$D0                  ;$03ACCD    |\\ OAM index (from $0300) for Peach when out of Bowser's car.
     STA.w $15EA,X               ;$03ACCF    |/
     TAY                         ;$03ACD2    |
     JSR CODE_03AAC8             ;$03ACD3    |\ 
@@ -6569,7 +6569,7 @@ CODE_03ACCB:                    ;           |
     BNE CODE_03ACEB             ;$03ACE8    ||
     INX                         ;$03ACEA    |/
 CODE_03ACEB:                    ;           |
-    LDY.b #$4C                  ;$03ACEB    || OAM index of Mario's blush tile.
+    LDY.b #$4C                  ;$03ACEB    || OAM index (from $0300) of Mario's blush tile.
     LDA $7E                     ;$03ACED    |\ Store X position for the blush to OAM.
     STA.w $0300,Y               ;$03ACEF    |/
     LDA $80                     ;$03ACF2    |\ 
@@ -6897,7 +6897,7 @@ CODE_03AF59:                    ;-----------| Subroutine to draw the spinning st
     LSR                         ;$03AF64    || $02 = animation frame
     AND.b #$07                  ;$03AF65    ||
     STA $02                     ;$03AF67    |/
-    LDA.b #$EC                  ;$03AF69    |\\ OAM index to use for the stars above Bowser's head.
+    LDA.b #$EC                  ;$03AF69    |\\ OAM index (from $0300) to use for the stars above Bowser's head.
     STA.w $15EA,X               ;$03AF6B    |/
     TAY                         ;$03AF6E    |
     PHX                         ;$03AF6F    |
@@ -6938,7 +6938,7 @@ CODE_03AF72:                    ;```````````| Tile loop for the stars.
     CMP.b #$0D                  ;$03AFAB    ||
     BCS CODE_03AFD7             ;$03AFAD    |/
     TAX                         ;$03AFAF    |
-    LDY.b #$FC                  ;$03AFB0    || OAM index to use for Bowser's teardrop.
+    LDY.b #$FC                  ;$03AFB0    || OAM index (from $0300) to use for Bowser's teardrop.
     LDA $04                     ;$03AFB2    |\ 
     ASL                         ;$03AFB4    ||
     ROL                         ;$03AFB5    ||
@@ -7272,7 +7272,7 @@ BowserBallDispY2:               ;$03B21D    | Y offsets for animation fo the "sh
     db $00,$FD,$F4,$EB,$E8,$EB,$F4,$FD
 
 BowserBallGfx:                  ;-----------| Bowser's bowling ball GFX routine
-    LDA.b #$70                  ;$03B221    |\\ OAM index for Bowser's bowling ball.
+    LDA.b #$70                  ;$03B221    |\\ OAM index (from $0300) for Bowser's bowling ball.
     STA.w $15EA,X               ;$03B223    |/
     JSR GetDrawInfoBnk3         ;$03B226    |
     PHX                         ;$03B229    |
@@ -7450,7 +7450,7 @@ MechaKoopaGfx:                  ;-----------| Actual MechaKoopa GFX routine.
     CMP.b #$05                  ;$03B361    ||
     BCC CODE_03B369             ;$03B363    ||
     CMP.b #$FA                  ;$03B365    ||
-    BCC CODE_03B36B             ;$03B367    || Animate the MechaKoopa's
+    BCC CODE_03B36B             ;$03B367    || Animate the MechaKoopa's key.
 CODE_03B369:                    ;           ||
     LDY.b #$04                  ;$03B369    ||
 CODE_03B36B:                    ;           ||
@@ -7603,7 +7603,7 @@ CODE_03B457:                    ;           ||
     BEQ Return03B48B            ;$03B45A    |/
     PHX                         ;$03B45C    |
     LDX.b #$03                  ;$03B45D    |
-    LDY.b #$04                  ;$03B45F    || OAM index to use for Mario's item box in Bowser's room.
+    LDY.b #$04                  ;$03B45F    || OAM index (from $0200) to use for Mario's item box in Bowser's room.
 CODE_03B461:                    ;           |
     LDA.w BowserItemBoxPosX,X   ;$03B461    |\ Store X position to OAM.
     STA.w $0200,Y               ;$03B464    |/
@@ -7645,14 +7645,14 @@ BowserRoofPosY:                 ;$03B49C    | Y offsets for additional tiles for
 
 BowserSceneGfx:                 ;-----------| Subroutine to set up Bowser's boss room.
     PHX                         ;$03B4AC    |
-    LDY.b #$BC                  ;$03B4AD    |\\ OAM index for the floor of Bowser's room when Bowser is still alive.
+    LDY.b #$BC                  ;$03B4AD    |\\ OAM index (from $0300) for the floor of Bowser's room when Bowser is still alive.
     STZ $01                     ;$03B4AF    ||
     LDA.w $190D                 ;$03B4B1    ||
     STA $0F                     ;$03B4B4    || Get OAM index for the floor of Bowser's room.
     CMP.b #$01                  ;$03B4B6    ||  For some reason, it also has one less tile uploaded after Bowser is defeated (not sure why).
     LDX.b #$10                  ;$03B4B8    ||
     BCC CODE_03B4BF             ;$03B4BA    ||
-    LDY.b #$90                  ;$03B4BC    ||| OAM index for the floor of Bowser's room after Bowser is defeated.
+    LDY.b #$90                  ;$03B4BC    ||| OAM index (from $0300) for the floor of Bowser's room after Bowser is defeated.
     DEX                         ;$03B4BE    |/
 CODE_03B4BF:                    ;```````````| Tile loop for the floor of Bowser's room.
     LDA.b #$C0                  ;$03B4BF    |\ 
@@ -7688,7 +7688,7 @@ CODE_03B4BF:                    ;```````````| Tile loop for the floor of Bowser'
     LDX.b #$0F                  ;$03B4F2    |
     LDA $0F                     ;$03B4F4    |\ Branch if Bowser has been defeated, to use the $0300 range of OAM.
     BNE CODE_03B532             ;$03B4F6    |/
-    LDY.b #$14                  ;$03B4F8    || OAM index for the extra tiles in Bowser's room while Bowser is still alive.
+    LDY.b #$14                  ;$03B4F8    || OAM index (from $0200) for the extra tiles in Bowser's room while Bowser is still alive.
 CODE_03B4FA:                    ;```````````| Tile loop for additional tiles in Bowser's room.
     LDA.w BowserRoofPosX,X      ;$03B4FA    |\ 
     SEC                         ;$03B4FD    || Store X position to OAM.
@@ -7725,7 +7725,7 @@ CODE_03B514:                    ;           ||
 
 
 CODE_03B532:                    ;```````````| Using the $0300 OAM range for Bowser's extra floor tiles.
-    LDY.b #$50                  ;$03B532    || OAM index for the extra tiles in Bowser's room after Bowser has been defeated.
+    LDY.b #$50                  ;$03B532    || OAM index (from $0300) for the extra tiles in Bowser's room after Bowser has been defeated.
 CODE_03B534:                    ;```````````| Alternate tile loop for additional tiles in Bowser's room.
     LDA.w BowserRoofPosX,X      ;$03B534    |\ 
     SEC                         ;$03B537    || Store X position to OAM.
@@ -8303,7 +8303,7 @@ BooBossPals:                    ;$03B982    | Big Boo Boss palette animation. Al
 
 
 
-Empty03BA02:                    ;$03BA02    | Empty. LM sticks a few hijacks in here.
+Empty03BA02:                    ;$03BA02    | Empty. LM sticks various hijacks in this block.
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
@@ -8313,13 +8313,9 @@ Empty03BA02:                    ;$03BA02    | Empty. LM sticks a few hijacks in 
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF
+
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BA50 - Used by LM as a hijack to $049199 for determining whether an overworld level is enterable.
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
@@ -8340,6 +8336,13 @@ Empty03BA02:                    ;$03BA02    | Empty. LM sticks a few hijacks in 
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF
+
+    db $FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
 
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BB20 - Used by LM for its level name hijack.
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
@@ -8388,9 +8391,9 @@ Empty03BA02:                    ;$03BA02    | Empty. LM sticks a few hijacks in 
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF
 
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BC7F - Used by LM as a table of message box stripe headers (first 2 bytes) for each line.
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ;  With Lunar Magic's overworld level expansion, this table is shifted a bit earlier, to $03BC79.
 
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BC8F - Unused.
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BC8F - Unused?
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
@@ -8401,7 +8404,7 @@ Empty03BA02:                    ;$03BA02    | Empty. LM sticks a few hijacks in 
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BCC0 - Used by LM for a 16-byte table related to ExAnimation.
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
 
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BCD0 - Probably also used by LM, I haven't checked.
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BCD0 - Unused?
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
@@ -8455,12 +8458,13 @@ Empty03BA02:                    ;$03BA02    | Empty. LM sticks a few hijacks in 
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BE80 - Used by LM as 16-bit pointers to each message box's text.
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ;  Indexed by ((level * 2) + message number) * 2.
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; Note: if LM's overworld level expansion is applied, this table is moved to read3($03BBD9).
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ;  Instead, this table used for the initial level flags (moved from $05DDA0).
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ;  The remainder of the table ($03BF80 onwards) is then left unused for now.
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
@@ -9744,7 +9748,7 @@ CODE_03C96D:                    ;-----------| GFX routine for the firework as it
     AND.b #$03                  ;$03C970    ||
     BNE Return03C9B8            ;$03C972    |/
     JSR GetDrawInfoBnk3         ;$03C974    |
-    LDY.b #$00                  ;$03C977    |] OAM index to use for the firework.
+    LDY.b #$00                  ;$03C977    |] OAM index (from $0300) to use for the firework.
     LDA $00                     ;$03C979    |\ Store X position to OAM.
     STA.w $0300,Y               ;$03C97B    |/
     STA.w $0304,Y               ;$03C97E    | (mistake?...)
@@ -11110,7 +11114,7 @@ DATA_03D8EC:                    ;$03D8EC    | Map16 data for each of the tiles l
     db $03,$05,$03,$08          ; 19
     db $03,$06,$0F,$1F          ; 1A
 
-CODE_03D958:                    ;-----------| Routine to clear out the Mode 7 tilemap. Also uploads Iggy/Larry's platform in their room.
+CODE_03D958:                    ;-----------| Routine to clear out the Mode 7 tilemap. Also uploads Iggy/Larry's platform tilemap in their room.
     REP #$10                    ;$03D958    |
     STZ.w $2115                 ;$03D95A    |\ 
     STZ.w $2116                 ;$03D95D    ||
@@ -11333,7 +11337,7 @@ CODE_03DD7D:                    ;-----------| Routine to load palettes and GFX f
     STY.w $13FC                 ;$03DD83    || Branch if not Reznor.
     CPY.b #$04                  ;$03DD86    ||
     BNE CODE_03DD97             ;$03DD88    |/
-    JSR CODE_03DE8E             ;$03DD8A    | Load Reznor's wheel.
+    JSR CODE_03DE8E             ;$03DD8A    | Load Reznor's wheel tilemap.
     LDA.b #$48                  ;$03DD8D    |\\ Y position of the center of rotation for Reznor's wheel.
     STA $2C                     ;$03DD8F    |/
     LDA.b #$14                  ;$03DD91    |\\ Size of Reznor's wheel.
@@ -11347,7 +11351,7 @@ CODE_03DD97:                    ;```````````| Not Reznor.
     LDY.w $13FC                 ;$03DD9E    |\ 
     LDX.w DATA_03DD78,Y         ;$03DDA1    ||
     LDA.w KoopaPalPtrLo,Y       ;$03DDA4    || Get index to the palette for the current Mode 7 room.
-    STA $00                     ;$03DDA7    ||
+    STA $00                     ;$03DDA7    ||  Also get the graphics file to use.
     LDA.w KoopaPalPtrHi,Y       ;$03DDA9    ||
     STA $01                     ;$03DDAC    |/
     STZ $02                     ;$03DDAE    |
@@ -11363,7 +11367,7 @@ CODE_03DDB2:                    ;           ||
     STZ.w $2117                 ;$03DDC2    |/
     TXY                         ;$03DDC5    |\ If Reznor, skip.
     BEQ CODE_03DDD7             ;$03DDC6    |/
-    JSL CODE_00BA28             ;$03DDC8    | Get GFX file data pointer.
+    JSL CODE_00BA28             ;$03DDC8    | Decompress GFX file to RAM.
     LDA.b #$80                  ;$03DDCC    |\ 
     STA $03                     ;$03DDCE    ||
 CODE_03DDD0:                    ;           || Upload 0x80 tiles to VRAM.
