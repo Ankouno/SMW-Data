@@ -119,7 +119,7 @@ CODE_018073:
 
 
 
-CODE_01808C:                    ;-----------| Routine for running all the sprite routines.
+CODE_01808C:                    ;-----------| Routine for running all the standard and cluster sprite routines.
     PHB                         ;$01808C    |
     PHK                         ;$01808D    |
     PLB                         ;$01808E    |
@@ -134,7 +134,7 @@ CODE_01808C:                    ;-----------| Routine for running all the sprite
     LDX.b #$0B                  ;$0180A7    |\ 
 CODE_0180A9:                    ;           ||
     STX.w $15E9                 ;$0180A9    ||
-    JSR CODE_0180D2             ;$0180AC    || Run each sprite's routine.
+    JSR CODE_0180D2             ;$0180AC    || Run each standard sprite's routine.
     JSR HandleSprite            ;$0180AF    ||
     DEX                         ;$0180B2    ||
     BPL CODE_0180A9             ;$0180B3    |/
@@ -1133,7 +1133,7 @@ SpriteMainPtr:                  ;$0185CC    | Sprite MAIN pointers.
     dw FishMain                             ; 16 - Fish, vertical
     dw GeneratedFish                        ; 17 - Fish, flying (spawned by sprite D1)
     dw JumpingFish                          ; 18 - Fish, jumping
-    dw PSwitch                              ; 19 - Display text from level message 1
+    dw DisplayMsg1                          ; 19 - Display text from level message 1
     dw ClassicPiranhas                      ; 1A - Classic Piranha Plant
     dw Bank3SprHandler                      ; 1B - Football
     dw BulletBill                           ; 1C - Bullet Bill
@@ -1170,7 +1170,7 @@ SpriteMainPtr:                  ;$0185CC    | Sprite MAIN pointers.
     dw WallFollowers                        ; 3B - Urchin (wall detect)
     dw WallFollowers                        ; 3C - Urchin (wall follow)
     dw RipVanFish                           ; 3D - Rip Van Fish
-    dw PSwitch                              ; 3E - P-switch
+    dw DisplayMsg1                          ; 3E - P-switch
     dw ParachuteSprites                     ; 3F - Para-Goomba
     dw ParachuteSprites                     ; 40 - Para-Bomb
     dw Dolphin                              ; 41 - Dolphin (long jump)
@@ -3562,7 +3562,7 @@ CODE_019523:                    ;           |
     STA $07                     ;$019525    ||
     LDX.w $15E9                 ;$019527    ||
     LDA [$05]                   ;$01952A    || Find what type of block the sprite is touching.
-    STA.w $1693                 ;$01952C    ||
+    STA.w $1693                 ;$01952C    ||  Get the proper Acts-Like setting in the process.
     INC $07                     ;$01952F    ||
     LDA [$05]                   ;$019531    ||
     JSL CODE_00F545             ;$019533    |/ {line hijacked by LM}
@@ -5877,9 +5877,9 @@ CODE_01A4B6:                    ;```````````| Return the routine.
 
 
 
-CODE_01A4BA:                    ;```````````| Sprites are touching; decide what the actual interaction is.
-    LDA.w $14C8,Y               ;$01A4BA    |
-    CMP.b #$08                  ;$01A4BD    |
+CODE_01A4BA:                    ;```````````| Sprites are touching; the below blocks use a series of branches to determine code to run.
+    LDA.w $14C8,Y               ;$01A4BA    |  They're all extremely similar and mainly based on the sprite state (08-0B), so I'll just
+    CMP.b #$08                  ;$01A4BD    |  include comments for the blocks and not the individual lines.
     BEQ CODE_01A4CE             ;$01A4BF    |
     CMP.b #$09                  ;$01A4C1    |
     BEQ CODE_01A4E2             ;$01A4C3    |
@@ -5902,14 +5902,13 @@ CODE_01A4CE:                    ;```````````| Sprite A is in normal status (08).
     RTS                         ;$01A4E1    |
 
 CODE_01A4E2:                    ;```````````| Sprite A is in carryable status (09).
-    LDA.w $1588,Y               ;$01A4E2    |
-    AND.b #$04                  ;$01A4E5    |
-    BNE CODE_01A4F2             ;$01A4E7    |
+    LDA.w $1588,Y               ;$01A4E2    |\ 
+    AND.b #$04                  ;$01A4E5    || Branch if on the ground.
+    BNE CODE_01A4F2             ;$01A4E7    |/
     LDA.w $009E,Y               ;$01A4E9    |\ 
-    CMP.b #$0F                  ;$01A4EC    || Branch if sprite 0F (Goomba); else, treat the sprite as thrown.
+    CMP.b #$0F                  ;$01A4EC    || Branch if A = sprite 0F (Goomba); else, treat the sprite as thrown.
     BEQ CODE_01A534             ;$01A4EE    ||
     BRA CODE_01A506             ;$01A4F0    |/
-
 CODE_01A4F2:                    ;```````````| Sprite A is carryable and on the ground.
     LDA.w $14C8,X               ;$01A4F2    |
     CMP.b #$08                  ;$01A4F5    |
@@ -5922,7 +5921,7 @@ CODE_01A4F2:                    ;```````````| Sprite A is carryable and on the g
     BEQ CODE_01A534             ;$01A503    |
     RTS                         ;$01A505    |
 
-CODE_01A506:                    ;```````````| Sprite A is in thrown status (0A).
+CODE_01A506:                    ;```````````| Sprite A is in thrown status (0A), or carryable and in the air (and not a Goomba).
     LDA.w $14C8,X               ;$01A506    |
     CMP.b #$08                  ;$01A509    |
     BEQ CODE_01A52E             ;$01A50B    |
@@ -5946,8 +5945,8 @@ CODE_01A51A:                    ;```````````| Sprite A is in carried status (0B)
     BEQ CODE_01A534             ;$01A52B    |
     RTS                         ;$01A52D    |
 
-
-
+    ; And here are the actual jumps all those branches above are leading to.
+    
 CODE_01A52E:                    ;```````````| Sprite A is thrown (0A) and sprite B is normal (08).
     JMP CODE_01A625             ;$01A52E    | Generally, kills sprite B.
 
@@ -5960,7 +5959,7 @@ CODE_01A534:                    ;```````````| Either sprite A or B are being car
 CODE_01A537:                    ;```````````| Sprite A is normal (08) and sprite B is thrown (0A).
     JMP CODE_01A5C4             ;$01A537    | Generally, kills sprite A.
 
-ADDR_01A53A:                    ;```````````| Unused.
+ADDR_01A53A:                    ;```````````| Unused. Does the same as above.
     JMP CODE_01A5C4             ;$01A53A    |
 
 CODE_01A53D:                    ;```````````| Both sprites are in normal status (08).
@@ -6398,7 +6397,7 @@ ProcessInteract:                ;-----------| The actual Mario-sprite interactio
     BCS ReturnNoContact         ;$01A801    ||  (i.e. not within any hitbox whatsoever)
     JSR SubVertPosBnk1          ;$01A803    ||
     LDA $0E                     ;$01A806    || That said, this is a single-byte compare, so this space loops each screen anyway.
-    CLC                         ;$01A808    ||
+    CLC                         ;$01A808    ||  (thankfully, the CheckForContact makes sure of that anyway).
     ADC.b #$60                  ;$01A809    ||
     CMP.b #$C0                  ;$01A80B    ||
     BCS ReturnNoContact         ;$01A80D    |/
@@ -6518,9 +6517,8 @@ CODE_01A8D8:                    ;           |
     JSL DispContactMario        ;$01A8E1    |
     RTS                         ;$01A8E5    |
 
-
-
-CODE_01A8E6:                    ;-----------| Subroutine for hitting an enemy without bouncing off of it.
+    
+CODE_01A8E6:                    ;```````````| Hitting an enemy without bouncing off of it.
     LDA.w $13ED                 ;$01A8E6    |\ 
     BEQ CODE_01A8F9             ;$01A8E9    ||
     LDA.w $190F,X               ;$01A8EB    ||
@@ -6549,8 +6547,7 @@ Return01A91B:                   ;           |
     RTS                         ;$01A91B    |
 
 
-
-CODE_01A91C:                    ;-----------| Subroutine for jumping on an enemy.
+CODE_01A91C:                    ;```````````| Hitting an enemy on top, handle bouncing off.
     LDA.w $140D                 ;$01A91C    |\ 
     ORA.w $187A                 ;$01A91F    || If not spinjumping or riding Yoshi, branch.
     BEQ CODE_01A947             ;$01A922    |/
@@ -6573,12 +6570,12 @@ CODE_01A935:                    ;           |
 CODE_01A947:                    ;```````````| Bouncing off an enemy without spinjumping/riding Yoshi.
     JSR CODE_01A8D8             ;$01A947    | Set Y speed, display a contact graphic, and set default sound effect (for disco shell).
     LDA.w $187B,X               ;$01A94A    |\ 
-    BEQ CODE_01A95D             ;$01A94D    || If bouncing on a disco shell, just give Mario some X speed and return.
+    BEQ CODE_01A95D             ;$01A94D    || If bouncing on a disco shell (or chuck/etc.), just give Mario some X speed and return.
     JSR SubHorzPosBnk1          ;$01A94F    ||
-    LDA.b #$18                  ;$01A952    ||| X speed to give Mario to the right of a disco shell.
+    LDA.b #$18                  ;$01A952    ||| X speed to give Mario to the right of a disco shell/Chuck.
     CPY.b #$00                  ;$01A954    ||
     BEQ CODE_01A95A             ;$01A956    ||
-    LDA.b #$E8                  ;$01A958    ||| X speed to give Mario to the left of a disco shell.
+    LDA.b #$E8                  ;$01A958    ||| X speed to give Mario to the left of a disco shell/Chuck.
 CODE_01A95A:                    ;           ||
     STA $7B                     ;$01A95A    ||
     RTS                         ;$01A95C    |/
@@ -8936,7 +8933,7 @@ FinishOAMWrite:                 ;-----------| Routine to make sure sprite tiles 
 FinishOAMWriteRt:
     STY $0B                     ;$01B7BB    |
     STA $08                     ;$01B7BD    |
-    LDY.w $15EA,X               ;$01B7BF    |
+    LDY.w $$15EA,X              ;$01B7BF    |
     LDA $D8,X                   ;$01B7C2    |\ 
     STA $00                     ;$01B7C4    ||
     SEC                         ;$01B7C6    ||
@@ -11113,9 +11110,9 @@ Return01C5EB:                   ;           |
 
 
 GiveMarioFire:                  ;-----------| Routine to handle giving Mario a fireflower.
-    LDA.b #$20                  ;$01C5EC    | How many frames the animation lasts.
-    STA.w $149B                 ;$01C5EE    |
-    STA $9D                     ;$01C5F1    |
+    LDA.b #$20                  ;$01C5EC    |\\ How many frames the animation lasts.
+    STA.w $149B                 ;$01C5EE    ||
+    STA $9D                     ;$01C5F1    |/
     LDA.b #$04                  ;$01C5F3    |
     STA $71                     ;$01C5F5    |
     LDA.b #$03                  ;$01C5F7    |\ Set fire status.
@@ -12230,7 +12227,7 @@ InitKoopaKid:                   ;-----------| Koopa Kid INIT
     STA $D8,X                   ;$01CD41    ||| Initial Y position.
     LDA.b #$01                  ;$01CD43    |||
     STA.w $14D4,X               ;$01CD45    ||/
-    LDA.b #$80                  ;$01CD48    ||\ 
+    LDA.b #$80                  ;$01CD48    ||\ How long before the boss rises out of the pipe for the first time.
     STA.w $1540,X               ;$01CD4A    ||/
     RTS                         ;$01CD4D    |/
 
@@ -12239,7 +12236,7 @@ CODE_01CD4E:                    ;```````````| Not Wendy/Lemmy.
     STY $D8,X                   ;$01CD50    |
     CMP.b #$03                  ;$01CD52    |\ Iggy/Larry only.
     BCC CODE_01CD5E             ;$01CD54    ||
-    JSL CODE_00FCF5             ;$01CD56    ||
+    JSL CODE_00FCF5             ;$01CD56    || Set initial position and face Mario.
     JSR FaceMario               ;$01CD5A    ||
     RTS                         ;$01CD5D    |/
 
@@ -14192,10 +14189,10 @@ Return01DA09:                   ;           |
     RTS                         ;$01DA09    |
 
 CODE_01DA0A:                    ;```````````| In contact with Mario.
-    LDA.w $14C8,X               ;$01DA0A    |\ Branch if the rope is despawning...?
+    LDA.w $14C8,X               ;$01DA0A    |\ Clear climbing flag if the rope is despawning...?
     BEQ CODE_01DA37             ;$01DA0D    |/
     LDA.w $1470                 ;$01DA0F    |\ 
-    ORA.w $187A                 ;$01DA12    || Return not in contact if Mario is caring something.
+    ORA.w $187A                 ;$01DA12    || Return not in contact if Mario is carrying something.
     BNE CODE_01D9FE             ;$01DA15    |/
     LDA.b #$03                  ;$01DA17    |\ Set flag for being in contact with the rope. 
     STA.w $163E,X               ;$01DA19    |/
@@ -15083,7 +15080,7 @@ Podoboo:                        ;-----------| Podoboo MAIN (and also Bowser fire
     BEQ CODE_01E0A7             ;$01E099    |/
     STA.w $15D0,X               ;$01E09B    |
     DEC A                       ;$01E09E    |\ 
-    BNE Return01E0A6            ;$01E09F    ||
+    BNE Return01E0A6            ;$01E09F    || If about to jump, play the sound effect for doing so.
     LDA.b #$27                  ;$01E0A1    ||\ SFX for the podoboo leaping out of the lava.
     STA.w $1DFC                 ;$01E0A3    |//
 Return01E0A6:                   ;           |
@@ -15230,10 +15227,10 @@ CODE_01E198:                    ;-----------| Podoboo GFX routine.
     ASL                         ;$01E1A2    ||
     ASL                         ;$01E1A3    ||
     ASL                         ;$01E1A4    ||
-    ASL                         ;$01E1A5    ||
-    ASL                         ;$01E1A6    || Store the pointer for the Podoboo's graphics for DMA upload.
-    CLC                         ;$01E1A7    || ($7E8600; tile x548)
-    ADC.w #$8500                ;$01E1A8    || All the math on A here is kinda pointless, can just directly load #$8600.
+    ASL                         ;$01E1A5    || Store the pointer for the Podoboo's graphics for DMA upload.
+    ASL                         ;$01E1A6    ||  ($7E8600; tile 0x548)
+    CLC                         ;$01E1A7    || All the math on A here is kinda pointless, can just directly load #$8600.
+    ADC.w #$8500                ;$01E1A8    ||
     STA.w $0D8B                 ;$01E1AB    ||
     CLC                         ;$01E1AE    ||
     ADC.w #$0200                ;$01E1AF    ||
@@ -16103,7 +16100,7 @@ Return01E75A:                   ;           |
     ; Display Level Message 1 misc RAM:
     ; $1564 - Timer to wait before actually showing the message. Set to #$28 on spawn.
 
-PSwitch:                        ;-----------| Display Level Message 1 MAIN (also kinda P-switch MAIN, but its actual MAIN is at $01A1FD)
+DisplayMsg1:                    ;-----------| Display Level Message 1 MAIN (also kinda P-switch MAIN, but its actual MAIN is at $01A1FD)
     LDA.w $1564,X               ;$01E75B    |\ 
     CMP.b #$01                  ;$01E75E    || Return if not time to show the message.
     BNE Return01E76E            ;$01E760    |/
@@ -17209,7 +17206,7 @@ CODE_01EF18:                    ;-----------| Yoshi GFX routine (OAM portion)
     PHA                         ;$01EF28    ||
     CLC                         ;$01EF29    ||
     ADC.w YoshiPositionY,Y      ;$01EF2A    ||
-    STA $D8,X                   ;$01EF2D    || Set Y displacement for Yoshi's head.
+    STA $D8,X                   ;$01EF2D    || Get Y displacement for Yoshi's head.
     LDA.w $14D4,X               ;$01EF2F    ||
     PHA                         ;$01EF32    ||
     ADC.b #$00                  ;$01EF33    ||
@@ -17222,7 +17219,7 @@ CODE_01EF18:                    ;-----------| Yoshi GFX routine (OAM portion)
 CODE_01EF41:                    ;           ||
     TAY                         ;$01EF41    ||
     LDA $E4,X                   ;$01EF42    ||
-    PHA                         ;$01EF44    || Set X displacement for Yoshi's head.
+    PHA                         ;$01EF44    || Get X displacement for Yoshi's head.
     CLC                         ;$01EF45    ||
     ADC.w YoshiHeadDispX,Y      ;$01EF46    ||
     STA $E4,X                   ;$01EF49    ||
@@ -17956,7 +17953,7 @@ CODE_01F462:                    ;           |
     STA $05                     ;$01F462    |
     LDA.b #$04                  ;$01F464    || How many tiles actually make up Yoshi's tongue (also affects visual length).
     STA $06                     ;$01F466    |
-    LDY.b #$0C                  ;$01F468    || Base OAM index of Yoshi's tongue.
+    LDY.b #$0C                  ;$01F468    || Base OAM index (from $0200) of Yoshi's tongue.
 CODE_01F46A:                    ;```````````| Tongue tile loop.
     LDA $00                     ;$01F46A    |\ 
     STA.w $0200,Y               ;$01F46C    ||
