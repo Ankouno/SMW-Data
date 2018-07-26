@@ -1034,7 +1034,7 @@ InitStandardSprite:             ;-----------| Standard sprite INIT. Used by all 
     JSL GetRand                 ;$018575    |
     STA.w $1570,X               ;$018579    |
 
-FaceMario:                      ;-----------| Subroutine to make Mario face Mario.
+FaceMario:                      ;-----------| Subroutine to make a sprite face Mario.
     JSR SubHorzPosBnk1          ;$01857C    |
     TYA                         ;$01857F    |
     STA.w $157C,X               ;$018580    |
@@ -7191,7 +7191,7 @@ CODE_01AD26:                    ;           |
 
 
     ; Equivalent routine in bank 2 at $02848D, bank 3 at $03B817.
-    ;  Curiously, this one uses $D1, while the others use $96.
+    ;  Curiously, this one uses $D1, while the others use $94.
 SubHorzPosBnk1:                 ;-----------| Subroutine to check horizontal proximity of Mario to a sprite.
     LDY.b #$00                  ;$01AD30    |  Returns the side in Y (0 = right) and distance in $0F.
     LDA $D1                     ;$01AD32    |
