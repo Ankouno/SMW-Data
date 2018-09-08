@@ -124,3 +124,40 @@ endif
 
 org $0EF600
 	print "Palette data table: ",pc
+	print ""
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+if read1($058A65) == $22
+	print "Map16 tilemap data tables:"
+  org read1($06F557)<<16|(read2($06F553)+$1000&$FFFF)
+	print "  Pages 02-0F: ",pc
+  org read1($06F560)<<16|(read2($06F55C)+$8000&$FFFF)
+	print "  Pages 10-1F: ",pc
+  org read1($06F56B)<<16|read2($06F567)+1
+	print "  Pages 20-3F: ",pc
+  org read1($06F574)<<16|(read2($06F570)+$8000&$FFFF)+1
+	print "  Pages 30-3F: ",pc
+  org read1($06F598)<<16|read2($06F594)
+	print "  Pages 40-4F: ",pc
+  org read1($06F5A1)<<16|(read2($06F59D)+$8000&$FFFF)
+	print "  Pages 50-5F: ",pc
+  org read1($06F5AC)<<16|read2($06F5A8)+1
+	print "  Pages 60-6F: ",pc
+  org read1($06F5B5)<<16|(read2($06F5B1)+$8000&$FFFF)+1
+	print "  Pages 70-7F: ",pc
+  
+  if read1($06F547) != $00
+    org read1($06F58A)<<16|(read2($06F586)+$1000&$FFFF)
+	  print "  Tileset-specific Map16 for page 2: ",pc
+  else
+	print "  Tileset-specific Map16 for page 2 is not enabled on this ROM."
+  endif
+  
+  org read3($06F624)
+	print "Map16 Acts-Like Settings (pages 00-3F): ",pc
+  org read3($06F63A)
+	print "Map16 Acts-Like Settings (pages 40-7F): ",pc
+else
+	print "Map16 VRAM modification has not been applied."
+endif
