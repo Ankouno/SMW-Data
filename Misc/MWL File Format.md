@@ -47,11 +47,11 @@ The first four bytes of each pointer are the offset within the file to that data
 
 ## Data
 ### Level Information
-The first two bytes are the source level number. The next four are the secondary level header.
+The first two bytes are the source level number, and after this are the first five bytes of the secondary level header. Two more bytes follow these, but appear to be unused for now.
 
-After this are three bytes with additional primary entrance information. The first byte comes directly from the table at $05DE00; the other two are currently unused/unknown.
+Following that are the four bytes of the midway point's data tables. A fifth byte follows this but appears to be unused for now.
 
-Following that are the three bytes of the midway point's data tables.
+After this are three additional bytes from the secondary level header. The first two pull from $06FC00 and $06FE00 respectively, while the third one pulls from the expanded level data table at ``read3(read3($05D9A2)+70)``.
 
 All remaining bytes in this section appear to just be padding for now.
 
@@ -77,7 +77,7 @@ After this are direct 16-bit SNES RGB values for all of the colors (regardless o
 
 ### Secondary Entrances
 Has an (unused?) 8-byte header, followed by 8 bytes for each secondary entrance present in the level.  
-The first two bytes of the data is the secondary entrance's ID (16-bit, little endian). Following this are three bytes for its values in the secondary exit tables $05FA00, $05FC00, and $05FE00 ($05F800 is implied by the level ID). The remaining three bytes appear to be unused for now.
+The first two bytes of the data is the secondary entrance's ID (16-bit, little endian). Following this are three bytes for its values in the secondary exit tables $05FA00, $05FC00, and $05FE00 ($05F800 is implied by the level ID). Two more bytes then follow for the dynamically allocated tables at ``read3($05DC86)`` and ``read3($05DC8B)``. The final byte appears to be unused for now.
 
 
 
