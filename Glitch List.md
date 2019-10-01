@@ -1,3 +1,9 @@
+- [Physics-Related Glitches](#physics-related-glitches)
+- [Yoshi-Related Glitches](#yoshi-related-glitches)
+- [Item and Object Glitches](#item-and-object-glitches)
+- [Miscellaneous Glitches](#miscellaneous-glitches)
+- [Locks and Crashes](#locks-and-crashes)
+
 # Physics-Related Glitches  
 __(Mario and controls)__  
 _70 recorded glitches, 64 of which are useful_  
