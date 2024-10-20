@@ -1,4 +1,4 @@
-.BANK1
+org $018000
 
 DATA_018000:                    ;$018000    | AND table, used by the line-guided sprites.
     db $80,$40,$20,$10,$08,$04,$02,$01
@@ -46,7 +46,7 @@ UpdateSpritePos:                ;-----------| Subroutine (JSL) to update a sprit
     PLB                         ;$018030    |
     RTL                         ;$018031    |
 
-SprSprInteract:                 ;-----------| Subroutine (JSL) to check for interaction between two sprites.
+SprSprInteract:                 ;-----------| Subroutine (JSL) to check for interaction between a sprite and all other sprites.
     PHB                         ;$018032    |
     PHK                         ;$018033    |
     PLB                         ;$018034    |
@@ -223,9 +223,9 @@ CODE_018133:
 
 SpriteStatusRtPtr:              ;$018137    | Sprite status pointers.
     dw EraseSprite                          ; 0 - Empty
-    dw CallSpriteInit                       ; 1 - Just spawned
+    dw CallSpriteInit                       ; 1 - Slot taken, not yet initialized.
     dw HandleSprKilled                      ; 2 - Killed and falling offscreen
-    dw HandleSprSmushed                     ; 3 - Killed by smush (Rex, Koopa, classic Goomba, P-switch)
+    dw HandleSprSmushed                     ; 3 - Killed by smushing (Rex, Koopa, classic Goomba, P-switch)
     dw HandleSprSpinJump                    ; 4 - Killed with a spinjump
     dw HandleSprLava                        ; 5 - Killed by lava
     dw HandleSprLvlEnd                      ; 6 - Turned into a coin by a goal tape
@@ -238,8 +238,8 @@ SpriteStatusRtPtr:              ;$018137    | Sprite status pointers.
 
 
 
-EraseSprite:                    ;-----------| Routine to permanently erase a sprite from a level (sprite status 0).
-    LDA.b #$FF                  ;$018151    |\ Tell the game not to respawn the sprite ever again.
+EraseSprite:                    ;-----------| Routine that runs for sprite status 0, to re-initialize $161A.
+    LDA.b #$FF                  ;$018151    |\ Indicate that no sprite is using this index.
     STA.w $161A,X               ;$018153    |/
 Return018156:                   ;           |
     RTS                         ;$018156    |
@@ -247,9 +247,9 @@ Return018156:                   ;           |
 
 
 HandleGoalPowerup:              ;-----------| Routine to handle a powerup spawned from an item carried into a goal tape (sprite status C).
-    JSR CallSpriteMain          ;$018157    | Run MAIN code for the powerup.
-    JSR SubOffscreen0Bnk1       ;$01815A    | Process offscreen from -$40 to +$30.
-    JSR SubUpdateSprPos         ;$01815D    | Update X/Y position, apply gravity, and process interaction with blocks.
+    JSR CallSpriteMain          ;$018157    |] Run MAIN code for the powerup.
+    JSR SubOffscreen0Bnk1       ;$01815A    |] Process offscreen from -$40 to +$30.
+    JSR SubUpdateSprPos         ;$01815D    |] Update X/Y position, apply gravity, and process interaction with blocks.
     DEC $AA,X                   ;$018160    |\ 
     DEC $AA,X                   ;$018162    ||
     JSR IsOnGround              ;$018164    || Apply, uh, more gravity.
@@ -350,13 +350,13 @@ SpriteInitPtr:                  ;$01817D    | Sprite INIT pointers.
     dw Return0183EE                         ; 4A - Goal Sphere
     dw InitPiranha                          ; 4B - Pipe-dwelling Lakitu
     dw InitExplodingBlk                     ; 4C - Exploding block
-    dw InitMontyMole                        ; 4D - Monty Mole (grownd-dwelling)
+    dw InitMontyMole                        ; 4D - Monty Mole (ground-dwelling)
     dw InitMontyMole                        ; 4E - Monty Mole (ledge-dwelling)
     dw InitPiranha                          ; 4F - Jumping Piranha Plant
     dw InitPiranha                          ; 50 - Jumping Piranha Plant (fireballs)
     dw FaceMario                            ; 51 - Ninji
-    dw InitMovingLedge                      ; 52 - Moving Ghost House hole
-    dw Return0185C2                         ; 53 - Throwblock
+    dw InitMovingLedge                      ; 52 - Moving Ghost House hole [changed to $0185B7 in LM v2.53+]
+    dw Return0185C2                         ; 53 - Throwblock [changed to $018435 in LM v3.40+]
     dw InitClimbingDoor                     ; 54 - Revolving door for climbing net
     dw InitChckbrdPlat                      ; 55 - Checkerboard platform (horizontal)
     dw Return01B25D                         ; 56 - Flying rock platform (horizontal)
@@ -383,8 +383,8 @@ SpriteInitPtr:                  ;$01817D    | Sprite INIT pointers.
     dw Return01843D                         ; 6B - Wall springboard (left wall)
     dw InitPeaBouncer                       ; 6C - Wall springboard (right wall)
     dw Return0185C2                         ; 6D - Invisible solid block
-    dw InitDinos                            ; 6E - Dino-Rhino
-    dw InitDinos                            ; 6F - Dino-Torch
+    dw InitDinos                            ; 6E - Dino Rhino
+    dw InitDinos                            ; 6F - Dino Torch
     dw InitPokey                            ; 70 - Pokey
     dw InitSuperKoopa                       ; 71 - Super Koopa (red cape)
     dw InitSuperKoopa                       ; 72 - Super Koopa (yellow cape)
@@ -436,7 +436,7 @@ SpriteInitPtr:                  ;$01817D    | Sprite INIT pointers.
     dw InitBowserScene                      ; A0 - Bowser
     dw Return0185C2                         ; A1 - Bowser's bowling ball
     dw Return0185C2                         ; A2 - MechaKoopa
-    dw InitGreyChainPlat                    ; A3 - Rotating gray platform
+    dw InitGrayChainPlat                    ; A3 - Rotating gray platform
     dw InitFloatSpkBall                     ; A4 - Floating spike ball
     dw InitFuzzBallPSpark                   ; A5 - Sparky/Fuzzy (wall follow)
     dw InitFuzzBallPSpark                   ; A6 - Hothead
@@ -454,7 +454,7 @@ SpriteInitPtr:                  ;$01817D    | Sprite INIT pointers.
     dw Return0185C2                         ; B2 - Falling spike
     dw InitBowsersFire                      ; B3 - Bowser statue fireball
     dw FaceMario                            ; B4 - Grinder (ground)
-    dw Return0185C2                         ; B5 - Unused
+    dw Return0185C2                         ; B5 - Falling Podoboo (unused)
     dw InitDiagBouncer                      ; B6 - Reflecting Podoboo
     dw Return0185C2                         ; B7 - Carrot Top Lift (up-right)
     dw Return0185C2                         ; B8 - Carrot Top Lift (up-left)
@@ -465,11 +465,11 @@ SpriteInitPtr:                  ;$01817D    | Sprite INIT pointers.
     dw InitSlidingKoopa                     ; BD - Sliding Blue Koopa
     dw Return0185C2                         ; BE - Swooper
     dw FaceMario                            ; BF - Mega Mole
-    dw InitGreyLavaPlat                     ; C0 - Sinking gray platform on lava
-    dw InitMontyMole                        ; C1 - Flying grey turnblocks
+    dw InitGrayLavaPlat                     ; C0 - Sinking gray platform on lava
+    dw InitMontyMole                        ; C1 - Flying gray turnblocks
     dw FaceMario                            ; C2 - Blurp
     dw FaceMario                            ; C3 - Porcu-Puffer
-    dw Return0185C2                         ; C4 - Falling grey platform
+    dw Return0185C2                         ; C4 - Falling gray platform
     dw FaceMario                            ; C5 - Big Boo BossBig Boo Boss
     dw Return018313                         ; C6 - Spotlight/disco ball
     dw Return0185C2                         ; C7 - Invisible mushroom
@@ -479,7 +479,7 @@ SpriteInitPtr:                  ;$01817D    | Sprite INIT pointers.
 
 
 
-InitGreyLavaPlat:               ;-----------| Sinking grey platform INIT
+InitGrayLavaPlat:               ;-----------| Sinking gray platform INIT
     INC $D8,X                   ;$01830F    |\ Lower the sprite two pixels from its spawn point.
     INC $D8,X                   ;$018311    |/
 Return018313:                   ;           |
@@ -505,14 +505,14 @@ Return018325:                   ;           |
 
 
 InitTimedPlat:                  ;-----------| Timed lift INIT
-    LDY.b #$3F                  ;$018326    | Timer for the 1-second platform.
-    LDA $E4,X                   ;$018328    |
-    AND.b #$10                  ;$01832A    |
-    BNE CODE_018330             ;$01832C    |
-    LDY.b #$FF                  ;$01832E    | Timer for the 4-second platform.
-CODE_018330:                    ;           |
-    TYA                         ;$018330    |
-    STA.w $1570,X               ;$018331    |
+    LDY.b #$3F                  ;$018326    |\\ Timer for the 1-second platform.
+    LDA $E4,X                   ;$018328    ||
+    AND.b #$10                  ;$01832A    ||
+    BNE CODE_018330             ;$01832C    ||
+    LDY.b #$FF                  ;$01832E    ||| Timer for the 4-second platform.
+CODE_018330:                    ;           ||
+    TYA                         ;$018330    ||
+    STA.w $1570,X               ;$018331    |/
     RTS                         ;$018334    |
 
 
@@ -630,7 +630,7 @@ InitBallNChain:                 ;-----------| Ball 'n' Chain INIT
 
 
 
-InitGreyChainPlat:              ;-----------| Grey platform on a chain INIT.
+InitGrayChainPlat:              ;-----------| Gray platform on a chain INIT.
     LDA.b #$30                  ;$01839A    | Radius of the circle that the platform part moves in.
 CODE_01839C:                    ;           |
     STA.w $187B,X               ;$01839C    |
@@ -709,8 +709,10 @@ Return0183EE:                   ;           |
 
 
 
-DATA_0183EF:                    ;$0183EF    | Initial X/Y speeds for wall-following sprites and Urchins.
-    db $08,$00,$08                          ; X uses indices 0/1, Y uses 1/2.
+DATA_0183EF:                    ;$0183EF    | Initial Y speeds for wall-following sprites and Urchins.
+    db $08
+DATA_0183F0:                    ;$0183EF    | Initial Y speeds for wall-following sprites and Urchins.
+    db $00,$08
 
 InitSpikeTop:                   ;-----------| Spike Top INIT.
     JSR SubHorzPosBnk1          ;$0183F3    |\ 
@@ -762,7 +764,7 @@ InitRipVanFish:                 ;           |
 
 
 
-InitKeyBabyYoshi:               ;-----------| Key INIT / Baby Yoshi INIT
+InitKeyBabyYoshi:               ;-----------| Key INIT / Baby Yoshi INIT (also used for throwblocks in LM v3.40+)
     LDA.b #$09                  ;$018435    |\ Give it carryable status.
     STA.w $14C8,X               ;$018437    |/
     RTS                         ;$01843A    |
@@ -1001,7 +1003,7 @@ CODE_018554:                    ;           |/
 
 
 
-InitDinos:                      ;-----------| Dino Rhino INIT
+InitDinos:                      ;-----------| Dino Rhino INIT / Dino Torch INIT
     LDA.b #$04                  ;$018558    |
     STA.w $151C,X               ;$01855A    |
 
@@ -1074,7 +1076,7 @@ InitFishbone:                   ;-----------| Fishbone INIT
 
 InitDownPiranha:                ;-----------| Upside-down Piranha Plant INIT
     ASL.w $15F6,X               ;$01859A    |\ 
-    SEC                         ;$01859D    || Really weird way of flipping the sprite vertically?
+    SEC                         ;$01859D    || Set the bit used by the plant's GFX routine to make it use two tiles properly.
     ROR.w $15F6,X               ;$01859E    |/
     LDA $D8,X                   ;$0185A1    |\ 
     SEC                         ;$0185A3    ||
@@ -1090,7 +1092,7 @@ InitPiranha:                    ;-----------| Classic Piranha Plant INIT / Jumpi
     CLC                         ;$0185B2    || Offset the plant half a block right of its spawn position.
     ADC.b #$08                  ;$0185B3    ||
     STA $E4,X                   ;$0185B5    |/
-    DEC $D8,X                   ;$0185B7    |\ 
+    DEC $D8,X                   ;$0185B7    |\ [NOTE: in LM v2.53+, the moving Ghost House hole enters here as well]
     LDA $D8,X                   ;$0185B9    ||
     CMP.b #$FF                  ;$0185BB    || Shift the plant down a pixel.
     BNE Return0185C2            ;$0185BD    ||
@@ -1218,8 +1220,8 @@ SpriteMainPtr:                  ;$0185CC    | Sprite MAIN pointers.
     dw PeaBouncer                           ; 6B - Wall springboard (left wall)
     dw PeaBouncer                           ; 6C - Wall springboard (right wall)
     dw InvisSolidPDinos                     ; 6D - Invisible solid block
-    dw InvisSolidPDinos                     ; 6E - Dino-Rhino
-    dw InvisSolidPDinos                     ; 6F - Dino-Torch
+    dw InvisSolidPDinos                     ; 6E - Dino Rhino
+    dw InvisSolidPDinos                     ; 6F - Dino Torch
     dw Pokey                                ; 70 - Pokey
     dw RedSuperKoopa                        ; 71 - Super Koopa (red cape)
     dw YellowSuperKoopa                     ; 72 - Super Koopa (yellow cape)
@@ -1304,7 +1306,7 @@ SpriteMainPtr:                  ;$0185CC    | Sprite MAIN pointers.
     dw Bank3SprHandler                      ; C1 - Flying gray turnblocks
     dw Bank3SprHandler                      ; C2 - Blurp
     dw Bank3SprHandler                      ; C3 - Porcu-Puffer
-    dw Bank3SprHandler                      ; C4 - Falling grey platform
+    dw Bank3SprHandler                      ; C4 - Falling gray platform
     dw Bank3SprHandler                      ; C5 - Big Boo BossBig Boo Boss
     dw Bank3SprHandler                      ; C6 - Spotlight/disco ball
     dw Bank3SprHandler                      ; C7 - Invisible mushroom
@@ -1351,7 +1353,7 @@ Bank3SprHandler:                ;-----------| Redirect for sprites in bank 03.
 
 
 
-BanzaiBnCGrayPlat:              ;-----------| Ball 'n' Chain, Banzai Bill, grey platform on a chain redirect
+BanzaiBnCGrayPlat:              ;-----------| Ball 'n' Chain, Banzai Bill, gray platform on a chain redirect
     JSL BanzaiPRotating         ;$018793    |
     RTS                         ;$018797    |
 
@@ -1376,7 +1378,7 @@ FlyingPlatform:                 ;-----------| Hammer Bro. platform redirect
 
 
 InitHammerBrother:              ;-----------| Hammer Bro. INIT
-    JSL Return02DA59            ;$0187A7    |   NOTE: Spritetool uses this as a custom sprite initialization routine.
+    JSL Return02DA59            ;$0187A7    |   NOTE: PIXI uses this as a custom sprite initialization routine.
     RTS                         ;$0187AB    |
 
 
@@ -1636,8 +1638,8 @@ Dolphin:                        ;-----------| Dolphin redirect
 
 
 InitMovingLedge:                ;-----------| Moving Ghost House hole INIT
-    DEC $D8,X                   ;$018890    |
-    RTS                         ;$018892    |
+    DEC $D8,X                   ;$018890    | NOTE: with Lunar Magic v2.53+, this is unused,
+    RTS                         ;$018892    |  and $0185B7 is instead used for initialization.
 
 MovingLedge:                    ;-----------| Moving Ghost House hole redirect
     JSL MovingLedgeMain         ;$018893    |
@@ -1881,11 +1883,11 @@ CODE_0189F6:                    ;           |
 CODE_0189FD:
     JSR IsOnGround              ;$0189FD    |\ If the sprite is not on the ground, branch.
     BEQ CODE_018A0F             ;$018A00    |/
-    LDA.b #$FF                  ;$018A02    | How many frames the green/red/yellow Koopas are stunned for after being knocked out of a shell (+#$80). 
+    LDA.b #$FF                  ;$018A02    |] How many frames the green/red/yellow Koopas are stunned for after being knocked out of a shell (+#$80). 
     LDY $9E,X                   ;$018A04    |
     CPY.b #$02                  ;$018A06    |
     BNE CODE_018A0C             ;$018A08    |
-    LDA.b #$A0                  ;$018A0A    | How many frames the blue Koopas are stunned for after being knocked out of a shell (+#$80). 
+    LDA.b #$A0                  ;$018A0A    |] How many frames the blue Koopas are stunned for after being knocked out of a shell (+#$80). 
 CODE_018A0C:                    ;           |
     STA.w $163E,X               ;$018A0C    |
 CODE_018A0F:                    ;           |
@@ -2006,11 +2008,12 @@ Return018AD9:                   ;           |
     ; Bob-Omb misc RAM:
     ; $C2   - Set equal to the stun timer when the Bob-omb is kicked or capespinned. Does not decrement.
     ; $1534 - Set to #$01 when it explodes.
-    ; $1540 - Explosion countdown timer. If the Bob-omb is stationary/carryable, it'll start flashing when the timer is below #$40 and will explode at #$00.
+    ; $1540 - Explosion countdown timer. If the Bob-omb is stationary/carryable, it'll start flashing when the timer is below #$40.
     ;          Set to #$FF on spawn. At #$00, it becomes stationary/carryable and resets the timer to #$40.
     ;          Set to #$FF when it's kicked by a blue Koopa.
     ;          Set to #$FF when it's hit/kicked by Mario.
     ;          Set to #$80 when spawned from a para-Bomb.
+    ;          Set to #$40 when the bomb actually explodes.
     ; $1558 - Timer for sinking in lava.
     ; $1564 - Timer to disable sprite contact with other sprites. Specifically set when stopped, dropped, or kicked.
     ; $1570 - Frame counter for animation.
@@ -2093,7 +2096,7 @@ CODE_018B43:                    ;```````````| Primary code for handling most spr
     JSR SetAnimationFrame       ;$018B49    | Handle 2-frame animation.
     JSR IsOnGround              ;$018B4C    |\ If the sprite is not on the ground, branch.
     BEQ SpriteInAir             ;$018B4F    |/
-SpriteOnGround:                 ;           |
+SpriteOnGround:                 ;```````````| Sprite is on the ground.
     JSR SetSomeYSpeed           ;$018B51    | Set the sprite's ground Y speed (#$00 or #$18 depending on flat or slope).
     STZ.w $151C,X               ;$018B54    | For sprites that stay on ledges: you're currently on a ledge.
     LDY $9E,X                   ;$018B57    |\ 
@@ -2120,12 +2123,12 @@ DontFollowMario:                ;           |
 CODE_018B82:                    ;           |
     BRA CODE_018BB0             ;$018B82    |
 
-SpriteInAir:
+SpriteInAir:                    ;```````````| Sprite is in midair.
     LDY $9E,X                   ;$018B84    |\ 
     LDA.w Spr0to13Prop,Y        ;$018B86    ||
-    BPL CODE_018B90             ;$018B89    ||
-    JSR SetAnimationFrame       ;$018B8B    || If set to do so, animate the sprite twice as fast in mid-air.
-    BRA CODE_018B93             ;$018B8E    ||  (only winged yellow Koopas)
+    BPL CODE_018B90             ;$018B89    || If set to do so, animate the sprite twice as fast in mid-air.
+    JSR SetAnimationFrame       ;$018B8B    ||  (only winged yellow Koopas)
+    BRA CODE_018B93             ;$018B8E    ||
 CODE_018B90:                    ;           ||
     STZ.w $1570,X               ;$018B90    |/
 CODE_018B93:                    ;           |
@@ -2140,7 +2143,7 @@ CODE_018B93:                    ;           |
     JSR FlipSpriteDir           ;$018BA8    ||
     LDA.b #$01                  ;$018BAB    ||
     STA.w $151C,X               ;$018BAD    |/
-CODE_018BB0:                    ;           |
+CODE_018BB0:                    ;```````````| On-ground code rejoins here.
     LDA.w $1528,X               ;$018BB0    |\ 
     BEQ CODE_018BBA             ;$018BB3    ||
     JSR CODE_018931             ;$018BB5    || If the sprite is not sliding, process standard interaction with Mario.
@@ -2470,7 +2473,7 @@ CODE_018DA5:                    ;           |
 CODE_018DAC:                    ;```````````| Winged Goomba graphics subroutine.
     JSR GoombaWingGfxRt         ;$018DAC    | Draw wings.
     LDA.w $15EA,X               ;$018DAF    |\ 
-    CLC                         ;$018DB2    || Increase the Goomba's OAM slot.
+    CLC                         ;$018DB2    || Increase the OAM slot for the flying Goomba's body.
     ADC.b #$04                  ;$018DB3    ||
     STA.w $15EA,X               ;$018DB5    |/
     JMP SubSprGfx2Entry1        ;$018DB8    | Draw a single 16x16 tile.
@@ -2519,54 +2522,54 @@ GoombaWingGfxRt:                ;-----------| Subroutine to draw wings on the Go
     STA $04                     ;$018DFF    |/
     LDY.w $15EA,X               ;$018E01    |
     PHX                         ;$018E04    |
-    LDX.b #$01                  ;$018E05    | Draw 2 wings.
-CODE_018E07:                    ;           |
-    STX $03                     ;$018E07    |
-    TXA                         ;$018E09    |
-    CLC                         ;$018E0A    |
-    ADC $02                     ;$018E0B    |
-    PHA                         ;$018E0D    |
-    LDX $04                     ;$018E0E    |
-    BNE CODE_018E15             ;$018E10    |
-    CLC                         ;$018E12    |
-    ADC.b #$08                  ;$018E13    |
-CODE_018E15:                    ;           |
-    TAX                         ;$018E15    |
-    LDA $00                     ;$018E16    |\ 
-    CLC                         ;$018E18    || Get X offset for the wing tile.
-    ADC.w DATA_018DC7,X         ;$018E19    ||
-    STA.w $0300,Y               ;$018E1C    |/
-    PLX                         ;$018E1F    |
-    LDA $01                     ;$018E20    |\ 
-    CLC                         ;$018E22    || Get Y offset for the wing tile.
-    ADC.w DATA_018DD7,X         ;$018E23    ||
-    STA.w $0301,Y               ;$018E26    |/
-    LDX $05                     ;$018E29    |\ 
-    LDA.w GoombaWingTiles,X     ;$018E2B    || Get the tile number for the wing.
-    STA.w $0302,Y               ;$018E2E    |/
-    PHY                         ;$018E31    |
-    TYA                         ;$018E32    |
-    LSR                         ;$018E33    |
-    LSR                         ;$018E34    |
-    TAY                         ;$018E35    |
-    LDA.w GoombaWingTileSize,X  ;$018E36    |\ Get the tile size for the wing.
-    STA.w $0460,Y               ;$018E39    |/
-    PLY                         ;$018E3C    |
-    LDX $03                     ;$018E3D    |
-    LDA $04                     ;$018E3F    |\ 
-    LSR                         ;$018E41    ||
-    LDA.w GoombaWingGfxProp,X   ;$018E42    ||
-    BCS CODE_018E49             ;$018E45    || Get the YXPPCCCT settings for the wing.
-    EOR.b #$40                  ;$018E47    || X flip if facing right.
-CODE_018E49:                    ;           ||
-    ORA $64                     ;$018E49    ||
-    STA.w $0303,Y               ;$018E4B    |/
-    TYA                         ;$018E4E    |
-    CLC                         ;$018E4F    |
-    ADC.b #$08                  ;$018E50    |
-    TAY                         ;$018E52    |
-    DEX                         ;$018E53    |
-    BPL CODE_018E07             ;$018E54    |
+    LDX.b #$01                  ;$018E05    |\ 
+CODE_018E07:                    ;           || Loop to draw 2 wings.
+    STX $03                     ;$018E07    || $03 = current wing
+    TXA                         ;$018E09    ||
+    CLC                         ;$018E0A    ||
+    ADC $02                     ;$018E0B    ||
+    PHA                         ;$018E0D    ||
+    LDX $04                     ;$018E0E    ||
+    BNE CODE_018E15             ;$018E10    ||
+    CLC                         ;$018E12    ||
+    ADC.b #$08                  ;$018E13    ||
+CODE_018E15:                    ;           ||
+    TAX                         ;$018E15    ||
+    LDA $00                     ;$018E16    ||\ 
+    CLC                         ;$018E18    ||| Get X offset for the wing tile.
+    ADC.w DATA_018DC7,X         ;$018E19    |||
+    STA.w $0300,Y               ;$018E1C    ||/
+    PLX                         ;$018E1F    ||
+    LDA $01                     ;$018E20    ||\ 
+    CLC                         ;$018E22    ||| Get Y offset for the wing tile.
+    ADC.w DATA_018DD7,X         ;$018E23    |||
+    STA.w $0301,Y               ;$018E26    ||/
+    LDX $05                     ;$018E29    ||\ 
+    LDA.w GoombaWingTiles,X     ;$018E2B    ||| Get the tile number for the wing.
+    STA.w $0302,Y               ;$018E2E    ||/
+    PHY                         ;$018E31    ||
+    TYA                         ;$018E32    ||
+    LSR                         ;$018E33    ||
+    LSR                         ;$018E34    ||
+    TAY                         ;$018E35    ||
+    LDA.w GoombaWingTileSize,X  ;$018E36    ||\ Get the tile size for the wing.
+    STA.w $0460,Y               ;$018E39    ||/
+    PLY                         ;$018E3C    ||
+    LDX $03                     ;$018E3D    ||
+    LDA $04                     ;$018E3F    ||\ 
+    LSR                         ;$018E41    |||
+    LDA.w GoombaWingGfxProp,X   ;$018E42    |||
+    BCS CODE_018E49             ;$018E45    ||| Get the YXPPCCCT settings for the wing.
+    EOR.b #$40                  ;$018E47    ||| X flip if facing right.
+CODE_018E49:                    ;           |||
+    ORA $64                     ;$018E49    |||
+    STA.w $0303,Y               ;$018E4B    ||/
+    TYA                         ;$018E4E    ||
+    CLC                         ;$018E4F    ||
+    ADC.b #$08                  ;$018E50    ||
+    TAY                         ;$018E52    ||
+    DEX                         ;$018E53    ||
+    BPL CODE_018E07             ;$018E54    |/
     PLX                         ;$018E56    |
     LDY.b #$FF                  ;$018E57    |\ 
     LDA.b #$02                  ;$018E59    || Draw two tile of no defined size.
@@ -2592,16 +2595,16 @@ SetAnimationFrame:              ;-----------| Subroutine to make 2-frame animati
 
 
 PiranhaSpeed:                   ;$018E6E    | Y speeds for the Piranha Plants.
-    db $00,$F0,$00,$10                      ; In pipe; going down; out of pipe; going up.
+    db $00,$F0,$00,$10                      ; In pipe; emerging; out of pipe; retracting.
 
 PiranTimeInState:               ;$018E72    ; Timings for how long the plant stays in each phase.
-    db $20,$30,$20,$30                      ; In pipe; going down; out of pipe; going up.
+    db $20,$30,$20,$30                      ; Emerging; out of pipe; retracting; in pipe.
 
     ; Piranha Plant misc RAM:
-    ; $C2   - Increments each time the plant changes phase. 00 = in pipe; 01 = exiting pipe; 02 = out of pipe; 03 = entering pipe.
+    ; $C2   - Increments each time the plant changes phase. 00 = in pipe; 01 = emerging; 02 = out of pipe; 03 = retracting.
     ; $1540 - Timer for how long the plant waits before shifting direction. Set to either #$20 or #$30 each phase change.
     ; $1570 - Frame counter for animation.
-    ; $1594 - Sets to #$01 when Mario is close to the plant. Tells it to stay in the pipe, turn invisible, and don't interact with Mario.
+    ; $1594 - Sets to #$01 when the plant is inside the pipe. Tells it to turn invisible and not interact with Mario.
     ; $1602 - Animation frame to use.
     ;          0/1 = biting
 
@@ -2617,9 +2620,9 @@ ClassicPiranhas:                ;-----------| Classic Piranha Plant MAIN / Upsid
 CODE_018E87:                    ;           |
     JSR SubSprGfx1              ;$018E87    | Draw a 16x32 sprite.
     LDY.w $15EA,X               ;$018E8A    |\ 
-    LDA.w $030B,Y               ;$018E8D    ||
-    AND.b #$F1                  ;$018E90    || Set the plant's vine to use palette D on GFX page 1.
-    ORA.b #$0B                  ;$018E92    ||
+    LDA.w $030B,Y               ;$018E8D    || Set the plant's vine to use palette D on GFX page 1.
+    AND.b #$F1                  ;$018E90    || Note: the classic piranha plant does not correctly handle this,
+    ORA.b #$0B                  ;$018E92    ||  and will edit the OAM data to another sprite's tiles instead.
     STA.w $030B,Y               ;$018E94    |/
     PLA                         ;$018E97    |
     STA $64                     ;$018E98    |
@@ -2629,7 +2632,7 @@ CODE_018E9A:                    ;           |
     BNE Return018EC7            ;$018E9F    |/
     JSR SetAnimationFrame       ;$018EA1    |
     LDA.w $1594,X               ;$018EA4    |\ 
-    BNE CODE_018EAC             ;$018EA7    || Only process interaction with Mario if it's not stuck inside a pipe.
+    BNE CODE_018EAC             ;$018EA7    || Only process interaction with Mario and other sprites if it's not stuck inside a pipe.
     JSR SubSprSprPMarioSpr      ;$018EA9    |/
 CODE_018EAC:                    ;           |
     LDA $C2,X                   ;$018EAC    |
@@ -3004,9 +3007,9 @@ DATA_019134:
     db $01,$02,$04,$08
 
 CODE_019138:                    ;-----------| Sprite-object interaction routine.
-    PHB                         ;$019138    |  Note that it does not handle blocked bits for the most part, except for sprites set to "not get stuck in walls".
-    PHK                         ;$019139    |  They have to be handled from within the sprite instead.
-    PLB                         ;$01913A    |
+    PHB                         ;$019138    |  Note that it while it sets the blocked bits, it does not handle them,
+    PHK                         ;$019139    |   except for sprites set to "not get stuck in walls".
+    PLB                         ;$01913A    |  The bits should be handled from within the sprite instead.
     JSR CODE_019140             ;$01913B    |
     PLB                         ;$01913E    |
     RTL                         ;$01913F    |
@@ -3019,7 +3022,7 @@ CODE_019140:
     LDA.w $164A,X               ;$01914C    ||
     STA.w $1695                 ;$01914F    ||
     STZ.w $164A,X               ;$019152    |/
-    JSR CODE_019211             ;$019155    | Handle sprite buoyancy for Layer 2.
+    JSR CODE_019211             ;$019155    | Handle object interaction for Layer 1.
     LDA $5B                     ;$019158    |\ Branch down if not set to interact with Layer 2/3. 
     BPL CODE_0191BE             ;$01915A    |/
     INC.w $185E                 ;$01915C    |
@@ -3037,7 +3040,7 @@ CODE_019140:
     LDA.w $14D4,X               ;$019175    ||
     ADC $29                     ;$019178    ||
     STA.w $14D4,X               ;$01917A    |/
-    JSR CODE_019211             ;$01917D    | Handle sprite buoyancy for Layer 2/3.
+    JSR CODE_019211             ;$01917D    | Handle object interaction for Layer 2/3.
     LDA $E4,X                   ;$019180    |\ 
     SEC                         ;$019182    ||
     SBC $26                     ;$019183    ||
@@ -3167,12 +3170,12 @@ CODE_01925B:                    ;```````````| Routine joins back up here; handle
 CODE_01926F:                    ;           |
     JSR CODE_0192C9             ;$01926F    | Process vertical block interaction.
     LDA.w $190F,X               ;$019272    |\ 
-    BPL CODE_019288             ;$019275    ||
-    LDA $B6,X                   ;$019277    || Process horizontal block interaction for sprites in the direction they're moving.
-    ORA.w $15AC,X               ;$019279    ||
-    BNE CODE_019288             ;$01927C    |/
-    LDA $13                     ;$01927E    |\ Process horizontal block interaction for carryable sprites not moving horizontally.
-    JSR CODE_01928E             ;$019280    |/  Alternates between left and right interaction every frame.
+    BPL CODE_019288             ;$019275    || Process horizontal block interaction for all sprites in the direction they're moving.
+    LDA $B6,X                   ;$019277    || For most sprites, if the X speed is 00, skip horizontal interaction entirely.
+    ORA.w $15AC,X               ;$019279    || For carriable sprites (indicated by bit 7 of $190F), if the X speed is 00:
+    BNE CODE_019288             ;$01927C    ||  - If $15AC is non-zero, skip horizontal interaction.
+    LDA $13                     ;$01927E    ||  - If $15AC is also zero, alternate between left and right interaction every frame.
+    JSR CODE_01928E             ;$019280    |/
 Return019283:                   ;           |
     RTS                         ;$019283    |
 
@@ -3227,7 +3230,7 @@ DATA_0192C7:                    ;$0192C7    | Speed (hi) that sprites get pushed
 
 CODE_0192C9:                    ;-----------| Routine to process vertical block interaction for sprites.
     LDY.b #$02                  ;$0192C9    |\ 
-    LDA $AA,X                   ;$0192CB    || Result: 2 = down, 3 = up. 
+    LDA $AA,X                   ;$0192CB    || Result: 2 = down, 3 = up (or stationary).
     BPL CODE_0192D0             ;$0192CD    ||
     INY                         ;$0192CF    |/
 CODE_0192D0:                    ;           |
@@ -3325,7 +3328,7 @@ CODE_019380:                    ;           ||
 CODE_019384:                    ;           |
     BRA CODE_0193B8             ;$019384    | Make solid.
 
-CODE_019386:                    ;```````````| Sprite is touching a corner tile or an upside-down slope.
+CODE_019386:                    ;```````````| Sprite is touching a corner tile (1D8-1FF) or an upside-down slope.
     LDA $0C                     ;$019386    |\ 
     AND.b #$0F                  ;$019388    || Treat as blank if not touching the top area of the tile (within 5 pixels).
     CMP.b #$05                  ;$01938A    ||
@@ -3447,7 +3450,7 @@ CODE_019441:                    ;-----------| Subroutine to find the Map16 numbe
     ASL                         ;$019449    |
     ADC $0F                     ;$01944A    |
     TAY                         ;$01944C    |
-CODE_01944D:                    ;```````````| Jump here instead to use a specified clipping index.
+CODE_01944D:                    ;```````````| Jump here instead to use a specified clipping index (in Y) instead of the one from $1656.
     LDA.w $185E                 ;$01944D    |\ 
     INC A                       ;$019450    || Branch if running horizontal interaction.
     AND $5B                     ;$019451    ||  Else, running vertical interaction.
@@ -3460,7 +3463,7 @@ CODE_01944D:                    ;```````````| Jump here instead to use a specifi
     STA $00                     ;$01945F    || Store 16-bit vertical clipping position to $0C/$0D.
     LDA.w $14D4,X               ;$019461    ||
     ADC.b #$00                  ;$019464    ||
-    CMP $5D                     ;$019466    ||\ If below the bottom of the level, return and treat as water.
+    CMP $5D                     ;$019466    ||\ If outside the vertical bounds of the level, treat as water and return.
     BCS CODE_0194B4             ;$019468    ||/
     STA $0D                     ;$01946A    |/
     LDA $E4,X                   ;$01946C    |\ 
@@ -3470,7 +3473,7 @@ CODE_01944D:                    ;```````````| Jump here instead to use a specifi
     STA $01                     ;$019474    || Store 16-bit horizontal clipping position to $0A/$0B.
     LDA.w $14E0,X               ;$019476    ||
     ADC.b #$00                  ;$019479    ||
-    CMP.b #$02                  ;$01947B    ||\ If off the sides of the level, return and treat as water.
+    CMP.b #$02                  ;$01947B    ||\ If outside the horizontal bounds of the level, treat as water and return.
     BCS CODE_0194B4             ;$01947D    ||/
     STA $0B                     ;$01947F    |/
     LDA $01                     ;$019481    |\ 
@@ -3480,8 +3483,8 @@ CODE_01944D:                    ;```````````| Jump here instead to use a specifi
     LSR                         ;$019486    ||
     ORA $00                     ;$019487    ||
     STA $00                     ;$019489    |/
-    LDX $0D                     ;$01948B    |
-    LDA.l DATA_00BA80,X         ;$01948D    |\ 
+    LDX $0D                     ;$01948B    |\ 
+    LDA.l DATA_00BA80,X         ;$01948D    ||
     LDY.w $185E                 ;$019491    ||
     BEQ CODE_01949A             ;$019494    ||
     LDA.l DATA_00BA8E,X         ;$019496    ||
@@ -3500,7 +3503,7 @@ CODE_0194AC:                    ;           ||
     RTS                         ;$0194B3    |
 
 
-CODE_0194B4:                    ;```````````| Return touched block as water. Used if the sprite goes offscreen.
+CODE_0194B4:                    ;```````````| Return touched block as water. Used if the sprite goes outside of the level.
     LDY $0F                     ;$0194B4    |
     LDA.b #$00                  ;$0194B6    |\ 
     STA.w $1693                 ;$0194B8    || Set the space outside of the level to act like water (tile 000) for sprites.
@@ -3520,7 +3523,7 @@ CODE_0194BF:                    ;-----------| Find the Map16 number a sprite is 
     STA $0D                     ;$0194D0    |/
     REP #$20                    ;$0194D2    |
     LDA $0C                     ;$0194D4    |\ 
-    CMP.w #$01B0                ;$0194D6    || If below the screen, return and treat as water.
+    CMP.w #$01B0                ;$0194D6    || If outside the vertical bounds of the level, treat as water and return.
     SEP #$20                    ;$0194D9    ||
     BCS CODE_0194B4             ;$0194DB    |/
     LDA $E4,X                   ;$0194DD    |\ 
@@ -3531,32 +3534,32 @@ CODE_0194BF:                    ;-----------| Find the Map16 number a sprite is 
     LDA.w $14E0,X               ;$0194E7    ||
     ADC.b #$00                  ;$0194EA    ||
     STA $0B                     ;$0194EC    |/
-    BMI CODE_0194B4             ;$0194EE    |
-    CMP $5D                     ;$0194F0    |
-    BCS CODE_0194B4             ;$0194F2    |
-    LDA $01                     ;$0194F4    |
-    LSR                         ;$0194F6    |
-    LSR                         ;$0194F7    |
-    LSR                         ;$0194F8    |
-    LSR                         ;$0194F9    |
-    ORA $00                     ;$0194FA    |
-    STA $00                     ;$0194FC    |
+    BMI CODE_0194B4             ;$0194EE    |\ 
+    CMP $5D                     ;$0194F0    || If outside the horizontal bounds of the level, treat as water and return.
+    BCS CODE_0194B4             ;$0194F2    |/
+    LDA $01                     ;$0194F4    |\ 
+    LSR                         ;$0194F6    ||
+    LSR                         ;$0194F7    ||
+    LSR                         ;$0194F8    || Store block position in #$YX format to $00.
+    LSR                         ;$0194F9    ||
+    ORA $00                     ;$0194FA    ||
+    STA $00                     ;$0194FC    |/
     LDX $0B                     ;$0194FE    |\ 
     LDA.l DATA_00BA60,X         ;$019500    ||
     LDY.w $185E                 ;$019504    ||
     BEQ CODE_01950D             ;$019507    ||
-    LDA.l DATA_00BA70,X         ;$019509    || Get the index to the block in Map16 data.
+    LDA.l DATA_00BA70,X         ;$019509    ||
 CODE_01950D:                    ;           ||
     CLC                         ;$01950D    ||
-    ADC $00                     ;$01950E    ||
-    STA $05                     ;$019510    |/
-    LDA.l DATA_00BA9C,X         ;$019512    |
-    LDY.w $185E                 ;$019516    |
-    BEQ CODE_01951F             ;$019519    |
-    LDA.l DATA_00BAAC,X         ;$01951B    |
-CODE_01951F:                    ;           |
-    ADC $0D                     ;$01951F    |
-    STA $06                     ;$019521    |
+    ADC $00                     ;$01950E    || Get lower two bytes of the Map16 pointer.
+    STA $05                     ;$019510    ||
+    LDA.l DATA_00BA9C,X         ;$019512    ||
+    LDY.w $185E                 ;$019516    ||
+    BEQ CODE_01951F             ;$019519    ||
+    LDA.l DATA_00BAAC,X         ;$01951B    ||
+CODE_01951F:                    ;           ||
+    ADC $0D                     ;$01951F    ||
+    STA $06                     ;$019521    |/
 CODE_019523:                    ;           |
     LDA.b #$7E                  ;$019523    |\ 
     STA $07                     ;$019525    ||
@@ -3565,7 +3568,7 @@ CODE_019523:                    ;           |
     STA.w $1693                 ;$01952C    ||  Get the proper Acts-Like setting in the process.
     INC $07                     ;$01952F    ||
     LDA [$05]                   ;$019531    ||
-    JSL CODE_00F545             ;$019533    |/ {line hijacked by LM}
+    JSL CODE_00F545             ;$019533    |/
     LDY $0F                     ;$019537    |
     CMP.b #$00                  ;$019539    |
     RTS                         ;$01953B    |
@@ -3683,11 +3686,13 @@ CODE_0195F5:                    ;           |
 
 
 
-Unused0195FC:
+Unused0195FC:                   ;$0195FC    | Unused table.
     db $00,$00,$00,$00,$04,$05,$06,$07
     db $00,$00,$00,$00,$04,$05,$06,$07
     db $00,$00,$00,$00,$04,$05,$06,$07
     db $00,$00,$00,$00,$04,$05,$06,$07
+
+
 
 SpriteKoopasSpawn:              ;$01961C    | Sprites spawned from a stunned shell. First four bytes are unused.
     db $00,$00,$00,$00,$00,$01,$02,$03
@@ -3774,7 +3779,7 @@ UnstunSprite:                   ;```````````| Routine to unstun a sprite.
     CMP.b #$2C                  ;$0196BF    || Sprite 2C (Yoshi Egg): Stay stunned.
     BEQ Return0196CA            ;$0196C1    ||
     CMP.b #$53                  ;$0196C3    || Sprite 04-07 (Shells): Spawn a Koopa. [note: the BNE is why stun glitch happens]
-    BNE GeneralResetSpr         ;$0196C5    ||
+    BNE GeneralResetSpr         ;$0196C5    ||  Yellow koopas also spawn a coin.
     JSR CODE_019ACB             ;$0196C7    |/ Sprite 53 (Throwblock): Erase it with a cloud of smoke.
 Return0196CA:                   ;           |
     RTS                         ;$0196CA    |
@@ -3794,7 +3799,7 @@ IncrmntStunTimer:               ;-----------| Subroutine to counter the stun tim
 Return0196E0:                   ;           |
     RTS                         ;$0196E0    |
 
-GeneralResetSpr:                ;-----------| Subroutine to spawn a sprite from a shell when unstunning.
+GeneralResetSpr:                ;-----------| Subroutine to spawn a sprite from a shell when unstunning (includes being knocked out from bouncing on).
     JSL FindFreeSprSlot         ;$0196E1    |\ Return if no empty slots.
     BMI Return0196CA            ;$0196E5    |/
     LDA.b #$08                  ;$0196E7    |
@@ -3806,66 +3811,67 @@ GeneralResetSpr:                ;-----------| Subroutine to spawn a sprite from 
     TYX                         ;$0196F5    |
     JSL InitSpriteTables        ;$0196F6    |
     LDX.w $15E9                 ;$0196FA    |
-    LDA $E4,X                   ;$0196FD    |
-    STA.w $00E4,Y               ;$0196FF    |
-    LDA.w $14E0,X               ;$019702    |
-    STA.w $14E0,Y               ;$019705    |
-    LDA $D8,X                   ;$019708    |
-    STA.w $00D8,Y               ;$01970A    |
-    LDA.w $14D4,X               ;$01970D    |
-    STA.w $14D4,Y               ;$019710    |
-    LDA.b #$00                  ;$019713    |
-    STA.w $157C,Y               ;$019715    |
+    LDA $E4,X                   ;$0196FD    |\ 
+    STA.w $00E4,Y               ;$0196FF    ||
+    LDA.w $14E0,X               ;$019702    ||
+    STA.w $14E0,Y               ;$019705    || Make sure it spawns at the same position as the shell.
+    LDA $D8,X                   ;$019708    ||
+    STA.w $00D8,Y               ;$01970A    ||
+    LDA.w $14D4,X               ;$01970D    ||
+    STA.w $14D4,Y               ;$019710    |/
+    LDA.b #$00                  ;$019713    |\ Face the koopa right.
+    STA.w $157C,Y               ;$019715    |/
     LDA.b #$10                  ;$019718    |\ Briefly disable sprite contact for the Koopa.
     STA.w $1564,Y               ;$01971A    |/
-    LDA.w $164A,X               ;$01971D    |
-    STA.w $164A,Y               ;$019720    |
-    LDA.w $1540,X               ;$019723    |
-    STZ.w $1540,X               ;$019726    |
-    CMP.b #$01                  ;$019729    |
-    BEQ CODE_019747             ;$01972B    |
-    LDA.b #$D0                  ;$01972D    || Y speed for a shell-less Koopa when it jumps out of a shell.
-    STA.w $00AA,Y               ;$01972F    |
+    LDA.w $164A,X               ;$01971D    |\ 
+    STA.w $164A,Y               ;$019720    || Share RAM for being in water + being stunned.
+    LDA.w $1540,X               ;$019723    ||
+    STZ.w $1540,X               ;$019726    |/
+    CMP.b #$01                  ;$019729    |\ Branch if the koopa is being spawned from being knocked out of the shell, not shaking itself out.
+    BEQ CODE_019747             ;$01972B    |/
+    LDA.b #$D0                  ;$01972D    |\\ Y speed for a shell-less Koopa when it jumps out of a shell.
+    STA.w $00AA,Y               ;$01972F    |/
     PHY                         ;$019732    |
-    JSR SubHorzPosBnk1          ;$019733    |
-    TYA                         ;$019736    |
-    EOR.b #$01                  ;$019737    |
-    PLY                         ;$019739    |
-    STA.w $157C,Y               ;$01973A    |
-    PHX                         ;$01973D    |
-    TAX                         ;$01973E    |
-    LDA.w Spr0to13SpeedX,X      ;$01973F    |
-    STA.w $00B6,Y               ;$019742    |
+    JSR SubHorzPosBnk1          ;$019733    |\ 
+    TYA                         ;$019736    ||
+    EOR.b #$01                  ;$019737    ||
+    PLY                         ;$019739    ||
+    STA.w $157C,Y               ;$01973A    || Face away from Mario.
+    PHX                         ;$01973D    ||
+    TAX                         ;$01973E    ||
+    LDA.w Spr0to13SpeedX,X      ;$01973F    ||
+    STA.w $00B6,Y               ;$019742    |/
     PLX                         ;$019745    |
     RTS                         ;$019746    |
 
-CODE_019747:
+CODE_019747:                    ;```````````| Spawning a koopa from a shell and about to unstun.
     PHY                         ;$019747    |
-    JSR SubHorzPosBnk1          ;$019748    |
-    LDA.w DATA_0197AD,Y         ;$01974B    |
-    STY $00                     ;$01974E    |
-    PLY                         ;$019750    |
-    STA.w $00B6,Y               ;$019751    |
-    LDA $00                     ;$019754    |
-    EOR.b #$01                  ;$019756    |
-    STA.w $157C,Y               ;$019758    |
-    STA $01                     ;$01975B    |
-    LDA.b #$10                  ;$01975D    |
-    STA.w $154C,Y               ;$01975F    |
-    STA.w $1528,Y               ;$019762    |
-    LDA $9E,X                   ;$019765    |
-    CMP.b #$07                  ;$019767    |
-    BNE Return019775            ;$019769    |
-    LDY.b #$08                  ;$01976B    |
-CODE_01976D:                    ;           |
-    LDA.w $14C8,Y               ;$01976D    |
-    BEQ SpawnMovingCoin         ;$019770    |
-    DEY                         ;$019772    |
-    BPL CODE_01976D             ;$019773    |
+    JSR SubHorzPosBnk1          ;$019748    |\ 
+    LDA.w DATA_0197AD,Y         ;$01974B    ||
+    STY $00                     ;$01974E    ||
+    PLY                         ;$019750    || Give Koopa an X speed away from Mario.
+    STA.w $00B6,Y               ;$019751    ||
+    LDA $00                     ;$019754    ||
+    EOR.b #$01                  ;$019756    ||
+    STA.w $157C,Y               ;$019758    ||
+    STA $01                     ;$01975B    |/
+    LDA.b #$10                  ;$01975D    |\ 
+    STA.w $154C,Y               ;$01975F    || Disable player contact and set sliding flag for the Koopa.
+    STA.w $1528,Y               ;$019762    |/
+    LDA $9E,X                   ;$019765    |\ 
+    CMP.b #$07                  ;$019767    || Return if not knocking out a yellow Koopa.
+    BNE Return019775            ;$019769    |/
+    LDY.b #$08                  ;$01976B    |\ 
+CODE_01976D:                    ;           ||
+    LDA.w $14C8,Y               ;$01976D    || Spawn a coin too.
+    BEQ SpawnMovingCoin         ;$019770    ||
+    DEY                         ;$019772    ||
+    BPL CODE_01976D             ;$019773    |/
 Return019775:                   ;           |
     RTS                         ;$019775    |
 
-SpawnMovingCoin:
+
+SpawnMovingCoin:                ;-----------| Routine to spawn a moving coin when a yellow koopa is hit.
     LDA.b #$08                  ;$019776    |
     STA.w $14C8,Y               ;$019778    |
     LDA.b #$21                  ;$01977B    |
@@ -3890,7 +3896,7 @@ SpawnMovingCoin:
     STA.w $154C,Y               ;$0197A9    |
     RTS                         ;$0197AC    |
 
-DATA_0197AD:                    ;$0197AD    | X speeds to give Koopas spawns from shells.
+DATA_0197AD:                    ;$0197AD    | X speeds to give Koopas spawned when knocked out of a shell.
     db $C0,$40
 
 
@@ -4130,10 +4136,10 @@ HandleSprKicked:                ;-----------| Routine to handle a sprite being k
     BEQ CODE_01991B             ;$019916    || Jump to the code above if it's a shell set to become a disco shell.
     JMP CODE_0198A9             ;$019918    |/
 
-CODE_01991B:
+CODE_01991B:                    ;```````````| Not a disco shell.
     LDA.w $167A,X               ;$01991B    |\ 
     AND.b #$10                  ;$01991E    ||
-    BEQ CODE_019928             ;$019920    || If it can't be kicked like a shell, set the stun timer and return to carryable status, then draw graphics.
+    BEQ CODE_019928             ;$019920    || If it can be kicked like a shell, set the stun timer and return to carryable status, then draw graphics.
     JSR CODE_01AA0B             ;$019922    ||
     JMP CODE_01A187             ;$019925    |/
 
@@ -4239,7 +4245,7 @@ Return0199DB:                   ;           |
 BreakThrowBlock:                ;-----------| Subroutine to shatter a throwblock.
     STZ.w $14C8,X               ;$0199DC    | Erase the throwblock.
     LDY.b #$FF                  ;$0199DF    |
-CODE_0199E1:                    ;```````````| Subroutine to create shatter particles. Y contains 
+CODE_0199E1:                    ;```````````| Subroutine to create shatter particles. Y contains the timer for the particles
     JSR IsSprOffScreen          ;$0199E1    |\ 
     BNE Return019A03            ;$0199E4    ||
     LDA $E4,X                   ;$0199E6    ||
@@ -4526,75 +4532,74 @@ CODE_019B78:                    ;           || Draw a 16x16 sprite. Send behind 
 
 
 SprTilemap:                     ;$019B83    | Various tilemaps for sprites. Indexed by the value from $019C7F + $1602 (*2 if 16x32, *4 if 4 8x8s).
-    db $82,$A0,$82,$A2,$84,$A4              ;$019B83 - Koopa (2-byte)
-    db $8C,$8A,$8E                          ;$019B86 - Shell (1-byte, but indexed from above)
-    db $C8,$CA,$CA,$CE,$CC,$86,$4E          ;$019B8C - Shell-less Koopa (fourth byte unused)
-    db $E0,$E2,$E2,$CE,$E4,$E0,$E0          ;$019B93 - Shell-less blue Koopa (fourth byte unused)
-    db $A3,$A3,$B3,$B3,$E9,$E8,$F9,$F8      ;$019B9A - Para-goomba
+    db $82,$A0,$82,$A2,$84,$A4              ; 00 - Koopa (2-byte)
+    db $8C,$8A,$8E                          ;   03 - Shell (1-byte, but indexed from above set)
+    db $C8,$CA,$CA,$CE,$CC,$86,$4E          ; 09 - Shell-less Koopa (fourth byte unused)
+    db $E0,$E2,$E2,$CE,$E4,$E0,$E0          ; 10 - Shell-less blue Koopa (fourth byte unused)
+    db $A3,$A3,$B3,$B3,$E9,$E8,$F9,$F8      ; 17 - Para-goomba
     db $E8,$E9,$F8,$F9,$E2,$E6
-    db $AA,$A8,$A8,$AA                      ;$019BA8 - Goomba
-    db $A2,$A2,$B2,$B2,$C3,$C2,$D3,$D2      ;$019BAC - Para-bomb
+    db $AA,$A8,$A8,$AA                      ; 25 - Goomba
+    db $A2,$A2,$B2,$B2,$C3,$C2,$D3,$D2      ; 29 - Para-bomb
     db $C2,$C3,$D2,$D3,$E2,$E6
-    db $CA,$CC,$CA                          ;$019BBA - Bob-omb
-    db $AC,$CE,$AE,$CE,$83,$83,$C4,$C4      ;$019BBD - Classic / Jumping Piranha Plant
+    db $CA,$CC,$CA                          ; 37 - Bob-omb
+    db $AC,$CE,$AE,$CE,$83,$83,$C4,$C4      ; 3A - Classic / Jumping Piranha Plant
     db $83,$83,$C5,$C5
-    db $8A                                  ;$019BC9 - Football
-    db $A6,$A4,$A6,$A8                      ;$019BCA - Bullet Bill
-    db $80,$82,$80                          ;$019BCE - Spiny
-    db $84,$84,$84,$84,$94,$94,$94,$94      ;$019BD1 - Spiny egg (4-byte)
-    db $A0,$B0,$A0,$D0                      ;$019BD9 - ???
-    db $82,$80,$82                          ;$019BDD - Buzzy Beetle
-    db $00,$00,$00                          ;$019BE0 - ???
-    db $86,$84,$88                          ;$019BE3 - Buzzy Beetle shell
-    db $EC,$8C,$A8,$AA,$8E,$AC              ;$019BE6 - Spike Top
-    db $AE,$8E                              ;$019BEC - Hopping Flame
-    db $EC,$EE,$CE,$EE,$A8,$EE              ;$019BEE - Lakitu
-    db $40,$40                              ;$019BF4 - Moving Ledge Hole?
-    db $A0,$C0,$A0,$C0,$A4,$C4,$A4,$C4      ;$019BF6 - Magikoopa
+    db $8A                                  ; 46 - Football
+    db $A6,$A4,$A6,$A8                      ; 47 - Bullet Bill
+    db $80,$82,$80                          ; 4B - Spiny
+    db $84,$84,$84,$84,$94,$94,$94,$94      ; 4E - Spiny egg (4-byte)
+    db $A0,$B0,$A0,$D0                      ; 56 - [Unused] (Display Level Message 1)
+    db $82,$80,$82                          ; 5A - Buzzy Beetle
+    db $00,$00,$00                          ; 5D - [Unused]
+    db $86,$84,$88                          ; 60 - Buzzy Beetle shell
+    db $EC,$8C,$A8,$AA,$8E,$AC              ; 63 - Spike Top
+    db $AE,$8E                              ; 69 - Hopping Flame
+    db $EC,$EE,$CE,$EE,$A8,$EE              ; 6B - Lakitu
+    db $40,$40                              ; 71 - Moving Ledge Hole?
+    db $A0,$C0,$A0,$C0,$A4,$C4,$A4,$C4      ; 73 - Magikoopa
     db $A0,$C0,$A0,$C0
-    db $40                                  ;$019C02 - Throwblock / exploding turnblock
-    db $07,$27,$4C,$29,$4E,$2B,$82,$A0      ;$019C03 - Climbing Koopa
+    db $40                                  ; 7F - Throwblock / exploding turnblock
+    db $07,$27,$4C,$29,$4E,$2B,$82,$A0      ; 80 - Climbing Koopa
     db $84,$A4
-    db $67,$69,$88,$CE                      ;$019C0D - Fish
-    db $8E,$AE                              ;$019C11 - ???
-    db $A2,$A2,$B2,$B2                      ;$019C13 - Thwimp (4-byte)
-    db $00,$40,$44,$42,$2C,$42              ;$019C17 - ???
-    db $28,$28,$28,$28,$4C,$4C,$4C,$4C      ;$019C1D - Springboard (4-byte)
+    db $67,$69,$88,$CE                      ; 8A - Fish
+    db $8E,$AE                              ; 8E - [Unused] (Thwomp)
+    db $A2,$A2,$B2,$B2                      ; 90 - Thwimp (4-byte)
+    db $00,$40,$44,$42,$2C,$42              ; 94 - Yoshi Egg
+    db $28,$28,$28,$28,$4C,$4C,$4C,$4C      ; 9A - Springboard (4-byte)
     db $83,$83,$6F,$6F
-    db $AC,$BC,$AC,$A6                      ;$019C29 - ???
-    db $8C,$AA.$86,$84                      ;$019C2D - Bony Beetle
-    db $DC,$EC,$DE,$EE                      ;$019C31 - ???
-    db $06,$06,$16,$16,$07,$07,$17,$17      ;$019C35 - Podoboo (4-byte)
+    db $AC,$BC,$AC,$A6                      ; A6 - Dry Bones (follow)
+    db $8C,$AA,$86,$84                      ; AA - Bony Beetle
+    db $DC,$EC,$DE,$EE                      ; AE - Dry Bones (ledge)
+    db $06,$06,$16,$16,$07,$07,$17,$17      ; B2 - Podoboo (4-byte)
     db $16,$16,$06,$06,$17,$17,$07,$07
-    db $84,$86                              ;$019C45 - [Unused]
-    db $00,$00,$00,$0E,$2A,$24,$02,$06      ;$019C47 - Yoshi
+    db $84,$86                              ; C2 - [Unused] (Boss fireball)
+    db $00,$00,$00,$0E,$2A,$24,$02,$06      ; C4 - Yoshi
     db $0A,$20,$22,$28,$26,$2E,$40,$42
     db $0C
-    db $04,$2B                              ;$019C58 - [Unused]
-    db $6A,$ED                              ;$019C5A - Eerie
-    db $88,$8C,$A8,$8E,$AA,$AE,$8C,$88      ;$019C5C - Boo
-    db $A8
-    db $AE,$AC,$8C,$8E                      ;$019C65 - Rip Van Fish
-    db $CE,$EE                              ;$019C69 - Vertical Dolphin
-    db $C4,$C6                              ;$019C6B - Diggin' Chuck's Rock
-    db $82,$84,$86                          ;$019C6D - Monty Mole
-    db $8C                                  ;$019C70 - Ledge-dwelling Monty Mole's Dirt, ? Sphere
-    db $CE,$CE,$88,$89,$CE,$CE,$89,$88      ;$019C71 - Ground-dwelling Monty Mole's Dirt (4-byte)
-    db $F3,$CE,$F3,$CE                      ;$019C79 - Sumo Bros. Lightning
-    db $A7,$A9                              ;$019C7D - Ninji
+    db $04,$2B                              ; D5 - [Unused]
+    db $6A,$ED                              ; D7 - Eerie
+    db $88,$8C,$A8,$8E,$AA,$AE,$8C,$88,$A8  ; D9 - Boo
+    db $AE,$AC,$8C,$8E                      ; E2 - Rip Van Fish
+    db $CE,$EE                              ; E6 - Vertical Dolphin
+    db $C4,$C6                              ; E8 - Diggin' Chuck's Rock
+    db $82,$84,$86                          ; EA - Monty Mole
+    db $8C                                  ; ED - Goal Sphere, Ledge-dwelling Monty Mole's dirt
+    db $CE,$CE,$88,$89,$CE,$CE,$89,$88      ; EE - Ground-dwelling Monty Mole's dirt (4-byte)
+    db $F3,$CE,$F3,$CE                      ; F6 - Sumo Bros. Lightning
+    db $A7,$A9                              ; FA - Ninji
 
 SprTilemapOffset:               ;$019C7F    | Table of indices to the above table, indexed by sprite ID.
-    db $09,$09,$10,$09,$00,$00,$00,$00
-    db $00,$00,$00,$00,$00,$37,$00,$25
-    db $25,$5A,$00,$4B,$4E,$8A,$8A,$8A
-    db $8A,$56,$3A,$46,$47,$69,$6B,$73
-    db $00,$00,$80,$80,$80,$80,$8E,$90
-    db $00,$00,$3A,$F6,$94,$95,$63,$9A
-    db $A6,$AA,$AE,$B2,$C2,$C4,$D5,$D9
-    db $D7,$D7,$E6,$E6,$E6,$E2,$99,$17
-    db $29,$E6,$E6,$E6,$00,$E8,$00,$8A
-    db $E8,$00,$ED,$EA,$7F,$EA,$EA,$3A
-    db $3A,$FA,$71,$7F
+    db $09,$09,$10,$09,$00,$00,$00,$00      ; 00-07
+    db $00,$00,$00,$00,$00,$37,$00,$25      ; 08-0F
+    db $25,$5A,$00,$4B,$4E,$8A,$8A,$8A      ; 10-17
+    db $8A,$56,$3A,$46,$47,$69,$6B,$73      ; 18-1F
+    db $00,$00,$80,$80,$80,$80,$8E,$90      ; 20-27
+    db $00,$00,$3A,$F6,$94,$95,$63,$9A      ; 28-2F
+    db $A6,$AA,$AE,$B2,$C2,$C4,$D5,$D9      ; 30-37
+    db $D7,$D7,$E6,$E6,$E6,$E2,$99,$17      ; 38-3F
+    db $29,$E6,$E6,$E6,$00,$E8,$00,$8A      ; 40-47
+    db $E8,$00,$ED,$EA,$7F,$EA,$EA,$3A      ; 48-4F
+    db $3A,$FA,$71,$7F                      ; 50-53
 
 GeneralSprDispX:                ;$019CD3    | X displacements for each 8x8 in the first shared GFX routine.
     db $00,$08,$00,$08
@@ -4602,7 +4607,7 @@ GeneralSprDispX:                ;$019CD3    | X displacements for each 8x8 in th
 GeneralSprDispY:                ;$019CD7    | Y displacements for each 8x8 in the first shared GFX routine.
     db $00,$00,$08,$08
 
-GeneralSprGfxProp:              ;$019CDA    | YXPPCCCT bytes for tiles in the first shared GFX routine (four 8x8s). p = normal in the representations.
+GeneralSprGfxProp:              ;$019CDA    | YXPPCCCT bytes for tiles in the first shared GFX routine (four 8x8s). p = normal orientation, q/b/d = flipped X/Y/XY.
     db $00,$00,$00,$00          ; 00 - pp   |      pq   |      qp
     db $00,$40,$00,$40          ;      pp   | 04 - pq   | 05 - qp
     
@@ -4618,7 +4623,7 @@ GeneralSprGfxProp:              ;$019CDA    | YXPPCCCT bytes for tiles in the fi
     
     ; Scratch RAM setup:
     ; A = Index (divided by 4) to the YXPPCCCT properties table.
-    ; Y = Additional Y position offset for the graphics, when using Entry1.
+    ; Y = Additional Y position offset for the graphics, when using Entry1. (used exclusively for springboards)
 
     ; Scratch RAM usage and output:
     ; $00 = Tile X offset.
@@ -4762,7 +4767,7 @@ CODE_019DBE:                    ;           ||
     ORA.w $15A0,X               ;$019DCC    || Set size as two 16x16s.
     STA.w $0460,Y               ;$019DCF    ||
     STA.w $0461,Y               ;$019DD2    |/
-    JSR CODE_01A3DF             ;$019DD5    | Check for individual tiles being offscreen, and hid them if so.
+    JSR CODE_01A3DF             ;$019DD5    | Check for individual tiles being offscreen, and hide them if so.
     RTS                         ;$019DD8    |
 
 SubSprGfx1Hlpr1:                ;```````````| Sprite is Y flipped.
@@ -5045,7 +5050,7 @@ CODE_019F92:                    ;           |
 DATA_019F99:                    ;$019F99    | Base X speeds for carryable sprites when dropped.
     db $FC,$04
 
-CODE_019F9B:                    ;```````````| P-balloon.
+CODE_019F9B:                    ;```````````| Running carryable-sprite-specific routines; first up is P-balloon.
     LDA $9E,X                   ;$019F9B    |\ 
     CMP.b #$7D                  ;$019F9D    || Branch if not the P-balloon.
     BNE CODE_019FE0             ;$019F9F    |/
@@ -5086,7 +5091,7 @@ CODE_019FCA:                    ;```````````| Balloon Mario routine.
 
 
 
-CODE_019FE0:                    ;```````````| Actually carrying a sprite.
+CODE_019FE0:                    ;```````````| Carrying sprite other than P-balloon (i.e. actually carrying something).
     JSR CODE_019140             ;$019FE0    | Handle interaction with blocks.
     LDA $71                     ;$019FE3    |\ 
     CMP.b #$01                  ;$019FE5    ||
@@ -5217,8 +5222,8 @@ CODE_01A0A6:                    ;           |
 
 CODE_01A0B1:                    ;-----------| Subroutine to offset a carryable sprite from Mario's position.
     LDY.b #$00                  ;$01A0B1    |\ 
-    LDA $76                     ;$01A0B3    || Inefficiency ho!
-    BNE CODE_01A0B8             ;$01A0B5    || (0 = right, 1 = left)
+    LDA $76                     ;$01A0B3    || Get 0 = right, 1 = left.
+    BNE CODE_01A0B8             ;$01A0B5    ||
     INY                         ;$01A0B7    |/
 CODE_01A0B8:                    ;           |
     LDA.w $1499                 ;$01A0B8    |\ 
@@ -5247,8 +5252,8 @@ CODE_01A0D6:                    ;           |
     BEQ CODE_01A0E2             ;$01A0DE    ||
     LDY.b #$3D                  ;$01A0E0    ||
 CODE_01A0E2:                    ;           ||
-    LDA.w $94,Y                 ;$01A0E2    || Decide whether to use Mario's position on the next frame, 
-    STA $00                     ;$01A0E5    ||  or if on a revolving brown platform, current frame.
+    LDA.w $94,Y                 ;$01A0E2    || Decide whether to use Mario's position on the current frame ($D1/$D3), 
+    STA $00                     ;$01A0E5    ||  or if on a revolving brown platform, next frame ($94/$97).
     LDA.w $95,Y                 ;$01A0E7    ||
     STA $01                     ;$01A0EA    ||
     LDA.w $96,Y                 ;$01A0EC    ||
@@ -6349,9 +6354,11 @@ CODE_01A7C2:                    ;           |
 
 
 
-SpriteToSpawn:                  ;$01A7C9    | What sprites are spawned when various sprites are bounced off of by Mario, hit by a block, or eaten by Yoshi.
-    db $00,$01,$02,$03,$04,$05,$06,$07      ; Unused x8
-    db $04,$04,$05,$05,$07,$00,$00,$0F      ; 08, 09, 0A, 0B, 0C, unused x3
+SpriteToSpawn:                  ;$01A7C9    | What sprites to turn a sprite into when bounced off of by Mario, hit by a block, or eaten by Yoshi.
+    db $00,$01,$02,$03                      ; Unused
+    db $04,$05,$06,$07                      ; 04, 05, 06, 07 (only when swallowed by Yoshi)
+    db $04,$04,$05,$05,$07                  ; 08, 09, 0A, 0B, 0C
+    db $00,$00,$0F                          ; Unused
     db $0F,$0F,$0D                          ; 10, 3F, 40
 
     ; Scratch RAM usage:
@@ -6393,11 +6400,11 @@ ProcessInteract:                ;-----------| The actual Mario-sprite interactio
     LDA $0F                     ;$01A7FA    |\ 
     CLC                         ;$01A7FC    ||
     ADC.b #$50                  ;$01A7FD    ||
-    CMP.b #$A0                  ;$01A7FF    || Return if Mario is not within a 10x12 space around the sprite.
+    CMP.b #$A0                  ;$01A7FF    || Return if Mario is not within a 10x12 tile space around the sprite.
     BCS ReturnNoContact         ;$01A801    ||  (i.e. not within any hitbox whatsoever)
     JSR SubVertPosBnk1          ;$01A803    ||
     LDA $0E                     ;$01A806    || That said, this is a single-byte compare, so this space loops each screen anyway.
-    CLC                         ;$01A808    ||  (thankfully, the CheckForContact makes sure of that anyway).
+    CLC                         ;$01A808    ||  Thankfully, the CheckForContact routine later on does catch that.
     ADC.b #$60                  ;$01A809    ||
     CMP.b #$C0                  ;$01A80B    ||
     BCS ReturnNoContact         ;$01A80D    |/
@@ -6471,7 +6478,7 @@ CODE_01A87E:                    ;```````````| Mario doesn't have star power.
     LDA.w $14C8,X               ;$01A88B    |\ 
     CMP.b #$09                  ;$01A88E    || Branch if not a carryable sprite.
     BNE CODE_01A897             ;$01A890    |/
-    JSR CODE_01AA42             ;$01A892    | Handle touching a carryable sprite.
+    JSR CODE_01AA42             ;$01A892    |] Handle touching a carryable sprite.
 CODE_01A895:                    ;           |
     CLC                         ;$01A895    |
     RTS                         ;$01A896    |
@@ -6508,13 +6515,13 @@ CODE_01A8C9:                    ;           |
     AND.b #$10                  ;$01A8CC    || If the sprite can be bounced on, branch.
     BNE CODE_01A91C             ;$01A8CE    |/
     LDA.w $140D                 ;$01A8D0    |\ 
-    ORA.w $187A                 ;$01A8D3    || If not spinjumping or riding Yoshi, branch.
+    ORA.w $187A                 ;$01A8D3    || If not spinjumping and not riding Yoshi, branch.
     BEQ CODE_01A8E6             ;$01A8D6    |/
 CODE_01A8D8:                    ;           |
     LDA.b #$02                  ;$01A8D8    |\ SFX for spinjumping off an enemy that can't be bounced on.
     STA.w $1DF9                 ;$01A8DA    |/  Also used for bouncing off of disco shells.
-    JSL BoostMarioSpeed         ;$01A8DD    | Make Mario bounce upwards.
-    JSL DispContactMario        ;$01A8E1    |
+    JSL BoostMarioSpeed         ;$01A8DD    |] Make Mario bounce upwards.
+    JSL DispContactMario        ;$01A8E1    |] Spawn a contact sprite.
     RTS                         ;$01A8E5    |
 
     
@@ -6530,7 +6537,7 @@ CODE_01A8E6:                    ;```````````| Hitting an enemy without bouncing 
 CODE_01A8F9:                    ;           |
     LDA.w $1497                 ;$01A8F9    |\ 
     BNE Return01A91B            ;$01A8FC    || If Mario is invulnerable or riding Yoshi, return.
-    LDA.w $187A                 ;$01A8FE    ||
+    LDA.w $187A                 ;$01A8FE    ||  (interaction while riding Yoshi is handled in his interaction routine)
     BNE Return01A91B            ;$01A901    |/
     LDA.w $1686,X               ;$01A903    |\ 
     AND.b #$10                  ;$01A906    ||
@@ -6583,7 +6590,7 @@ CODE_01A95A:                    ;           ||
 CODE_01A95D:
     JSR CODE_01AB46             ;$01A95D    | Increase bounce counter/play SFX/give points.
     LDY $9E,X                   ;$01A960    |\ 
-    LDA.w $1686,X               ;$01A962    || Branch if the sprite doesn't spawn a new sprite when bounce on.
+    LDA.w $1686,X               ;$01A962    || Branch if the sprite doesn't spawn a new sprite when bounced on.
     AND.b #$40                  ;$01A965    ||
     BEQ CODE_01A9BE             ;$01A967    |/
     CPY.b #$72                  ;$01A969    |\ 
@@ -6611,7 +6618,7 @@ CODE_01A98A:
     BCC CODE_01A998             ;$01A98C    ||
     LDA.b #$80                  ;$01A98E    || Sprite 3F (para-Goomba) and sprite 40 (para-Bomb): turn into a Goomba/Bob-omb and set stun timer.
     STA.w $1540,X               ;$01A990    ||
-    LDA.w SpriteToSpawn-46,Y    ;$01A993    ||
+    LDA.w SpriteToSpawn-$2E,Y   ;$01A993    ||
     BRA CODE_01A99B             ;$01A996    |/
 
 CODE_01A998:
@@ -6870,23 +6877,23 @@ CODE_01AB31:                    ;```````````| Hitting the side of the key/P-swit
 
 
 
-CODE_01AB46:                    ;-----------| Subroutine to get bounce sound effect and give points. Also used when bump-kicking shells.
+CODE_01AB46:                    ;-----------| Subroutine to handle points/sfx for bouncing off most enemies. Also used when bump-kicking shells.
     PHY                         ;$01AB46    |
     LDA.w $1697                 ;$01AB47    |\ 
     CLC                         ;$01AB4A    ||
     ADC.w $1626,X               ;$01AB4B    ||
     INC.w $1697                 ;$01AB4E    ||
-    TAY                         ;$01AB51    || Increase Mario's bounce counter and get bounce SFX.
+    TAY                         ;$01AB51    || Increase Mario's bounce counter and play bounce SFX.
     INY                         ;$01AB52    ||
     CPY.b #$08                  ;$01AB53    ||
     BCS CODE_01AB5D             ;$01AB55    ||
     LDA.w DATA_01A61E-1,Y       ;$01AB57    ||
     STA.w $1DF9                 ;$01AB5A    |/
 CODE_01AB5D:                    ;           |
-    TYA                         ;$01AB5D    |
-    CMP.b #$08                  ;$01AB5E    |\ 
-    BCC CODE_01AB64             ;$01AB60    ||
-    LDA.b #$08                  ;$01AB62    || Give points.
+    TYA                         ;$01AB5D    |\ 
+    CMP.b #$08                  ;$01AB5E    ||
+    BCC CODE_01AB64             ;$01AB60    || Give an appropriate number of points.
+    LDA.b #$08                  ;$01AB62    ||
 CODE_01AB64:                    ;           ||
     JSL GivePoints              ;$01AB64    |/
     PLY                         ;$01AB68    |
@@ -7044,7 +7051,7 @@ CODE_01AC2D:                    ;           |
 SubOffscreen0Bnk1:              ;-----------| SubOffscreenX0 routine. Processes sprites offscreen from -$40 to +$30 ($0130,$FFC0).
     STZ $03                     ;$01AC30    |
 CODE_01AC33:                    ;           |
-    JSR IsSprOffScreen          ;$91AC33    |\ Return if not offscreen.
+    JSR IsSprOffScreen          ;$01AC33    |\ Return if not offscreen.
     BEQ Return01ACA4            ;$01AC36    |/
     LDA $5B                     ;$01AC38    |\ 
     AND.b #$01                  ;$01AC3A    || Branch if in a vertical level.
@@ -7113,7 +7120,7 @@ OffscreenVertBnk1:              ;```````````| Offscreen routine for a vertical l
     BCS Return01ACA4            ;$01ACAF    |/
     LDA $E4,X                   ;$01ACB1    |\ 
     CMP.b #$00                  ;$01ACB3    ||
-    LDA.w $14E0,X               ;$01ACB5    || Erase the sprite if of either side of the level.
+    LDA.w $14E0,X               ;$01ACB5    || Erase the sprite if off either side of the level.
     SBC.b #$00                  ;$01ACB8    ||
     CMP.b #$02                  ;$01ACBA    ||
     BCS OffScrEraseSprite       ;$01ACBC    |/
@@ -7173,7 +7180,7 @@ CODE_01AD07:
     ASL.w $148C                 ;$01AD13    |\ 
     LDA.b #$20                  ;$01AD16    ||
     BIT.w $148C                 ;$01AD18    || With b = $148C:
-    BCC CODE_01AD21             ;$01AD1B    ||  if (b.4 = b.7) {
+    BCC CODE_01AD21             ;$01AD1B    ||  if (b.4 == b.7) {
     BEQ CODE_01AD26             ;$01AD1D    ||    b = 2b + 1;
     BNE CODE_01AD23             ;$01AD1F    ||  } else {
 CODE_01AD21:                    ;           ||    b = 2b;
@@ -7182,7 +7189,7 @@ CODE_01AD23:                    ;           ||
     INC.w $148C                 ;$01AD23    |/
 CODE_01AD26:                    ;           |
     LDA.w $148C                 ;$01AD26    |\ 
-    EOR.w $148B                 ;$01AD29    || Invert byte B with byte A and output the result.
+    EOR.w $148B                 ;$01AD29    || Invert byte b with byte a and output the result.
     STA.w $148D,Y               ;$01AD2C    |/
     RTL                         ;$01AD2F    |
 
@@ -7256,7 +7263,7 @@ DATA_01AD6C:                    ;$01AD6C    | Maximum X speeds for the flying ? 
 
     ; Flying Question Block misc RAM:
     ; $C2   - Indicator that the block has been hit. When 1, it bounces up, and when 2, it comes back down.
-    ; $151C - Which item to spawn when hit. Coin, fireflower, feather, 1up.
+    ; $151C - Which item to spawn when hit (coin, fireflower, feather, 1up). When small, an additional 4 gets added to this.
     ; $1528 - How many pixels the sprite has moved horizontally in the frame.
     ; $1534 - Direction of horizontal acceleration. Even = left, odd = right
     ; $1558 - Set to #$10 when hit for the first time. (bounce animation timer)
@@ -7333,7 +7340,7 @@ CODE_01ADEC:                    ;           |
     STA.w $1528,X               ;$01ADF2    |/
     INC.w $1570,X               ;$01ADF5    | Handle animation timer.
 CODE_01ADF8:                    ;           |
-    JSR SubSprSprInteract       ;$01ADF8    | Process interaciton with other sprites.
+    JSR SubSprSprInteract       ;$01ADF8    | Process interaction with other sprites.
     JSR CODE_01B457             ;$01ADFB    | Make the block solid.
     JSR SubOffscreen0Bnk1       ;$01ADFE    | Process offscreen from -$40 to +$30.
     LDA.w $1558,X               ;$01AE01    |\ 
@@ -7373,8 +7380,8 @@ CODE_01AE38:                    ;           |
     PHX                         ;$01AE42    ||
     JSL CODE_02887D             ;$01AE43    ||
     PLX                         ;$01AE47    |/
-    LDY.w $185E                 ;$01AE48    |
-    LDA.b #$01                  ;$01AE4B    |\ Prevent the powerup from appearing behind FG objects while rising.
+    LDY.w $185E                 ;$01AE48    |\ Prevent the powerup from appearing behind FG objects while rising.
+    LDA.b #$01                  ;$01AE4B    || Note: if the block is spawning a coin, this causes glitches because $185E is uninitialized!
     STA.w $1528,Y               ;$01AE4D    |/
     LDA.w $009E,Y               ;$01AE50    |\ 
     CMP.b #$75                  ;$01AE53    ||
@@ -7409,7 +7416,8 @@ DATA_01AE7F:                    ;$01AE7F    | How much to shift the flying ? blo
     db $03
 
 DATA_01AE88:                    ;$01AE88    | Sprites for the flying ? block to spawn, corresponding to $0288A3.
-    db $06,$02,$04,$05,$06,$01,$01,$05      ; First set is when Mario is big, second is when small.
+    db $06,$02,$04,$05          ; If Mario is big
+    db $06,$01,$01,$05          ; If Mario is small
 
 
 
@@ -7818,7 +7826,7 @@ CODE_01B0EA:                    ;```````````| Fish code convenes here.
     LDA.w $1490                 ;$01B0F7    || - It's not in water
     BNE CODE_01B107             ;$01B0FA    || - Mario has star power
     LDA.w $187A                 ;$01B0FC    ||
-    BNE CODE_01B10A             ;$01B0FF    || Else, hurt Mario unless he's on Yoshi.
+    BNE CODE_01B10A             ;$01B0FF    || Else, hurt Mario, unless he's on Yoshi.
     JSL HurtMario               ;$01B101    ||
     BRA CODE_01B10A             ;$01B105    ||
 CODE_01B107:                    ;           ||
@@ -8015,7 +8023,7 @@ InitFloatSpkBall:               ;-----------| Floating spike ball INIT
 CODE_01B224:                    ;           ||
     LDA.w DATA_01B212,Y         ;$01B224    ||
     STA $B6,X                   ;$01B227    |/
-    BRA InitFloatingPlat        ;$01B229    | Find water  below and spawn in it.
+    BRA InitFloatingPlat        ;$01B229    | Find water below and spawn in it.
 
 
 
@@ -8033,15 +8041,15 @@ InitFloatingPlat:               ;-----------| Floating platform INIT (also used 
     LDA.b #$03                  ;$01B236    |\ 
     STA.w $151C,X               ;$01B238    ||
 CODE_01B23B:                    ;           ||
-    JSR CODE_019140             ;$01B23B    || 
+    JSR CODE_019140             ;$01B23B    ||] Process water interaction.
     LDA.w $164A,X               ;$01B23E    ||
     BNE Return01B25D            ;$01B241    ||
     DEC.w $151C,X               ;$01B243    || Look for water below the sprite and spawn it there.
-    BMI CODE_01B262             ;$01B246    ||  $151C is used as the number of tiles to look; if
-    LDA $D8,X                   ;$01B248    ||   no water could be found in that range, re-initialize the sprite
-    CLC                         ;$01B24A    ||   and check again next frame.
-    ADC.b #$08                  ;$01B24B    ||  Scans at most until its high Y position is greater than #$02, at
-    STA $D8,X                   ;$01B24D    ||   which point it gives up.
+    BMI CODE_01B262             ;$01B246    ||  $151C is used as the number of tiles to look;
+    LDA $D8,X                   ;$01B248    ||   if no water could be found in that range,
+    CLC                         ;$01B24A    ||   re-initialize the sprite and continue again next frame.
+    ADC.b #$08                  ;$01B24B    ||  Scans at most until it reaches a Y position of $0200,
+    STA $D8,X                   ;$01B24D    ||   at which point it gives up.
     LDA.w $14D4,X               ;$01B24F    ||
     ADC.b #$00                  ;$01B252    ||
     STA.w $14D4,X               ;$01B254    ||
@@ -8461,10 +8469,14 @@ CODE_01B4F7:                    ;           |
 
 
 DATA_01B4F9:                    ;$01B4F9    | Low X offset from a sprite to push Mario if he ends up inside.
-    db $0E,$F1,$10,$E0,$1F,$F1              ; 0/1 = one-tile sprites, 2/3 = Reznor, 4/5 = two-tile sprites
+    db $0E,$F1                  ; 0/1 = one-tile sprites
+    db $10,$E0                  ; 2/3 = Reznor
+    db $1F,$F1                  ; 4/5 = two-tile sprites
 
 DATA_01B4FF:                    ;$01B4FF    | High X offset from a sprite to push Mario if he ends up inside.
-    db $00,$FF,$00,$FF,$00,$FF
+    db $00,$FF
+    db $00,$FF
+    db $00,$FF
 
 CODE_01B505:                    ;-----------| Push Mario to the side of the sprite and returns carry clear.
     JSR SubHorzPosBnk1          ;$01B505    |\ 
@@ -8673,14 +8685,14 @@ CODE_01B631:                    ;           ||
     PHA                         ;$01B63E    ||
     SBC.b #$00                  ;$01B63F    ||
     STA.w $14D4,X               ;$01B641    |/
-    JSR CODE_019140             ;$01B644    | Process interaction with water.
+    JSR CODE_019140             ;$01B644    |] Process interaction with water.
     PLA                         ;$01B647    |
     STA.w $14D4,X               ;$01B648    |
     PLA                         ;$01B64B    |
     STA $D8,X                   ;$01B64C    |
 
 CODE_01B64E:                    ;```````````| Handle graphics.
-    JSR SubOffscreen0Bnk1       ;$01B64E    | Process offscreen from -$40 to +$30.
+    JSR SubOffscreen0Bnk1       ;$01B64E    |] Process offscreen from -$40 to +$30.
     LDA $9E,X                   ;$01B651    |\ 
     CMP.b #$A4                  ;$01B653    || Draw graphics. Spike ball routine is below,
     BEQ CODE_01B666             ;$01B655    ||  platform routine is back before this.
@@ -8750,10 +8762,10 @@ BlkBridgeTiming:                ;$01B6A3    | How long to wait at max/min length
     ; $1540 - Timer to wait before extending/retracting.
     
 TurnBlockBridge:                ;-----------| Horizontal/vertical turnblock bridge MAIN.
-    JSR SubOffscreen0Bnk1       ;$01B6A5    | Process offscreen from -$40 to +$30.
-    JSR CODE_01B710             ;$01B6A8    | Draw GFX.
-    JSR CODE_01B852             ;$01B6AB    | Handle contact.
-    JSR CODE_01B6B2             ;$01B6AE    |
+    JSR SubOffscreen0Bnk1       ;$01B6A5    |] Process offscreen from -$40 to +$30.
+    JSR CODE_01B710             ;$01B6A8    |] Draw GFX.
+    JSR CODE_01B852             ;$01B6AB    |] Handle contact.
+    JSR CODE_01B6B2             ;$01B6AE    |] Run main routine (the routine literally right after this)
     RTS                         ;$01B6B1    |
 
 CODE_01B6B2:                    ;```````````| H/V bridge primary routine.
@@ -8773,7 +8785,7 @@ CODE_01B6B2:                    ;```````````| H/V bridge primary routine.
 Return01B6D0:                   ;           |
     RTS                         ;$01B6D0    |
 
-CODE_01B6D1
+CODE_01B6D1:
     LDA.w BlkBridgeTiming,Y     ;$01B6D1    |\ 
     STA.w $1540,X               ;$01B6D4    || Move to next phase and temporarily freeze the bridge.
     INC $C2,X                   ;$01B6D7    |/
@@ -8781,11 +8793,11 @@ CODE_01B6D1
 
 
 
-HorzTurnBlkBridge:              ;-----------| Horizontal turnblock bridge MAIN (see above for misc).
-    JSR SubOffscreen0Bnk1       ;$01B6DA    | Process offscreen from -$40 to +$30.
-    JSR CODE_01B710             ;$01B6DD    | Draw GFX.
-    JSR CODE_01B852             ;$01B6E0    | Handle contact.
-    JSR CODE_01B6E7             ;$01B6E3    | Run main routine.
+HorzTurnBlkBridge:              ;-----------| Horizontal turnblock bridge MAIN (see above for misc RAM).
+    JSR SubOffscreen0Bnk1       ;$01B6DA    |] Process offscreen from -$40 to +$30.
+    JSR CODE_01B710             ;$01B6DD    |] Draw GFX.
+    JSR CODE_01B852             ;$01B6E0    |] Handle contact.
+    JSR CODE_01B6E7             ;$01B6E3    |] Run main routine (the routine literally right after this)
     RTS                         ;$01B6E6    |
 
 CODE_01B6E7:                    ;```````````| H bridge primary routine.
@@ -8926,14 +8938,14 @@ FinishOAMWrite:                 ;-----------| Routine to make sure sprite tiles 
     PHB                         ;$01B7B3    | Usage:
     PHK                         ;$01B7B4    |  A = Number of tiles to draw, -1
     PLB                         ;$01B7B5    |  Y = Tile size (00 = 8x8, 02 = 16x16, 80+ = variable; set size manually)
-    JSR FinishOAMWriteRt        ;$01B7B6    | Jump to this after storing values to OAM to upload them.
+    JSR FinishOAMWriteRt        ;$01B7B6    | Note: $0300/$0301 must also be set first for each tile before calling this.
     PLB                         ;$01B7B9    |
     RTL                         ;$01B7BA    |
 
 FinishOAMWriteRt:
     STY $0B                     ;$01B7BB    |
     STA $08                     ;$01B7BD    |
-    LDY.w $$15EA,X              ;$01B7BF    |
+    LDY.w $15EA,X               ;$01B7BF    |
     LDA $D8,X                   ;$01B7C2    |\ 
     STA $00                     ;$01B7C4    ||
     SEC                         ;$01B7C6    ||
@@ -9013,7 +9025,7 @@ CODE_01B838:                    ;           |
     RTS                         ;$01B843    |
 
 
-CODE_01B844:                    ;```````````| Returns carry set if the tile is offscreen to the right, clear if not.
+CODE_01B844:                    ;```````````| Returns carry set if the tile is offscreen horizontally, clear if not.
     REP #$20                    ;$01B844    | Store X position in $04 first.
     LDA $04                     ;$01B846    |
     SEC                         ;$01B848    |
@@ -9047,7 +9059,7 @@ CODE_01B852:                    ;-----------| Contact routine for the turnblock 
     CLC                         ;$01B870    ||
     ADC.b #$18                  ;$01B871    ||
     CMP $09                     ;$01B873    ||
-    BCS ADDR_01B8B2             ;$01B875    |/
+    BCS CODE_01B8B2             ;$01B875    |/
     LDA $7D                     ;$01B877    |\ Return if Mario is moving up. Else, he's on top of the bridge.
     BMI Return01B8B1            ;$01B879    |/
     STZ $7D                     ;$01B87B    | Clear Mario's Y speed.
@@ -9244,7 +9256,7 @@ ClimbingKoopa:                  ;-----------| Climbing net Koopa MAIN
     LDA.w $1632,X               ;$01B992    |\ 
     EOR.b #$01                  ;$01B995    || Stun timer is 40; flip its direction,
     STA.w $1632,X               ;$01B997    ||  invert its Y speed, and
-    JSR FlipSpriteDir           ;$01B99A    ||  invert the side of the fence the Koopa is on,
+    JSR FlipSpriteDir           ;$01B99A    ||  invert the side of the fence the Koopa is on.
     JSR CODE_01BA7F             ;$01B99D    |/  
 CODE_01B9A0:                    ;           |
     JMP CODE_01BA37             ;$01B9A0    |
@@ -10081,9 +10093,9 @@ CODE_01BF28:
     STA.w $00B6,Y               ;$01BF66    |/
     RTS                         ;$01BF69    |
 
-CODE_01BF6A:                    ;```````````| Aim the magic at Mario. Total speed should be loaded in A.
-    STA $01                     ;$01BF6A    |
-    PHX                         ;$01BF6C    |
+CODE_01BF6A:                    ;```````````| Aiming routine for the Magikooa's magic.
+    STA $01                     ;$01BF6A    |  Input: A = desired magnitude of the final speed vector, X = sprite slot to aim from.
+    PHX                         ;$01BF6C    |  Output: $00 = X speed, $01 = Y speed
     PHY                         ;$01BF6D    |
     JSR SubVertPosBnk1          ;$01BF6E    |\ 
     STY $02                     ;$01BF71    ||
@@ -10710,7 +10722,7 @@ EatenBerryGfxProp:              ;$01C345    | YXPPCCCT properties for the differ
     ; $1528 - Direction of the feather's acceleration. Even = left, odd = right.
     ;          If set while rising from a ? block, prevents it from going behind objects (used by the flying ? block).
     ; $1534 - Flag for having been dropped from the item box. Set for all items, but not used in feathers.
-    ; $1540 - Timer for rising out of the item box. Set to #$3E at the start.
+    ; $1540 - Timer for rising out of a ? block. Set to #$3E at the start.
     ; $154C - Timer for disabling contact with Mario. Set to #$2C when spawned from item boxes.
     ; $1558 - Timer to prevent interaction with the sides of blocks. Only ever used by the roulette sprite, after being hit out of the block.
     ; $1570 - Frame counter for the fire flower's animation.
@@ -10818,7 +10830,7 @@ CODE_01C3F1:                    ;           |
 CODE_01C3F3:                    ;```````````| Sprite is not stationary.
     LDA.w $0D9B                 ;$01C3F3    |\ 
     CMP.b #$C1                  ;$01C3F6    || Branch unless in level mode #$C0?
-    BEQ CODE_01C42C             ;$01C3F8    ||  i.e.  Reznor/Morton/Roy boss rooms? which don't have powerups?
+    BEQ CODE_01C42C             ;$01C3F8    ||  i.e.  Reznor/Morton/Roy/Ludwig boss rooms? which don't have powerups?
     BIT.w $0D9B                 ;$01C3FA    ||
     BVC CODE_01C42C             ;$01C3FD    |/
     STZ.w $1588,X               ;$01C3FF    |\ 
@@ -11026,7 +11038,7 @@ GiveMarioMushroom:              ;-----------| Routine to handle giving Mario a m
     LDA.b #$02                  ;$01C561    |\ 
     STA $71                     ;$01C563    ||
     LDA.b #$2F                  ;$01C565    ||| How many frames the mushroom powerup animation lasts.
-    STA.w $1496,Y               ;$01C567    |/ (sidenote: the ,Y here is probably a typo?)
+    STA.w $1496,Y               ;$01C567    |/ (sidenote: the ,Y here is probably a typo. Y is always 00 here though, so no issues)
     STA $9D                     ;$01C56A    |
     JMP CODE_01C56F             ;$01C56C    |
 
@@ -11265,7 +11277,7 @@ DATA_01C6E8:                    ;$01C6E8    | Maximum X speeds for the feather.
 DATA_01C6EA:                    ;$01C6EA    | Y speeds for the feather's "swing". Actual speed is this + #$06.
     db $0A,$F6,$08                          ; 0 = down (left); 1 = up; 2 = down (right)
 
-Feather:                        ;-----------| Feather MAIN.
+FeatherMain:                    ;-----------| Feather MAIN.
     LDA $9D                     ;$01C6ED    |\ If game frozen, just handle touched routine and graphics.
     BNE CODE_01C744             ;$01C6EF    |/
     LDA $C2,X                   ;$01C6F1    |\ Branch if not stationary.
@@ -11525,7 +11537,7 @@ CODE_01C8B9:                    ;           |
     ADC $05                     ;$01C8C2    ||
     STA $09                     ;$01C8C4    |/
     LDA.b #$A2                  ;$01C8C6    |\ 
-    STA.w $0302,Y               ;$01C8C8    || Store tile number and YXPPCCCT.
+    STA.w $0302,Y               ;$01C8C8    || Store tile number and YXPPCCCT for the chain link.
     LDA.b #$31                  ;$01C8CB    ||
     STA.w $0303,Y               ;$01C8CD    |/
     DEX                         ;$01C8D0    |
@@ -12669,7 +12681,7 @@ Return01CFDF:                   ;           |
 
 
 
-CODE_01CFE0:                    ;-----------| Morton/Roy/Ludwig phase 3 - Dying.
+CODE_01CFE0:                    ;-----------| Morton/Roy/Ludwig phase 4 - Dying.
     LDY.w $1540,X               ;$01CFE0    |\ Branch if shrinking the boss (not growing).
     BEQ CODE_01CFFC             ;$01CFE3    |/
     LDA $D8,X                   ;$01CFE5    |\ 
@@ -13683,8 +13695,8 @@ InitLinePlat:                   ;-----------| Brown/checkered line-guided platfo
     INC.w $1662,X               ;$01D6DD    |/
 CODE_01D6E0:                    ;           |
     INC.w $1540,X               ;$01D6E0    |
-    JSR LineFuzzyPPlats         ;$01D6E3    |
-    JSR LineFuzzyPPlats         ;$01D6E6    |
+    JSR LineFuzzyPPlats         ;$01D6E3    |\ Run MAIN routine, twice for some reason.
+    JSR LineFuzzyPPlats         ;$01D6E6    |/
     INC.w $1626,X               ;$01D6E9    | Make stationary.
 Return01D6EC:                   ;           |
     RTS                         ;$01D6EC    |
@@ -13700,10 +13712,10 @@ InitLineGuidedSpr:              ;-----------| Chainsaw, Grinder, and Fuzzy INIT
     SEC                         ;$01D6F8    ||
     SBC.b #$40                  ;$01D6F9    ||
     STA $E4,X                   ;$01D6FB    ||
-    LDA.w $14E0,X               ;$01D6FD    || If in an odd X position, 
-    SBC.b #$01                  ;$01D700    ||  spawn 20 tiles to the left,
-    STA.w $14E0,X               ;$01D702    ||  and set to move up/left instead of right/down.
-    BRA InitLineBrwnPlat        ;$01D705    ||
+    LDA.w $14E0,X               ;$01D6FD    || If in an even X position,
+    SBC.b #$01                  ;$01D700    ||  spawn 20 tiles to the left, and set it to go right/down.
+    STA.w $14E0,X               ;$01D702    || Else,
+    BRA InitLineBrwnPlat        ;$01D705    ||  spawn one tile to the right, and set to go left/up.
 CODE_01D707:                    ;           ||
     INC.w $157C,X               ;$01D707    ||
     LDA $E4,X                   ;$01D70A    ||
@@ -14131,7 +14143,7 @@ CODE_01D9A7:                    ;-----------| Various line-guided sprite routine
     CMP.b #$68                  ;$01D9B1    ||\ Branch if not a fuzzy (grinder, chainsaw). 
     BNE CODE_01D9BA             ;$01D9B3    |//
 CODE_01D9B5:                    ;```````````| Fuzzy.
-    JSR CODE_01DBD4             ;$01D9B5    |
+    JSR CODE_01DBD4             ;$01D9B5    |] Draw GFX.
     BRA CODE_01D9C1             ;$01D9B8    |
 
 
@@ -14139,15 +14151,15 @@ CODE_01D9BA:
     CMP.b #$67                  ;$01D9BA    |\ Branch if not a grinder.
     BNE CODE_01D9C6             ;$01D9BC    |/
 CODE_01D9BE:                    ;```````````| Grinder.
-    JSR CODE_01DC0B             ;$01D9BE    | Draw GFX.
-CODE_01D9C1:                    ;           |
-    JSR MarioSprInteractRt      ;$01D9C1    | Interact with Mario.
+    JSR CODE_01DC0B             ;$01D9BE    |] Draw GFX.
+CODE_01D9C1:                    ;```````````| Fuzzy rejoins here.
+    JSR MarioSprInteractRt      ;$01D9C1    |] Interact with Mario.
     BRA CODE_01D9CD             ;$01D9C4    | Run line-guided routines.
 
 
 CODE_01D9C6:                    ;```````````| Chainsaw.
-    JSR MarioSprInteractRt      ;$01D9C6    | Interact with Mario.
-    JSL CODE_03C263             ;$01D9C9    | Draw GFX.
+    JSR MarioSprInteractRt      ;$01D9C6    |] Interact with Mario.
+    JSL CODE_03C263             ;$01D9C9    |] Draw GFX.
 CODE_01D9CD:                    ;           |
     JMP CODE_01D74D             ;$01D9CD    | Run line-guided routines.
 
@@ -14157,7 +14169,7 @@ CODE_01D9D0:                    ;```````````| Platform.
 
 
 CODE_01D9D3:                    ;```````````| Actual rope mechanism MAIN.
-    JSR CODE_01DC54             ;$01D9D3    | Draw GFX.
+    JSR CODE_01DC54             ;$01D9D3    |] Draw GFX.
     LDA $E4,X                   ;$01D9D6    |\ 
     PHA                         ;$01D9D8    ||
     LDA $D8,X                   ;$01D9D9    ||
@@ -14917,11 +14929,11 @@ CODE_01DF6C:                    ;           |
     TAX                         ;$01DF73    ||
     LDA.w DATA_01DEE3,X         ;$01DF74    || Set tiles for the item inside the box.
     STA.w $0302,Y               ;$01DF77    ||
-    LDA.w DATA_01DEE4,X         ;$01DF7A    ||
+    LDA.w DATA_01DEE3+1,X       ;$01DF7A    ||
     STA.w $0306,Y               ;$01DF7D    ||
-    LDA.w DATA_01DEE5,X         ;$01DF80    ||
+    LDA.w DATA_01DEE3+2,X       ;$01DF80    ||
     STA.w $030A,Y               ;$01DF83    ||
-    LDA.w DATA_01DEE6,X         ;$01DF86    ||
+    LDA.w DATA_01DEE3+3,X       ;$01DF86    ||
     STA.w $030E,Y               ;$01DF89    |/
     LDA.b #$E4                  ;$01DF8C    |\\ Tile for the white box.
     STA.w $0312,Y               ;$01DF8E    |/
@@ -15119,7 +15131,7 @@ CODE_01E0E2:                    ;           |
     STA $00                     ;$01E0E8    ||
     LDA.w $14D4,X               ;$01E0EA    ||
     SBC.w $151C,X               ;$01E0ED    ||
-    LSR                         ;$01E0F0    || Determine the number of blocksbetween the Podoboo and
+    LSR                         ;$01E0F0    || Determine the number of blocks between the Podoboo and
     ROR $00                     ;$01E0F1    ||  its spawn position, then use that to get the Y speed
     LDA $00                     ;$01E0F3    ||  necessary to reach it.
     LSR                         ;$01E0F5    ||
@@ -15519,7 +15531,7 @@ CODE_01E37F:                    ;-----------| Monty Mole phase 2 - Jumping out.
     LDA.b #$02                  ;$01E382    |\ Set aniamtion frame (2).
     STA.w $1602,X               ;$01E384    |/
     JSR IsOnGround              ;$01E387    |\ 
-    BEQ Return01E38E            ;$01E38A    || If the mole has hit the ground, imove to next phase (normal movement).
+    BEQ Return01E38E            ;$01E38A    || If the mole has hit the ground, move to next phase (normal movement).
     INC $C2,X                   ;$01E38C    |/
 Return01E38E:                   ;           |
     RTS                         ;$01E38E    |
@@ -16038,7 +16050,7 @@ CODE_01E6F0:                    ;```````````| Draw springboard graphics.
     JSR SubSprGfx0Entry1        ;$01E6F9    |/
     RTS                         ;$01E6FC    |
 
-DATA_01E6FD:                    ;$01E6FD    | Y position shifts for the springboard animation.
+DATA_01E6FD:                    ;$01E6FD    | Y position offsets for each frame of the springboard's animation.
     db $00,$02,$00
 
 
@@ -16104,7 +16116,7 @@ DisplayMsg1:                    ;-----------| Display Level Message 1 MAIN (also
     LDA.w $1564,X               ;$01E75B    |\ 
     CMP.b #$01                  ;$01E75E    || Return if not time to show the message.
     BNE Return01E76E            ;$01E760    |/
-    STA.w $1F11                 ;$01E762    |\ Move Mario to the YI submap.
+    STA.w $1F11                 ;$01E762    |\ Move Mario to the YI submap. [hijacked by LM, goes to $03BCA0]
     STA.w $1FB8                 ;$01E765    |/
     STZ.w $14C8,X               ;$01E768    | Erase the sprite.
     INC.w $1426                 ;$01E76B    | Show message 1.
@@ -16309,7 +16321,7 @@ LakituCloudGfx:                 ;```````````| Lakitu cloud GFX routine.
     LDA.b #$FC                  ;$01E8D6    ||
     STA $0D                     ;$01E8D8    ||
     LDA.b #$00                  ;$01E8DA    ||
-    LDY $C2,X                   ;$01E8DC    || $0C-$0F: OAM offsets for each of the cloud's tiles (excluding face).
+    LDY $C2,X                   ;$01E8DC    || $0C-$0F: OAM offsets for each of the cloud's tiles (excluding face). Set to F8, FC, 00/30, 04/34.
     BNE CODE_01E8E2             ;$01E8DE    ||  $0E and $0F specifically are set to a low OAM index in order to hide Mario/Lakitu behind it.
     LDA.b #$30                  ;$01E8E0    ||
 CODE_01E8E2:                    ;           ||
@@ -16364,7 +16376,7 @@ CODE_01E935:                    ;           ||
     DEC $03                     ;$01E93E    ||
     BPL CODE_01E901             ;$01E940    |/
     LDX.w $15E9                 ;$01E942    |\ 
-    LDA.b #$F8                  ;$01E945    ||| OAM index for the Lakitu cloud's face.
+    LDA.b #$F8                  ;$01E945    ||| Base OAM index for the first two tiles of the Lakitu cloud. Should be same as at $01E8D2.
     STA.w $15EA,X               ;$01E947    ||
     LDY.b #$02                  ;$01E94A    ||
     LDA.b #$01                  ;$01E94C    ||
@@ -16794,7 +16806,7 @@ CODE_01EC04:                    ;```````````| Check whether to hatch a Yoshi.
     LDA.w $187A                 ;$01EC04    |\ 
     BEQ CODE_01EC0E             ;$01EC07    ||
     LDA.w $1419                 ;$01EC09    || Skip if:
-    BNE CODE_01EC61             ;$01EC0C    ||  - Entering a pipe while not on Yoshi.
+    BNE CODE_01EC61             ;$01EC0C    ||  - Entering a pipe while on Yoshi.
 CODE_01EC0E:                    ;           ||  - Yoshi is laying an egg.
     LDA.w $18DE                 ;$01EC0E    ||  - Not growing and game not frozen.
     BNE CODE_01EC61             ;$01EC11    ||
@@ -17724,10 +17736,10 @@ CODE_01F2DF:                    ;-----------| Spit out sprite normally.
     AND.b #$40                  ;$01F2E7    ||
     BEQ Return01F2FE            ;$01F2E9    ||
     PHX                         ;$01F2EB    ||
-    LDX.w $009E,Y               ;$01F2EC    ||
-    LDA.l SpriteToSpawn,X       ;$01F2EF    || If set to spawn a new sprite, spawn said sprite.
-    PLX                         ;$01F2F3    ||  This code actually can't normally run; the only actual cases for it are handled at $01F360.
-    STA.w $009E,Y               ;$01F2F4    ||  However, it can end up being used for unintentionally stunned sprites.
+    LDX.w $009E,Y               ;$01F2EC    || If set to spawn a new sprite, spawn said sprite.
+    LDA.l SpriteToSpawn,X       ;$01F2EF    ||  This code actually can't normally run; the only actual cases for it are handled at $01F360.
+    PLX                         ;$01F2F3    ||  However, it can end up being used for unintentionally stunned sprites.
+    STA.w $009E,Y               ;$01F2F4    ||
     PHX                         ;$01F2F7    ||
     TYX                         ;$01F2F8    ||
     JSL LoadSpriteTables        ;$01F2F9    ||
@@ -18227,9 +18239,9 @@ CODE_01F62B:                    ;           |
     LDA.w $14C8,Y               ;$01F640    || Skip the slot if:
     CMP.b #$08                  ;$01F643    || - Not time to process (even slots on even frames, odd slots on odd frames)
     BCC CODE_01F661             ;$01F645    || - It's on Yoshi's tongue.
-    LDA.w $009E,Y               ;$01F647    || - It's literally Yoshi.
-    LDA.w $14C8,Y               ;$01F64A    || - It's dying.
-    CMP.b #$09                  ;$01F64D    || - It's carryable.
+    LDA.w $009E,Y               ;$01F647    || - It's Yoshi himself.
+    LDA.w $14C8,Y               ;$01F64A    || - It's dying (sprite status < 8).
+    CMP.b #$09                  ;$01F64D    || - It's carryable (sprite status 9).
     BEQ CODE_01F661             ;$01F64F    || - It's invincible to star/cape/fire ($167A bit 1).
     LDA.w $167A,Y               ;$01F651    || - It has Yoshi interaction disabled (e.g. already on tongue).
     AND.b #$02                  ;$01F654    || - It's on the wrong layer.
@@ -18294,7 +18306,7 @@ CODE_01F6B4:                    ;           |
     BEQ Return01F6DC            ;$01F6BE    |/
     CMP.b #$02                  ;$01F6C0    |\ 
     BNE CODE_01F6CD             ;$01F6C2    ||
-    LDA.b #$08                  ;$01F6C4    || Warp to Yoshi wings game.
+    LDA.b #$08                  ;$01F6C4    || Warp to Yoshi Wings game.
     STA $71                     ;$01F6C6    ||
     LDA.b #$03                  ;$01F6C8    ||\ SFX for collecting wings, when touched.
     STA.w $1DFC                 ;$01F6CA    |//
@@ -19180,7 +19192,7 @@ Return01FC61:                   ;           |
 
 
 
-CODE_01FC62:                    ;-----------| Subroutine for Iggy/Larry, to handle Mario and fireball interaction.
+CODE_01FC62:                    ;-----------| Subroutine for Iggy/Larry to handle Mario and fireball interaction.
     LDA $71                     ;$01FC62    |\ 
     CMP.b #$01                  ;$01FC64    ||
     BCS Return01FC61            ;$01FC66    || Return if Mario is currently frozen or Iggy/Larry are falling into the lava.

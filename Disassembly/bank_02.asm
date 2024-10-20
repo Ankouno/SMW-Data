@@ -1,4 +1,4 @@
-.BANK2
+org $028000
 
 DATA_028000:                    ;$028000    | Unused AND table.
     db $80,$40,$20,$10,$08,$04,$02,$01
@@ -295,11 +295,11 @@ CODE_0282AF:                    ;           ||
     STX $0C                     ;$0282BE    |
     LDX.w #$0038                ;$0282C0    |\ 
     LDY.w #$00E0                ;$0282C3    ||
-    LDA.w $1884                 ;$0282C6    || X = Highest index to the background tilemap data for the boss (this value decrements).
-    CMP.b #$01                  ;$0282C9    || Y = Highest OAM indice for the boss's background (this value decrements).
-    BNE CODE_0282D8             ;$0282CB    ||
-    LDX.w #$0039                ;$0282CD    || Get indices based on whether the BG is Ludwig's or Morton/Roy's.
-    STX $0C                     ;$0282D0    ||
+    LDA.w $1884                 ;$0282C6    || X = Number of sprite tiles to draw in the boss's BG.
+    CMP.b #$01                  ;$0282C9    || Y = Highest OAM index (from $020C) for the boss's background (this value decrements).
+    BNE CODE_0282D8             ;$0282CB    || $0C = base index to the above sprite tile tables for the boss.
+    LDX.w #$0039                ;$0282CD    ||
+    STX $0C                     ;$0282D0    || Get indices based on whether the BG is Ludwig's (38/E0) or Morton/Roy's (1D/FC).
     LDX.w #$001D                ;$0282D2    ||
     LDY.w #$00FC                ;$0282D5    |/
 CODE_0282D8:                    ;```````````| Morton/Roy/Ludwig tilemap upload loop.
@@ -579,7 +579,7 @@ IsOffScreenBnk2:                ;-----------| Subroutine to check if a sprite is
 
 
 CODE_0284A6:                    ;-----------| Subroutine to spawn three splash graphics in a row. Used for dolphins.
-    STA $03                     ;$0284A6    |  Usage: horizontal distance between splashes in A, see $0284BC for additioanl adresses ($00/$02).
+    STA $03                     ;$0284A6    |  Usage: horizontal distance between splashes in A, see $0284BC for additional adresses ($00/$02).
     LDA.b #$02                  ;$0284A8    |\\ Number of splash tiles.
     STA $01                     ;$0284AA    |/
 CODE_0284AC:                    ;           |
@@ -650,7 +650,7 @@ CODE_0284E8:
     STA.w $18EA,Y               ;$028502    |/
     LDA.b #$07                  ;$028505    |\\ Minor extended sprite number to spawn (water splash).
     STA.w $17F0,Y               ;$028507    |/
-    LDA $00                     ;$02850A    |\ Set initial timer as $00.
+    LDA $00                     ;$02850A    |\\ Set initial timer.
     STA.w $1850,Y               ;$02850C    |/
     RTL                         ;$02850F    |
 
@@ -824,7 +824,7 @@ CODE_02862F:                    ;-----------| Routine (JSL) to spawn a throwbloc
     LDA $96                     ;$02863B    |\ 
     STA $D8,X                   ;$02863D    ||
     LDA $97                     ;$02863F    || Spawn at Mario's position.
-    STA.w $14D4,X               ;$028641    ||  Note: the "LDA $95,X" is likely Nintendo's mistake.
+    STA.w $14D4,X               ;$028641    ||  Note: the "LDA $95,X" is likely a typo on Nintendo's part.
     LDA $94                     ;$028644    ||   It can cause some bugs with the throwblock on spawn,
     STA $E4,X                   ;$028646    ||   but generally the code to handle holding items fixes this.
     LDA $95,X                   ;$028648    ||
@@ -845,8 +845,8 @@ Return028662:                   ;           |
 
 
 ShatterBlock:                   ;-----------| Routine (JSL) to create the shattered block effect at the position in $98-$9B.
-    PHX                         ;$028663    |  Usage: time to keep minor extended sprites active in A. If 0, keep active until offscreen.
-    STA $00                     ;$028664    |   0 makes it appears as brown particles (e.g. turnblock), non-zero makes them flash (e.g. throwblock)
+    PHX                         ;$028663    |  Usage: A == 0 spawns brown particles (e.g. turnblock)
+    STA $00                     ;$028664    |         A != 0 spawns flashing particles (e.g. throwblock)
     LDY.b #$03                  ;$028666    |\ 
     LDX.b #$0B                  ;$028668    ||
 CODE_02866A:                    ;           ||
@@ -909,7 +909,7 @@ YoshiStompRoutine:              ;-----------| Routine (JSL) to handle Yoshi's ea
     LDA $95                     ;$0286D4    ||
     STA.w $16DD,Y               ;$0286D6    ||
     LDA $96                     ;$0286D9    || Set bounce interaction center to Yoshi.
-    CLC                         ;$0286DB    ||  Likely a typo at $0286D6; should be stored to $16D5.
+    CLC                         ;$0286DB    ||  Likely a typo at $0286D6; should be stored to $16D5 instead.
     ADC.b #$20                  ;$0286DC    ||  Rarely noticeable though.
     STA.w $16D9,Y               ;$0286DE    ||
     LDA $97                     ;$0286E1    ||
@@ -1104,8 +1104,8 @@ CODE_028818:                    ;           |
     LDA $04                     ;$028818    |\ 
     CMP.b #$05                  ;$02881A    || If hitting an ON/OFF switch, place a sound effect.
     BNE CODE_028823             ;$02881C    ||
-    LDX.b #$0B                  ;$02881E    ||\ SFX for hitting an On/Off switch.
-    STX.w $1DF9                 ;$028820    |//
+    LDX.b #$0B                  ;$02881E    ||\ One of two SFX for hitting an ON/OFF switch (the other at $02918C).
+    STX.w $1DF9                 ;$028820    |//  This one plays when the block is hit.
 CODE_028823:                    ;           |
     TAX                         ;$028823    |
     LDA.w BounceProp,X          ;$028824    |\ Set YXPPCCCT for the bounce block. 
@@ -1165,16 +1165,16 @@ CODE_028885:                    ;           |
     LDA.b #$FF                  ;$028898    ||
     STA.w $186B                 ;$02889A    |/
 CODE_02889D:                    ;           |
-    JSR CODE_028A66             ;$02889D    | Spawn a coin sprite.
+    JSR CODE_028A66             ;$02889D    |] Spawn a coin sprite.
 Return0288A0:                   ;           |
     RTL                         ;$0288A0    |
 
 
-DATA_0288A1:                    ;$0288A1    | Sprites that spawn from Yoshi block eggs. With Yoshi, without Yoshi.
+DATA_0288A1:                    ;$0288A1    | Sprites that spawn from Yoshi eggs in blocks. With Yoshi, without Yoshi.
     db $35,$78
 
 SpriteInBlock:                  ;$0288A3    | Sprites to spawn from various blocks and sprites.
-    db $00,$74,$75,$76,$77,$78,$00,$00      ; See the ROM map for details: http://www.smwcentral.net/?p=nmap&m=smwrom#02887D
+    db $00,$74,$75,$76,$77,$78,$00,$00      ; See the ROM map for details: https://smwc.me/m/smw/rom/02887D
     db $79,$00,$3E,$7D,$2C,$04,$81,$45
     db $80
 
@@ -1328,7 +1328,7 @@ CODE_0289CD:                    ;           |
     BRA CODE_028A01             ;$0289D1    |/
 
 CODE_0289D3:                    ;```````````| Not key/wings/balloon/shell.
-    CMP.b #$04                  ;$0289D3    |\ Branch if spawning a shell (direc\tly, not from key/wings/balloon/shell).
+    CMP.b #$04                  ;$0289D3    |\ Branch if spawning a shell (directly, not from key/wings/balloon/shell).
     BEQ ADDR_028A08             ;$0289D5    |/
     CMP.b #$3E                  ;$0289D7    |\ Branch if spawning a P-switch.
     BEQ CODE_028A2A             ;$0289D9    |/
@@ -1580,8 +1580,7 @@ Return028B77:                   ;           |
 
 
 MExtendedOAM:                   ;$028B77    | OAM indices for most minor extended sprites.
-    db $50,$54,$58,$5C,$60,$64,$68,$6C
-    db $70,$74,$78,$7C
+    db $50,$54,$58,$5C,$60,$64,$68,$6C,$70,$74,$78,$7C
 
 BrokenBlock:                    ;$028B84    | Tiles for the broken block bits.
     db $3C,$3D,$3D,$3C,$3C,$3D,$3D,$3C
@@ -1847,31 +1846,33 @@ Return028D41:                   ;           |
 
 
 
-WaterSplashTiles:               ;           |
-    db $68,$68,$6A,$6A,$6A,$62,$62,$62
-    db $64,$64,$64,$64,$66
+WaterSplashTiles:               ;$028D42    | Tile numbers for the water splash animation.
+    db $68,$68,$6A,$6A
+    db $6A,$62,$62,$62
+    db $64,$64,$64,$64
+    db $66
 
 CODE_028D4F:                    ;-----------| Water splash extended sprite MAIN
-    LDA.w $1808,X               ;$028D4F    |
-    CMP $1A                     ;$028D52    |
-    LDA.w $18EA,X               ;$028D54    |
-    SBC $1B                     ;$028D57    |
-    BNE CODE_028D62             ;$028D59    |
-    LDA.w $1850,X               ;$028D5B    |
-    CMP.b #$20                  ;$028D5E    |
-    BNE CODE_028D66             ;$028D60    |
-CODE_028D62:                    ;           |
-    STZ.w $17F0,X               ;$028D62    |
-    RTS                         ;$028D65    |
+    LDA.w $1808,X               ;$028D4F    |\ 
+    CMP $1A                     ;$028D52    ||
+    LDA.w $18EA,X               ;$028D54    ||
+    SBC $1B                     ;$028D57    || If the offscreen horizontally,
+    BNE CODE_028D62             ;$028D59    ||  or the sprite's timer runs out,
+    LDA.w $1850,X               ;$028D5B    ||  erase the sprite.
+    CMP.b #$20                  ;$028D5E    ||
+    BNE CODE_028D66             ;$028D60    ||
+CODE_028D62:                    ;           ||
+    STZ.w $17F0,X               ;$028D62    ||
+    RTS                         ;$028D65    |/
 
-CODE_028D66:                    ;           |
+CODE_028D66:                    ;```````````| Not despawning yet.
     STZ $00                     ;$028D66    |
-    CMP.b #$10                  ;$028D68    |
-    BCC CODE_028D8B             ;$028D6A    |
-    AND.b #$01                  ;$028D6C    |
-    ORA $9D                     ;$028D6E    |
-    BNE CODE_028D75             ;$028D70    |
-    INC.w $17FC,X               ;$028D72    |
+    CMP.b #$10                  ;$028D68    |\ Branch if it isn't time for the splash to shake yet.
+    BCC CODE_028D8B             ;$028D6A    |/
+    AND.b #$01                  ;$028D6C    |\ 
+    ORA $9D                     ;$028D6E    || Sink the splash downwards 1 pixel every 2 frames.
+    BNE CODE_028D75             ;$028D70    ||
+    INC.w $17FC,X               ;$028D72    |/
 CODE_028D75:                    ;           |
     LDA.w $1850,X               ;$028D75    |\ 
     SEC                         ;$028D78    ||
@@ -1879,7 +1880,7 @@ CODE_028D75:                    ;           |
     LSR                         ;$028D7B    ||
     LSR                         ;$028D7C    ||
     STA $02                     ;$028D7D    ||
-    LDA $13                     ;$028D7F    || Get an X offset for keeping the splash's animation together.
+    LDA $13                     ;$028D7F    || Get an X offset for shaking the splash back and forth as it fades.
     LSR                         ;$028D81    ||
     LDA $02                     ;$028D82    ||
     BCC CODE_028D89             ;$028D84    ||
@@ -2192,6 +2193,9 @@ CODE_028F87:                    ;```````````| Small subroutine to despawn a mino
 
 
 
+    ; Brick piece misc RAM:
+    ; $1850 - Flag for whether the piece is brown (e.g. turnblock) or flashing (e.g. throwblock).
+    
 CODE_028F8B:                    ;-----------| Minor extended brick piece MAIN
     LDA $9D                     ;$028F8B    |\ Branch if game frozen.
     BNE CODE_028FCA             ;$028F8D    |/
@@ -2315,13 +2319,13 @@ CODE_02905E:                    ;           |
 
 BounceSpritePtrs:               ;$029062    | Bounce sprite MAIN pointers.
     dw Return02904C
-    dw BounceBlockSpr
-    dw BounceBlockSpr
-    dw BounceBlockSpr
-    dw BounceBlockSpr
-    dw BounceBlockSpr
-    dw BounceBlockSpr
-    dw TurnBlockSpr
+    dw BounceBlockSpr   ; 01 - Turnblock, not turning
+    dw BounceBlockSpr   ; 02 - Noteblock
+    dw BounceBlockSpr   ; 03 - ? block
+    dw BounceBlockSpr   ; 04 - Sideways bouncing block
+    dw BounceBlockSpr   ; 05 - Translucent block
+    dw BounceBlockSpr   ; 06 - ON/OFF block
+    dw TurnBlockSpr     ; 07 - Turnblock
 
 
 
@@ -2428,8 +2432,8 @@ CODE_02910B:                    ;```````````| General bounce sprite routine; mai
     AND.b #$03                  ;$02912E    || Branch if:
     CMP.b #$03                  ;$029130    || - The block was not touched from above
     BNE CODE_02915E             ;$029132    || - Mario is not in a normal status
-    LDA $71                     ;$029134    || Only  applies to noteblocks, which are the only block that can be touched from above.
-    CMP.b #$01                  ;$029136    ||
+    LDA $71                     ;$029134    || Only applies to noteblocks, which are the only bounce block
+    CMP.b #$01                  ;$029136    ||  that can be spawned from above.
     BCS CODE_02915E             ;$029138    |/
     LDA.b #$20                  ;$02913A    |\ 
     LDY.w $187A                 ;$02913C    ||
@@ -2448,7 +2452,7 @@ CODE_029143:                    ;           ||
     STA.w $1471                 ;$029156    || Set flag for being on a noteblock and for being on a sprite.
     STA.w $1402                 ;$029159    |/
     STZ $7D                     ;$02915C    |
-CODE_02915E:                    ;```````````| Not on a noteblock.
+CODE_02915E:                    ;```````````| Non-noteblocks rejoin here.
     LDA.w $16C5,X               ;$02915E    |\ Return if the bounce animation isn't finished.
     BNE Return02919C            ;$029161    |/
     LDA.w $16C9,X               ;$029163    |\ 
@@ -2466,20 +2470,20 @@ CODE_02915E:                    ;```````````| Not on a noteblock.
     STA $97                     ;$02917B    |/
     LDA.b #$08                  ;$02917D    |\ SFX for bouncing on a noteblock.
     STA.w $1DFC                 ;$02917F    |/
-CODE_029182:                    ;           |
+CODE_029182:                    ;```````````| Block was hit from side or below.
     JSR TileFromBounceSpr0      ;$029182    |
     LDY.w $1699,X               ;$029185    |\ 
     CPY.b #$06                  ;$029188    || Branch if not a ON/OFF block.
     BCC CODE_029199             ;$02918A    |/
-    LDA.b #$0B                  ;$02918C    |\ SFX for hitting an ON/OFF block.
-    STA.w $1DF9                 ;$02918E    |/
+    LDA.b #$0B                  ;$02918C    |\ One of two SFX for hitting an ON/OFF block (the other at $02881E).
+    STA.w $1DF9                 ;$02918E    |/  This one plays when the bounce sprite disappears.
     LDA.w $14AF                 ;$029191    |\ 
     EOR.b #$01                  ;$029194    || Toggle the ON/OFF switch.
     STA.w $14AF                 ;$029196    |/
 CODE_029199:                    ;           |
     STZ.w $1699,X               ;$029199    |
 Return02919C:                   ;           |
-    RTS
+    RTS                         ;$02919C    |
 
 
 
@@ -2708,9 +2712,9 @@ CODE_02931A:                    ;```````````| Done doing the horizontal-vertical
     AND.b #$F0                  ;$029339    ||
     STA.w $16A1,X               ;$02933B    ||
     LDA.w $16A9,X               ;$02933E    ||
-    PHA                         ;$029341    ||
-    SBC.b #$00                  ;$029342    || Turn the coin into an invisible solid block (likely was meant to be a non-solid block)
-    STA.w $16A9,X               ;$029344    ||  and spawn a spinning coin sprite / give Mario a coin.
+    PHA                         ;$029341    || Turn the coin into an invisible solid block
+    SBC.b #$00                  ;$029342    ||  and spawn a spinning coin sprite / give Mario a coin.
+    STA.w $16A9,X               ;$029344    || (it was probably intended to be non-solid, but Nintendo forgot about it)
     JSR InvisSldFromBncSpr      ;$029347    ||
     JSR CODE_029356             ;$02934A    ||
     PLA                         ;$02934D    ||
@@ -2721,7 +2725,7 @@ Return029355:                   ;           |
     RTS                         ;$029355    |
 
 
-CODE_029356:                    ;```````````| Routine to spawn a spinning coin sprite when a bounce sprite is spawned under a coin.
+CODE_029356:                    ;-----------| Subroutine to spawn a spinning coin sprite when a bounce sprite is spawned under a coin.
     LDY.b #$03                  ;$029356    |\ 
 CODE_029358:                    ;           ||
     LDA.w $17D0,Y               ;$029358    ||
@@ -2774,7 +2778,7 @@ CODE_029398:                    ;-----------| Quake sprite interaction routine.
     BCS Return029391            ;$0293A7    |/
     LDY.w $1698                 ;$0293A9    |
     STZ $0E                     ;$0293AC    |
-CODE_0293AE:                    ;```````````| Interaction routine below is also used for net/capespin interaction, with $0E = #$01.
+CODE_0293AE:                    ;```````````| Sprite interaction routine below is also used for net/capespin interaction, with $0E = #$01.
     LDX.b #$0B                  ;$0293AE    |
 CODE_0293B0:                    ;```````````| Loop to look for sprites to interact with.
     STX.w $15E9                 ;$0293B0    |
@@ -2787,7 +2791,7 @@ CODE_0293B0:                    ;```````````| Loop to look for sprites to intera
     AND.b #$20                  ;$0293C1    || Skip slot if the sprite:
     ORA.w $15D0,X               ;$0293C3    || - Is being carried
     ORA.w $154C,X               ;$0293C6    || - Is dead
-    ORA.w $1FE2,X               ;$0293C9    || - Can't be killed by a cape / quake sprite ($166E)
+    ORA.w $1FE2,X               ;$0293C9    || - Can't be hit by a cape / quake sprite ($166E)
     BNE CODE_0293F7             ;$0293CC    || - Is on Yoshi's tongue
     LDA.w $1632,X               ;$0293CE    || - Has contact with Mario temporarily disabled
     PHY                         ;$0293D1    || - Has contact with the cape/quake temporarily disabled
@@ -2919,7 +2923,7 @@ CODE_0294B0:                    ;           ||
 GroundPound:                    ;-----------| Routine to handle smashing the ground as Cape Mario.
     LDA.b #$30                  ;$0294C1    |\ Set timer for shaking Layer 1.
     STA.w $1887                 ;$0294C3    |/
-    STZ.w $14A9                 ;$0294C6    | [unused]
+    STZ.w $14A9                 ;$0294C6    | (unused)
     PHB                         ;$0294C9    |
     PHK                         ;$0294CA    |
     PLB                         ;$0294CB    |
@@ -3555,11 +3559,11 @@ CODE_0298F1:                    ;           |
     ADC $00                     ;$02990D    ||
     STA.w $1808,Y               ;$02990F    |/
     LDA.w DATA_0298C6,X         ;$029912    |\ 
-    CLC                         ;$029915    ||
+    CLC                         ;$029915    || Store Y position.
     ADC $01                     ;$029916    ||
-    STA.w $17FC,Y               ;$029918    || Store Y position.
-    PLX                         ;$02991B    ||
-    LDA.b #$17                  ;$02991C    ||
+    STA.w $17FC,Y               ;$029918    |/
+    PLX                         ;$02991B    |
+    LDA.b #$17                  ;$02991C    |\\ Timer for the glitter's animation.
     STA.w $1850,Y               ;$02991E    |/
 Return029921:                   ;           |
     RTS                         ;$029921    |
@@ -3568,7 +3572,7 @@ Return029921:                   ;           |
 
 
 
-DATA_029922:                    ;           |
+DATA_029922:                    ;$029922    | Tile numbers for the smoke spawned when Mario skids.
     db $66,$66,$64,$62,$62
 
 CODE_029927:                    ;-----------| Friction smoke MAIN
@@ -3685,7 +3689,7 @@ CODE_0299E3:                    ;```````````| Small subroutine to erase a spinni
     RTS                         ;$0299E8    |
 
 
-DATA_0299E9:                    ;$0299E9    | OAM indices for the spinning coin sprites.
+DATA_0299E9:                    ;$0299E9    | OAM indices for the spinning coin sprites ($0200).
     db $30,$38,$40,$48,$EC,$EA,$E8,$EC
 
 CODE_0299F1:                    ;-----------| Spinning coin from blocks MAIN
@@ -4027,7 +4031,7 @@ SmokeTrailTiles:                ;           |
     ; $176F - Lifespan timer.
 
 SmokeTrail:                     ;-----------| Yoshi stomp smoke MAIN
-    JSR CODE_02A1A4             ;$029C32    | Get the base tile.
+    JSR CODE_02A1A4             ;$029C32    | Write X and Y position to OAM.
     LDY.w DATA_02A153,X         ;$029C41    |
     LDA.w $176F,X               ;$029C44    |\ 
     LSR                         ;$029C47    || Get tile index based on the smoke's lifespan.
@@ -4036,16 +4040,16 @@ SmokeTrail:                     ;-----------| Yoshi stomp smoke MAIN
     LDA $14                     ;$029C4A    |\ 
     ASL                         ;$029C4C    ||
     ASL                         ;$029C4D    ||
-    ASL                         ;$029C4E    || Change YXPPCCCT in OAM, flipping X and Y every two frames.
+    ASL                         ;$029C4E    || Write YXPPCCCT to OAM, flipping X and Y every two frames.
     ASL                         ;$029C4F    ||
     AND.b #$C0                  ;$029C50    ||
     ORA.b #$32                  ;$029C52    ||
     STA.w $0203,Y               ;$029C54    |/
-    LDA.w SmokeTrailTiles,X     ;$029C57    |\ Change tile number in OAM.
+    LDA.w SmokeTrailTiles,X     ;$029C57    |\ Write tile number to OAM.
     STA.w $0202,Y               ;$029C5A    |/
     TYA                         ;$029C5D    |\ 
     LSR                         ;$029C5E    ||
-    LSR                         ;$029C5F    || Change size in OAM to 16x16.
+    LSR                         ;$029C5F    || Write size in OAM as 16x16.
     TAY                         ;$029C60    ||
     LDA.b #$02                  ;$029C61    ||
     STA.w $0420,Y               ;$029C63    |/
@@ -4078,7 +4082,7 @@ CODE_029C7F:                    ;```````````| Subroutine to erase an extended sp
 SpinJumpStars:                  ;-----------| Spinjump stars MAIN
     LDA.w $176F,X               ;$029C82    |\ Erase the sprite if its timer runs out.
     BEQ CODE_029C7F             ;$029C86    |/
-    JSR CODE_02A1A4             ;$029C88    | Get base tile.
+    JSR CODE_02A1A4             ;$029C88    | Write X and Y position to OAM.
     LDY.w DATA_02A153,X         ;$029C8B    |
     LDA.b #$34                  ;$029C8E    |\\ Tile to use for the spinjump stars.
     STA.w $0203,Y               ;$029C90    |/
@@ -4134,7 +4138,7 @@ CODE_029CDA:                    ;           ||
     JSR CODE_02B554             ;$029CDE    | Update X position.
     BRA CODE_029CF8             ;$029CE1    | Draw GFX.
 
-CODE_029CE3:
+CODE_029CE3:                    ;```````````| Coin game cloud coin only.
     LDA.w $1765,X               ;$029CE3    |\ 
     BNE CODE_029CF5             ;$029CE6    ||
     JSR CODE_02A56E             ;$029CE8    || If the coin hasn't hit the ground yet, process object interaction.
@@ -4354,7 +4358,7 @@ CODE_029E4E:                    ;           |
     STA.w $173D,X               ;$029E56    ||
     JSR CODE_02B560             ;$029E59    |/
 CODE_029E5C:                    ;           |
-    JSR CODE_02A1A4             ;$029E5C    | Get base tile.
+    JSR CODE_02A1A4             ;$029E5C    | Write X and Y position to OAM.
     LDY.w DATA_02A153,X         ;$029E5F    |
     PLA                         ;$029E62    |\ 
     CMP.b #$01                  ;$029E63    ||
@@ -4364,8 +4368,8 @@ CODE_029E5C:                    ;           |
 CODE_029E6B:                    ;           ||
     STA.w $0202,Y               ;$029E6B    |/
     LDA.w $0203,Y               ;$029E6E    |\ 
-    AND.b #$00                  ;$029E71    || Change YXPPCCCT in OAM.
-    ORA.b #$13                  ;$029E73    ||
+    AND.b #$00                  ;$029E71    || Change YXPPCCCT in OAM. These first three lines are essentially equivalent to just LDA #$13.
+    ORA.b #$13                  ;$029E73    ||] YXPPCCCT for the Torpedo Ted launcher's arm.
     STA.w $0203,Y               ;$029E75    |/
     TYA                         ;$029E78    |\ 
     LSR                         ;$029E79    ||
@@ -4469,18 +4473,18 @@ CODE_029F08:                    ;           |
     BCS CODE_029F2A             ;$029F0C    ||
     JSR CODE_02A56E             ;$029F0E    ||
     BCS CODE_029F27             ;$029F11    ||
-    LDA $85                     ;$029F13    || Branch if not touching a solid block,
-    BNE CODE_029F2A             ;$029F15    ||  and either in a water level or touching a water block.
-    LDA $0C                     ;$029F17    ||
-    CMP.b #$06                  ;$029F19    || On odd frames, branch irregardless.
+    LDA $85                     ;$029F13    ||
+    BNE CODE_029F2A             ;$029F15    || Erase the sprite if either touching a solid block,
+    LDA $0C                     ;$029F17    ||  or not in a water level and not touching a water block.
+    CMP.b #$06                  ;$029F19    || On odd frames, skip processing this either way.
     BCC CODE_029F2A             ;$029F1B    ||
     LDA $0F                     ;$029F1D    ||
     BEQ CODE_029F27             ;$029F1F    ||
     LDA $0D                     ;$029F21    ||
     CMP.b #$06                  ;$029F23    ||
-    BCC CODE_029F2A             ;$029F25    |/
-CODE_029F27:                    ;           |
-    JMP CODE_02A211             ;$029F27    | Erase the sprite.
+    BCC CODE_029F2A             ;$029F25    ||
+CODE_029F27:                    ;           ||
+    JMP CODE_02A211             ;$029F27    |// Erase the sprite.
 
 CODE_029F2A:                    ;```````````| Bubble is in water.
     LDA.w $1715,X               ;$029F2A    |\ 
@@ -4488,7 +4492,7 @@ CODE_029F2A:                    ;```````````| Bubble is in water.
     LDA.w $1729,X               ;$029F2F    || Erase the sprite if vertically offscreen.
     SBC $1D                     ;$029F32    ||
     BNE CODE_029F27             ;$029F34    |/
-    JSR CODE_02A1A4             ;$029F36    | Get the base tile.
+    JSR CODE_02A1A4             ;$029F36    | Write X and Y position to OAM.
     LDA.w $1765,X               ;$029F39    |\ 
     AND.b #$0C                  ;$029F3C    ||
     LSR                         ;$029F3E    ||
@@ -4520,7 +4524,7 @@ YoshiFireball:                  ;-----------| Yoshi fireball MAIN
     JSR CODE_02B560             ;$029F68    ||
     JSR ProcessFireball         ;$029F6B    |/
 CODE_029F6E:                    ;           |
-    JSR CODE_02A1A4             ;$029F6E    | Get base tile.
+    JSR CODE_02A1A4             ;$029F6E    | Write X and Y position to OAM.
     LDA $14                     ;$029F71    |\ 
     LSR                         ;$029F73    ||
     LSR                         ;$029F74    ||
@@ -4557,18 +4561,18 @@ DATA_029FA2:                    ;$029FA2    | Position offsets for fireballs fro
     db $00,$05,$03,$02,$02,$02,$02,$02
     db $02
 
-DATA_029FAB:                    ;$029FAB    | OAM indices for Mario's fireball.
+DATA_029FAB:                    ;$029FAB    | OAM indices for Mario's fireball ($0200).
     db $F8,$FC
-DATA_029FAD:                    ;$029FAD    | OAM indices for Mario's fireball in a mode 7 room.
+DATA_029FAD:                    ;$029FAD    | OAM indices for Mario's fireball in a mode 7 room ($0300).
     db $A0,$A4
 
-MarioFireball:                  ;-----------| Mario's fireball MAIN.
+MarioFireball:                  ;-----------| Mario's fireball MAIN
     LDA $9D                     ;$029FAF    |\ If the game is locked, branch.
     BNE CODE_02A02C             ;$029FB1    |/
     LDA.w $1715,X               ;$029FB3    |\ 
     CMP $1C                     ;$029FB6    ||
-    LDA.w $1729,X               ;$029FB8    || If offscreen, erase the sprite.
-    SBC $1D                     ;$029FBB    ||
+    LDA.w $1729,X               ;$029FB8    || If vertically offscreen, erase the sprite.
+    SBC $1D                     ;$029FBB    ||  (redundant since the fireball's GFX routine also handles this better)
     BEQ CODE_029FC2             ;$029FBD    ||
     JMP CODE_02A211             ;$029FBF    |/
 
@@ -4634,7 +4638,7 @@ CODE_02A02C:                    ;           |
     LDA.w $0D9B                 ;$02A032    || Branch if in a Mode 7 boss room with a lot of sprite tiles (Morton, Roy, Bowser).
     BPL CODE_02A03B             ;$02A035    ||
     AND.b #$40                  ;$02A037    ||
-    BNE ADDR_02A04F             ;$02A039    |/
+    BNE CODE_02A04F             ;$02A039    |/
 CODE_02A03B:                    ;           |
     LDY.w DATA_029FAB-8,X       ;$02A03B    |\ Upload graphics ($0200 version).
     JSR CODE_02A1A7             ;$02A03E    |/
@@ -4703,7 +4707,7 @@ CODE_02A0A9:
 
 
 
-ProcessFireball:                ;-----------| Subroutine to handle fireball-sprite interaction (for both Mario's and Yoshi's).
+ProcessFireball:                ;-----------| Subroutine to handle sprite-fireball interaction (for both Mario's and Yoshi's).
     TXA                         ;$02A0AC    |
     EOR $13                     ;$02A0AD    |\ 
     AND.b #$03                  ;$02A0AF    || Process only 1/4 frames.
@@ -4711,7 +4715,7 @@ ProcessFireball:                ;-----------| Subroutine to handle fireball-spri
     PHX                         ;$02A0B3    |
     TXY                         ;$02A0B4    |
     STY.w $185E                 ;$02A0B5    |
-    LDX.b #$09                  ;$02A0B8    | Highest sprite slot that the fireballs interact with.
+    LDX.b #$09                  ;$02A0B8    || Highest sprite slot that the fireballs interact with.
 FireRtLoopStart:                ;           |
     STX.w $15E9                 ;$02A0BA    |
     LDA.w $14C8,X               ;$02A0BD    |\ 
@@ -4721,7 +4725,7 @@ FireRtLoopStart:                ;           |
     AND.b #$02                  ;$02A0C7    ||  - Dying/dead
     ORA.w $15D0,X               ;$02A0C9    ||  - Invincible to fireballs
     ORA.w $1632,X               ;$02A0CC    ||  - On Yoshi's tongue
-    EOR.w $1779,Y               ;$02A0CF    ||  - On a different layer than Mario
+    EOR.w $1779,Y               ;$02A0CF    ||  - On a different layer than the fireball
     BNE FireRtNextSprite        ;$02A0D2    ||  - Not in contact with the fireball
     JSL GetSpriteClippingA      ;$02A0D4    ||
     JSR CODE_02A547             ;$02A0D8    ||
@@ -4730,7 +4734,7 @@ FireRtLoopStart:                ;           |
     LDA.w $170B,Y               ;$02A0E1    |\ 
     CMP.b #$11                  ;$02A0E4    ||
     BEQ CODE_02A0EE             ;$02A0E6    ||
-    PHX                         ;$02A0E8    || If not Yoshi's fireballs, erase the sprite.
+    PHX                         ;$02A0E8    || If not one of Yoshi's fireballs, erase the fireball with a puff of smoke.
     TYX                         ;$02A0E9    ||
     JSR CODE_02A045             ;$02A0EA    ||
     PLX                         ;$02A0ED    |/
@@ -4793,10 +4797,10 @@ FireKillSpeedX:                 ;$02A151    | X speeds to give Chucks killed by 
 DATA_02A153:                    ;$02A153    | OAM indices for extended sprites, indexed by slot.
     db $90,$94,$98,$9C,$A0,$A4,$A8,$AC
 
-FireballTiles:                  ;$02A15B    | Tile for fireballs (Mario's and normal sprites').
+FireballTiles:                  ;$02A15B    | Tile for fireballs (Mario and Piranha Plants).
     db $2C,$2D,$2C,$2D
 
-DATA_02A15F:                    ;$02A15F    | YXPPCCCT for fireballs (Mario's and normal sprites').
+DATA_02A15F:                    ;$02A15F    | YXPPCCCT for fireballs (Mario and Piranha Plants).
     db $04,$04,$C4,$C4
 
 ReznorFireTiles:                ;$02A163    | Tiles for Reznor's fireballs.
@@ -4811,10 +4815,10 @@ ReznorFireball:                 ;-----------| Reznor fireball MAIN
     JSR CODE_02B554             ;$02A16F    || If the game isn't frozen, update X/Y position and process interaction with Mario.
     JSR CODE_02B560             ;$02A172    ||
     JSR CODE_02A3F6             ;$02A175    |/
-CODE_02A178:                    ;```````````| Reznor and Piranha Plant fireballs GFX routine.
+CODE_02A178:                    ;```````````| Reznor and Piranha Plant fireball GFX routine.
     LDA.w $0D9B                 ;$02A178    |\ If not in Reznor's room, branch to use the standard fireball GFX routine.
     BPL CODE_02A1A4             ;$02A17B    |/
-    JSR CODE_02A1A4             ;$02A17D    | Get the base tile.
+    JSR CODE_02A1A4             ;$02A17D    | Write X and Y position to OAM.
     LDY.w DATA_02A153,X         ;$02A180    |
     LDA $14                     ;$02A183    |\ 
     LSR                         ;$02A185    ||
@@ -4844,39 +4848,39 @@ CODE_02A178:                    ;```````````| Reznor and Piranha Plant fireballs
     ; $02 - Y position within screen.
     
 CODE_02A1A4:                    ;-----------| Extended sprite graphics routine. Primary purpose is for fireballs; to do other sprites, overwrite the uploaded tile.
-    LDY.w DATA_02A153,X         ;$02A1A4    | Get OAM index.
-CODE_02A1A7:                    ;           |
+    LDY.w DATA_02A153,X         ;$02A1A4    | Get OAM index for the sprite slot.
+CODE_02A1A7:                    ;```````````| Mario's fireballs enter here.
     LDA.w $1747,X               ;$02A1A7    |\ 
     AND.b #$80                  ;$02A1AA    ||
     EOR.b #$80                  ;$02A1AC    || X flip the sprite based on direction.
     LSR                         ;$02A1AE    ||
     STA $00                     ;$02A1AF    |/
-    LDA.w $171F,X               ;$02A1B1    |
-    SEC                         ;$02A1B4    |
-    SBC $1A                     ;$02A1B5    |
-    STA $01                     ;$02A1B7    |
-    LDA.w $1733,X               ;$02A1B9    |\ 
-    SBC $1B                     ;$02A1BC    || Erase sprite if horizontally offscreen.
+    LDA.w $171F,X               ;$02A1B1    |\ 
+    SEC                         ;$02A1B4    ||
+    SBC $1A                     ;$02A1B5    ||
+    STA $01                     ;$02A1B7    || Erase sprite if horizontally offscreen.
+    LDA.w $1733,X               ;$02A1B9    ||
+    SBC $1B                     ;$02A1BC    ||
     BNE CODE_02A211             ;$02A1BE    |/
-    LDA.w $1715,X               ;$02A1C0    |
-    SEC                         ;$02A1C3    |
-    SBC $1C                     ;$02A1C4    |
-    STA $02                     ;$02A1C6    |
-    LDA.w $1729,X               ;$02A1C8    |\ 
+    LDA.w $1715,X               ;$02A1C0    |\ 
+    SEC                         ;$02A1C3    ||
+    SBC $1C                     ;$02A1C4    ||
+    STA $02                     ;$02A1C6    ||
+    LDA.w $1729,X               ;$02A1C8    || Erase sprite if vertically offscreen.
     SBC $1D                     ;$02A1CB    ||
-    BNE CODE_02A211             ;$02A1CD    || Erase sprite if vertically offscreen.
+    BNE CODE_02A211             ;$02A1CD    ||
     LDA $02                     ;$02A1CF    ||
     CMP.b #$F0                  ;$02A1D1    ||
     BCS CODE_02A211             ;$02A1D3    |/
     STA.w $0201,Y               ;$02A1D5    |\ 
-    LDA $01                     ;$02A1D8    || Upload X and Y position to OAM.
+    LDA $01                     ;$02A1D8    || Write X and Y position to OAM.
     STA.w $0200,Y               ;$02A1DA    |/
     LDA.w $1779,X               ;$02A1DD    |
     STA $01                     ;$02A1E0    |
     LDA $14                     ;$02A1E2    |\ 
     LSR                         ;$02A1E4    ||
     LSR                         ;$02A1E5    ||
-    AND.b #$03                  ;$02A1E6    || Upload animation tile (fireball) to OAM.
+    AND.b #$03                  ;$02A1E6    || Write animation tile (fireball) to OAM.
     TAX                         ;$02A1E8    ||
     LDA.w FireballTiles,X       ;$02A1E9    ||
     STA.w $0202,Y               ;$02A1EC    |/
@@ -4884,7 +4888,7 @@ CODE_02A1A7:                    ;           |
     EOR $00                     ;$02A1F2    ||
     ORA $64                     ;$02A1F4    ||
     STA.w $0203,Y               ;$02A1F6    ||
-    LDX $01                     ;$02A1F9    || Upload YXPPCCCT to OAM.
+    LDX $01                     ;$02A1F9    || Write YXPPCCCT to OAM.
     BEQ CODE_02A204             ;$02A1FB    ||
     AND.b #$CF                  ;$02A1FD    ||
     ORA.b #$10                  ;$02A1FF    ||
@@ -4931,7 +4935,7 @@ FlameRemnant:                   ;-----------| Hopping flame remnant MAIN
 CODE_02A22F:                    ;           |
     JSR CODE_02A3F6             ;$02A22F    | Process Mario interaction.
 CODE_02A232:                    ;           |
-    JSR CODE_02A1A4             ;$02A232    | Get the base tile.
+    JSR CODE_02A1A4             ;$02A232    | Write X and Y position to OAM.
     LDY.w DATA_02A153,X         ;$02A235    |
     LDA.w $1765,X               ;$02A238    |\ 
     LSR                         ;$02A23B    ||
@@ -5046,37 +5050,37 @@ HammerEx:                       ;-----------| Hammer MAIN and Piranha Plant fire
     BNE CODE_02A30C             ;$02A2F1    |/
     JSR CODE_02B554             ;$02A2F3    | Update X position.
     JSR CODE_02B560             ;$02A2F6    | Update Y position.
-    LDA.w $173D,X               ;$02A2F9    |
-    CMP.b #$40                  ;$02A2FC    | Max Y speed.
-    BPL CODE_02A306             ;$02A2FE    |
-    INC.w $173D,X               ;$02A300    |\ Vertical acceleration.
-    INC.w $173D,X               ;$02A303    |/
+    LDA.w $173D,X               ;$02A2F9    |\ 
+    CMP.b #$40                  ;$02A2FC    ||| Max Y speed.
+    BPL CODE_02A306             ;$02A2FE    ||
+    INC.w $173D,X               ;$02A300    ||\ Vertical acceleration.
+    INC.w $173D,X               ;$02A303    |//
 CODE_02A306:                    ;           |
     JSR CODE_02A3F6             ;$02A306    | Process Mario interaction.
     INC.w $1765,X               ;$02A309    | Increment animation timer.
 CODE_02A30C:                    ;           |
     LDA.w $170B,X               ;$02A30C    |\ 
-    CMP.b #$0B                  ;$02A30F    || Jump away if the Piranha Plant fireball.
+    CMP.b #$0B                  ;$02A30F    || Jump away for graphics if this is a Piranha Plant fireball.
     BNE CODE_02A317             ;$02A311    ||
     JSR CODE_02A178             ;$02A313    |/
     RTS                         ;$02A316    |
 
 
 CODE_02A317:                    ;```````````| Hammer and bone GFX routine.
-    JSR CODE_02A1A4             ;$02A317    | Upload X and Y position to OAM.
+    JSR CODE_02A1A4             ;$02A317    | Write X and Y position to OAM.
     LDY.w DATA_02A153,X         ;$02A31A    |
     LDA.w $1765,X               ;$02A31D    |\ 
     LSR                         ;$02A320    ||
     LSR                         ;$02A321    ||
     LSR                         ;$02A322    ||
-    AND.b #$07                  ;$02A323    || Upload animation tile to OAM.
+    AND.b #$07                  ;$02A323    || Write animation tile to OAM.
     PHX                         ;$02A325    ||
     TAX                         ;$02A326    ||
     LDA.w HammerTiles,X         ;$02A327    ||
     STA.w $0202,Y               ;$02A32A    |/
     LDA.w HammerGfxProp,X       ;$02A32D    |\ 
     EOR $00                     ;$02A330    ||
-    EOR.b #$40                  ;$02A332    || Upload YXPPCCCT to OAM.
+    EOR.b #$40                  ;$02A332    || Write YXPPCCCT to OAM.
     ORA $64                     ;$02A334    ||
     STA.w $0203,Y               ;$02A336    |/
     TYA                         ;$02A339    |
@@ -5121,26 +5125,26 @@ CODE_02A362:                    ;           |
 CODE_02A36C:                    ;           |
     LDA.w $171F,X               ;$02A36C    |\ 
     SEC                         ;$02A36F    ||
-    SBC $1A                     ;$02A370    || Store X position to OAM, and erase if horizontally offscreen.
+    SBC $1A                     ;$02A370    || Write X position to OAM, and erase if horizontally offscreen.
     CMP.b #$F8                  ;$02A372    ||
     BCS CODE_02A3AE             ;$02A374    ||
     STA.w $0200,Y               ;$02A376    |/
     LDA.w $1715,X               ;$02A379    |\ 
     SEC                         ;$02A37C    ||
-    SBC $1C                     ;$02A37D    || Store Y position to OAM, and erase if vertically offscreen.
+    SBC $1C                     ;$02A37D    || Write Y position to OAM, and erase if vertically offscreen.
     CMP.b #$F0                  ;$02A37F    ||
     BCS CODE_02A3AE             ;$02A381    ||
     STA.w $0201,Y               ;$02A383    |/
     LDA.w $176F,X               ;$02A386    |\ 
     LSR                         ;$02A389    ||
-    LSR                         ;$02A38A    || Store the tile number to OAM.
+    LSR                         ;$02A38A    || Write the tile number to OAM.
     TAX                         ;$02A38B    ||
     LDA.w DustCloudTiles,X      ;$02A38C    ||
     STA.w $0202,Y               ;$02A38F    |/
     LDA $14                     ;$02A392    |\ 
     LSR                         ;$02A394    ||
     LSR                         ;$02A395    ||
-    AND.b #$03                  ;$02A396    || Store YXPPCCCT to OAM.
+    AND.b #$03                  ;$02A396    || Write YXPPCCCT to OAM.
     TAX                         ;$02A398    ||
     LDA.w DATA_02A34B,X         ;$02A399    ||
     ORA $64                     ;$02A39C    ||
@@ -5331,14 +5335,14 @@ DATA_02A50D:                    ;$02A50D    | Height for extended sprites $02-$0
     db $0C,$01,$01,$01
 
     ; Scratch RAM returns:
-    ; $04 - Clipping X displacement lo
-    ; $05 - Clipping Y displacement lo
+    ; $04 - Clipping X displacement, low
+    ; $05 - Clipping Y displacement, low
     ; $06 - Clipping width
     ; $07 - Clipping height
-    ; $0A - Clipping X displacement hi
-    ; $0B - Clipping Y displacement hi
+    ; $0A - Clipping X displacement, high
+    ; $0B - Clipping Y displacement, high
 
-CODE_02A519:                    ;-----------| Subroutine to get clipping values (B) for an extended sprite.
+CODE_02A519:                    ;-----------| Subroutine to get clipping values (as sprite A) for an extended sprite.
     LDY.w $170B,X               ;$02A519    |
     LDA.w $171F,X               ;$02A51C    |
     CLC                         ;$02A51F    |
@@ -5363,14 +5367,14 @@ CODE_02A519:                    ;-----------| Subroutine to get clipping values 
 
 
     ; Scratch RAM returns:
-    ; $00 - Clipping X displacement lo
-    ; $01 - Clipping Y displacement lo
+    ; $00 - Clipping X displacement, low
+    ; $01 - Clipping Y displacement, low
     ; $02 - Clipping width (#$0C)
     ; $03 - Clipping height (#$13)
-    ; $08 - Clipping X displacement hi
-    ; $09 - Clipping Y displacement hi
+    ; $08 - Clipping X displacement, high
+    ; $09 - Clipping Y displacement, high
 
-CODE_02A547:                    ;-----------| Subroutine to get clipping values (A) for Mario's fireballs.
+CODE_02A547:                    ;-----------| Subroutine to get clipping values (as sprite B) for Mario's fireballs.
     LDA.w $171F,Y               ;$02A547    |
     SEC                         ;$02A54A    |
     SBC.b #$02                  ;$02A54B    |
@@ -5435,7 +5439,7 @@ CODE_02A592:                    ;```````````| In Iggy/Larry's room.
     LDA.w $1729,X               ;$02A5AC    ||
     ADC.b #$00                  ;$02A5AF    ||
     STA.w $14B7                 ;$02A5B1    |/
-    JSL CODE_01CC9D             ;$02A5B4    | Check for contact with the platform and return result in carry.
+    JSL CODE_01CC9D             ;$02A5B4    | Check for contact between the extended sprite and Iggy/Larry's platform, and return result in carry.
     LDX.w $15E9                 ;$02A5B8    |
     RTS                         ;$02A5BB    |
 
@@ -5490,7 +5494,7 @@ CODE_02A611:                    ;-----------| Subroutine to check whether an ext
     BEQ CODE_02A679             ;$02A616    |/
     LDA.w $1715,X               ;$02A618    |\ 
     CLC                         ;$02A61B    ||
-    ADC.b #$08                  ;$02A61C    || Get position of the block being hit.
+    ADC.b #$08                  ;$02A61C    || Get position of the block to check into $98-$9B.
     STA $98                     ;$02A61E    ||
     AND.b #$F0                  ;$02A620    ||
     STA $00                     ;$02A622    ||
@@ -5514,7 +5518,7 @@ CODE_02A611:                    ;-----------| Subroutine to check whether an ext
     LDA $01                     ;$02A648    |\ 
     LSR                         ;$02A64A    ||
     LSR                         ;$02A64B    ||
-    LSR                         ;$02A64C    || Get position as an XY-formatted value.
+    LSR                         ;$02A64C    || Get position as an $XY-formatted value.
     LSR                         ;$02A64D    ||
     ORA $00                     ;$02A64E    ||
     STA $00                     ;$02A650    |/
@@ -5553,7 +5557,7 @@ CODE_02A679:                    ;```````````| Extended sprite object interaction
     STA $99                     ;$02A68C    ||
     LDA $00                     ;$02A68E    ||\ 
     SEC                         ;$02A690    |||
-    SBC $1C                     ;$02A691    ||| Return carry clear if vertically outside the level.
+    SBC $1C                     ;$02A691    ||| Return carry clear if vertically offscreen.
     CMP.b #$F0                  ;$02A693    |||
     BCS CODE_02A677             ;$02A695    ||/
     LDA.w $171F,X               ;$02A697    ||
@@ -5721,7 +5725,7 @@ ReservedSprite2:                ;$02A7E4    | Second sprite reserved for certain
     db $FF,$FF
 
 DATA_02A7F6:                    ;$02A7F6    | Positions of the spawn region for the current direction of scrolling.
-    db $D0,$00,$20              ; 0 = right/down, 1 = no scroll (level load), 2 = left/up.
+    db $D0,$00,$20              ; 0 = left/up, 1 = no scroll (level load), 2 = right/down
 
 DATA_02A7F9:                    ;$02A7F9    | High bytes of the spawn region positions above.
     db $FF,$00,$01
@@ -5764,7 +5768,7 @@ LoadSpriteLoopStrt:             ;```````````| Main sprite spawn loop; scans thro
     ASL                         ;$02A836    ||
     AND.b #$10                  ;$02A837    ||
     STA $02                     ;$02A839    || Make sure the spawn region is on the same screen as the sprite.
-    INY                         ;$02A83B    ||  Skip to the next sprite if not.
+    INY                         ;$02A83B    ||  Skip to the next sprite if past it.
     LDA [$CE],Y                 ;$02A83C    ||
     AND.b #$0F                  ;$02A83E    ||
     ORA $02                     ;$02A840    ||
@@ -5816,7 +5820,7 @@ LoadScrollSprite:               ;```````````| Spawning sprites E7-FE (scroll spr
 CODE_02A88A:                    ;           |
     BRA LoadNextSprite          ;$02A88A    |
 
-CODE_02A88C:                    ;```````````| Not a scroll sprite; check other special values.
+CODE_02A88C:                    ;```````````| Not a scroll sprite; check other special values (e.g. "run-once" sprites).
     CMP.b #$DE                  ;$02A88C    |\ If it's not sprite DE (5 eeries), then branch.
     BNE CODE_02A89C             ;$02A88E    |/
     PHY                         ;$02A890    |
@@ -5874,7 +5878,7 @@ CODE_02A8D4:
     CMP.b #$C9                  ;$92A7D4    |\ 
     BCC LoadNormalSprite        ;$02A8D6    || If the sprite ID is 00-C8, it's a normal sprite.
     JSR LoadShooter             ;$02A8D8    || If it's C9 or CA, process as a shooter.
-    BRA CODE_02A89A             ;$02A8DB    |/
+    BRA CODE_02A89A             ;$02A8DB    |/  NOTE: there is a bug in implementation here, see the end of LoadShooter for details. PIXI fixes this.
 
 
 
@@ -6334,9 +6338,9 @@ CODE_02ABDF:                    ;           |
     LDA.b #$10                  ;$02ABE4    |\\ Amount of time before the shooter first shoots.
     STA.w $17AB,X               ;$02ABE6    |/
     INY                         ;$02ABE9    |\ 
-    INY                         ;$02ABEA    ||
-    INY                         ;$02ABEB    || Return to load the next sprite from data.
-    LDX $02                     ;$02ABEC    ||
+    INY                         ;$02ABEA    || Return to load the next sprite from data.
+    INY                         ;$02ABEB    ||  NOTE: this actually *SHOULD NOT HAPPEN*!!! this routine should just RTS instead.
+    LDX $02                     ;$02ABEC    ||   as is, this may cause the game to load additional sprite data that was not intended to be loaded.
     INX                         ;$02ABEE    ||
     JMP LoadSpriteLoopStrt      ;$02ABEF    |/
 
@@ -6374,10 +6378,10 @@ CODE_02AC13:                    ;           ||
     LDA $9E,X                   ;$02AC22    ||
     STA $9E                     ;$02AC24    ||
     LDA $E4,X                   ;$02AC26    ||
-    STA $E4                     ;$02AC28    ||
-    LDA.w $14E0,X               ;$02AC2A    || If a sprite is being carried, respawn it in slot 0.
-    STA.w $14E0                 ;$02AC2D    ||  In regards to double-grab: only the lowest carried slot is respawned.
-    LDA $D8,X                   ;$02AC30    ||  Higher slots retain all their data.
+    STA $E4                     ;$02AC28    || If a sprite is being carried, respawn it in slot 0.
+    LDA.w $14E0,X               ;$02AC2A    ||  In regards to double-grab: only the lowest carried slot is respawned.
+    STA.w $14E0                 ;$02AC2D    ||  Higher slots retain all their data.
+    LDA $D8,X                   ;$02AC30    ||
     STA $D8                     ;$02AC32    ||
     LDA.w $14D4,X               ;$02AC34    ||
     STA.w $14D4                 ;$02AC37    ||
@@ -6566,19 +6570,23 @@ PointTile2:                     ;$02AD63    | Tiles used for the score sprites (
     db $57,$4E,$44,$4F,$54,$5D
 
 PointMultiplierLo:              ;$02AD78    | Low byte of the score each sprite gives (divided by 10).
-    db $00,$01,$02,$04,$08,$0A,$14,$28
-    db $50,$64,$C8,$90,$20,$00,$00,$00
     db $00
+    db $01,$02,$04,$08          ;   10,   20,   40,   80
+    db $0A,$14,$28,$50          ;  100,  200,  400,  800
+    db $64,$C8,$90,$20          ; 1000, 2000, 4000, 8000
+    db $00,$00,$00,$00          ;  1up,  2up,  3up,  5up
 
 PointMultiplierHi:              ;$02AD89    | High byte of the score each sprite gives (divided by 10).
-    db $00,$00,$00,$00,$00,$00,$00,$00
-    db $00,$00,$00,$01,$03,$00,$00,$00
     db $00
+    db $00,$00,$00,$00          ;   10,   20,   40,   80
+    db $00,$00,$00,$00          ;  100,  200,  400,  800
+    db $00,$00,$01,$03          ; 1000, 2000, 4000, 8000
+    db $00,$00,$00,$00          ;  1up,  2up,  3up,  5up
 
 PointSpeedY:                    ;$02AD9A    | Speeds for the score sprite to travel (aka number of frames to wait before moving 1 pixel)
     db $03,$01,$00,$00                      ; Index is the high byte of the sprite's frame counter.
 
-DATA_02AD9E:                    ;$02AD9E    | OAM indices for the six score sprites, except in Reznor/Morton/Roy's rooms.
+DATA_02AD9E:                    ;$02AD9E    | OAM indices for the six score sprites ($0200), except in Reznor/Morton/Roy's rooms.
     db $B0,$B8,$C0,$C8,$D0,$D8
 
 ScoreSprites:                   ;-----------| Routine to handle score sprites (including lives and coins).
@@ -6633,7 +6641,7 @@ CODE_02ADE4:                    ;-----------| Main score sprite routine.
     BCC CODE_02AE12             ;$02ADF0    |/
     CPY.b #$11                  ;$02ADF2    |\ If giving 1ups (y = 0D - 10), branch.
     BCC CODE_02AE03             ;$02ADF4    |/
-    PHX                         ;$02ADF6    | Else, giving coins (y = 11 - 15) [unused].
+    PHX                         ;$02ADF6    | Else, giving coins (y = 11 - 15) (unused).
     PHY                         ;$02ADF7    |
     LDA.w CoinsToGive-17,Y      ;$02ADF8    |\ Add the coins to Mario's coin count.
     JSL ADDR_05B329             ;$02ADFB    |/
@@ -6721,8 +6729,8 @@ CODE_02AE5B:                    ;```````````| Score sprite GFX routine.
     BNE Return02AEFB            ;$02AE99    |/
     LDY.w DATA_02AD9E,X         ;$02AE9B    |\ 
     BIT.w $0D9B                 ;$02AE9E    || Get OAM index.
-    BVC CODE_02AEA5             ;$02AEA1    ||  In Reznor/Morton/Roy, use a special index.
-    LDY.b #$04                  ;$02AEA3    |/
+    BVC CODE_02AEA5             ;$02AEA1    || 
+    LDY.b #$04                  ;$02AEA3    |// Index to use in Reznor/Morton/Roy's boss fights.
 CODE_02AEA5:                    ;           |
     LDA.w $16E7,X               ;$02AEA5    |\ 
     SEC                         ;$02AEA8    ||
@@ -6824,7 +6832,7 @@ CODE_02AF45:                    ;           |
     TYX                         ;$02AF4B    |
     LDA.b #$01                  ;$02AF4C    |\ 
     STA.w $14C8,X               ;$02AF4E    ||
-    LDA.b #$A3                  ;$02AF51    ||| Sprite to spawn (grey platform).
+    LDA.b #$A3                  ;$02AF51    ||| Sprite to spawn (gray platform).
     STA $9E,X                   ;$02AF53    |/
     JSL InitSpriteTables        ;$02AF55    |
     LDA $00                     ;$02AF59    |\ 
@@ -7307,8 +7315,8 @@ GenerateDolphin:                ;-----------| Dolphin generator MAIN
     AND.b #$1F                  ;$02B26E    || Return if not time to spawn a dolphin.
     BNE Return02B2CF            ;$02B270    |/
     LDY.w $18B9                 ;$02B272    |\ 
-    LDX.w DATA_02B268,Y         ;$02B275    ||
-    LDA.w DATA_02B26A,Y         ;$02B278    ||
+    LDX.w DATA_02B268-5,Y       ;$02B275    ||
+    LDA.w DATA_02B26A-5,Y       ;$02B278    ||
     STA $00                     ;$02B27B    ||
 CODE_02B27D:                    ;           || Find an empty sprite slot to spawn the dolphin into,
     LDA.w $14C8,X               ;$02B27D    ||  and return if none can be found.
@@ -7373,7 +7381,7 @@ GenerateEerie:                  ;-----------| Eerie generator MAIN.
     TYX                         ;$02B2E2    |
     LDA.b #$08                  ;$02B2E3    |\ 
     STA.w $14C8,X               ;$02B2E5    ||
-    LDA.b #$38                  ;$02B2E8    || Sprite to spawn (Eerie).
+    LDA.b #$38                  ;$02B2E8    ||| Sprite to spawn (Eerie).
     STA $9E,X                   ;$02B2EA    |/
     JSL InitSpriteTables        ;$02B2EC    |
     JSL GetRand                 ;$02B2F0    |\ 
@@ -7839,16 +7847,19 @@ CODE_02B5E4:                    ;           ||
 
 
 
-Empty02B5EC:
+Empty02B5EC:                    ;$02B5EC    | Used by PIXI.
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF
+
+Empty02B60D:                    ;$02B60D    | Empty.
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF
+    db $FF,$FF,$FF
 
 
 
@@ -8388,7 +8399,7 @@ CODE_02B969:                    ;           |
     LDA.b #$0F                  ;$02B99E    |\\ How long the smoke lasts for.
     STA.w $17CC,Y               ;$02B9A0    |/
 Return02B9A3:                   ;           |
-    RTS                         ;$02B9A4    |
+    RTS                         ;$02B9A3    |
 
 
 
@@ -8505,7 +8516,7 @@ Return02BA47:
     RTL                         ;$02BA47    |
 
 
-CODE_02BA48:                    ;```````````| Berry interaction in a horizontal level.
+CODE_02BA48:                    ;```````````| Berry-tongue interaction in a horizontal level.
     LDA $01                     ;$02BA48    |
     AND.b #$F0                  ;$02BA4A    |
     STA $04                     ;$02BA4C    |
@@ -8550,7 +8561,7 @@ CODE_02BA92:                    ;```````````| Tile is found; handle contact.
     LDA [$05]                   ;$02BA99    ||
     STA.w $1693                 ;$02BA9B    ||
     INC $07                     ;$02BA9E    ||
-    LDA [$05]                   ;$02BAA0    || Return if not touching a berry.
+    LDA [$05]                   ;$02BAA0    || Return if tongue is not touching a berry.
     BNE Return02BABF            ;$02BAA2    ||
     LDA.w $1693                 ;$02BAA4    ||
     CMP.b #$45                  ;$02BAA7    ||
@@ -8588,7 +8599,7 @@ CODE_02BAC0:                    ;           |
     PHX                         ;$02BAE6    ||
     TYX                         ;$02BAE7    ||
     JSL InitSpriteTables        ;$02BAE8    |/
-    INC.w $160E,X               ;$02BAEC    | Turn the mushroom into a berry.
+    INC.w $160E,X               ;$02BAEC    |] Turn the mushroom into a berry.
     LDA.w $1662,X               ;$02BAEF    |\ 
     AND.b #$F0                  ;$02BAF2    || Change clipping.
     ORA.b #$0C                  ;$02BAF4    ||
@@ -8889,7 +8900,7 @@ DATA_02BCD7:                    ;$02BCD7    | Animation frames for the Urchins.
     ;          Spike Top: 0/1/2/3 = walking, 4/5/6 = turning.
     ; $163E - Timer for the Urchin's animation. Set to #$0C each time its frame changes.
     
-WallFollowersMain:              ;-----------| MAIN for wall-following sprites (spike top, Urchins, sparky/fuzzy, hothead)
+WallFollowersMain:              ;-----------| Wall-following sprite MAIN (spike top, Urchins, sparky/fuzzy, hothead)
     JSL SprSprInteract          ;$02BCDB    | Process interaction with other sprites.
     JSL GetRand                 ;$02BCDF    |\ 
     AND.b #$FF                  ;$02BCE3    ||
@@ -8961,7 +8972,7 @@ CODE_02BD3F:                    ;```````````| Sprite is alive.
     BEQ CODE_02BDB3             ;$02BD5A    |/
 
 
-CODE_02BD5A:                    ;-----------| Fixed-direction Urchins (3A/3B).
+CODE_02BD5C:                    ;-----------| Fixed-direction Urchins (3A/3B).
     LDA $C2,X                   ;$02BD5C    |
     AND.b #$01                  ;$02BD5E    |
     JSL ExecutePtr              ;$02BD60    |
@@ -9484,9 +9495,9 @@ CODE_02C0CA:                    ;```````````| Time to fall asleep again.
 
 
 
-ADDR_02C0CF:                    ;-----------| Unused subroutine for the exploding block to spawn some kind of unused minor extended sprite.
+ADDR_02C0CF:                    ;-----------| Unused subroutine for the exploding block to spawn a now-unused minor extended sprite (musical notes?)
     LDA.b #$08                  ;$02C0CF    |\ 
-    LDY.w $157C,X               ;$02C0D1    || Spawn either sprite 7 or 8 (unused Z's) depending on the direction the block is facing.
+    LDY.w $157C,X               ;$02C0D1    || Spawn either sprite 7 or 8 (unused Z's/notes) depending on the direction the block is facing.
     BEQ ADDR_02C0D7             ;$02C0D4    ||
     INC A                       ;$02C0D6    |/
 ADDR_02C0D7:                    ;           |
@@ -9569,7 +9580,7 @@ CODE_02C13A:                    ;-----------| Chuck phase 4 - Diggin'
     STA.w $1540,X               ;$02C145    |/
     LDA.b #$04                  ;$02C148    |\ Set an initial counter for the number of rocks to dig up. Any multiple of 4 work, though (smaller = more rocks).
     STA.w $1534,X               ;$02C14A    |/
-    STZ.w $1570,X               ;$02C14D    | Clear Z.
+    STZ.w $1570,X               ;$02C14D    | Clear animation frame counter.
 CODE_02C150:                    ;```````````| Not done with the head turn yet.
     LDA.b #$02                  ;$02C150    |\ Turn the Chuck's head towards the screen.
     STA.w $151C,X               ;$02C152    |/
@@ -9691,11 +9702,11 @@ DATA_02C1F3:                    ;           |
     ; $1594 - In phase 0 (looking side-to-side), used as a counter for the current frame of animation in the Chuck's head turning animation.
     ; $15AC - Timer for the "starting to run" animation frame when beginning a charge.
     ; $1602 - Animation frame.
-    ;          0 = sitting left/right, 1/2 = unused, 3 = sitting towards screen, 4 = croutching (clappin' chuck's), 5 = sitting slightly left/right,
-    ;          6 = whistling/jumping, 7 = clapping, 8 = unused, 9 = croutching, A/B/C/D = hurt, E/F/10 = digging, 11 = kicking, 12/13 = running
+    ;          0 = sitting left/right, 1/2 = unused, 3 = sitting towards screen, 4 = crouching (clappin' chuck's), 5 = sitting slightly left/right,
+    ;          6 = whistling/jumping, 7 = clapping, 8 = unused, 9 = crouching, A/B/C/D = hurt, E/F/10 = digging, 11 = kicking, 12/13 = running
     ;          14 = Waiting to throw a baseball, 15/16/17 = jumping and throwing baseball, 18/19 = throwing baseball
     ; $160E - Used by the Clappin' Chuck as a flag for whether it's hopping on the ground (0) or doing an actual jump (1).
-    ; $163E - Unused timer that gets set when Mario first enters a Chargin' Chuck's line of sight.
+    ; $163E - Unused timer that gets set when Mario first enters a Chargin' Chuck's line of sight, and cleared when the Chuck is hit.
     ; $187B - Various.
     ;          Chargin' - Flag for whether Mario has entered the Chuck's line of sight at some point during his charge. Must be set in order to break turn/throwblocks.
     ;          Pitchin' - Spawn X position mod 4, for determining how long to throw baseballs for in each set.
@@ -10396,10 +10407,9 @@ DATA_02C69F:                    ;$02C69F    | Running X speeds for the Chargin' 
     db $18,$E8                              ; Running towards Mario
 
 DATA_02C6A3:                    ;$02C6A3    | Animation frames for the Chargin' Chuck's run animation.
-    db $12,$13                              ; Auto-running
-    db $12,$13                              ; Running towards Mario
+    db $12,$13,$12,$13
 
-CODE_02C6A7:                    ;-----------| Chuck phase 1 - Charging.
+CODE_02C6A7:                    ;-----------| Chuck phase 1 - Chargin'
     LDA.w $1588,X               ;$02C6A7    |\ 
     AND.b #$04                  ;$02C6AA    ||
     BEQ CODE_02C6BA             ;$02C6AC    || Always branches.
@@ -10458,7 +10468,7 @@ CODE_02C713:                    ;           |
     LDY.w $187B,X               ;$02C715    ||
     BNE CODE_02C71B             ;$02C718    ||
     LSR                         ;$02C71A    ||
-CODE_02C71B:                    ;           || Set animation frame for the Chuck. Only animate half as fast when auto-running.
+CODE_02C71B:                    ;           || Set animation frame for the Chuck. Animate half as fast when auto-running.
     LSR                         ;$02C71B    ||
     AND.b #$03                  ;$02C71C    ||
     TAY                         ;$02C71E    ||
@@ -10719,10 +10729,11 @@ DATA_02C909:                    ;$02C909    | X offsets for the Chuck's first ti
     db $F8,$F8,$F8,$FC,$FC,$FC,$FC,$F8
     db $01,$FC,$FC,$FC,$FC,$FC,$FC,$FC
     db $FC,$F8,$F8,$F8,$F8,$08,$06,$F8
-    db $F8,$01,$10,$10,$10,$04,$04,$04
-    db $04,$08,$07,$04,$04,$04,$04,$04
-    db $04,$04,$04,$10,$08,$08,$10,$00
-    db $02,$10,$10,$07
+    db $F8,$01
+    db $10,$10,$10,$04,$04,$04,$04,$08
+    db $07,$04,$04,$04,$04,$04,$04,$04
+    db $04,$10,$08,$08,$10,$00,$02,$10
+    db $10,$07
 
 DATA_02C93D:                    ;$02C93D    | X offsets for the Chuck's second tile. Second set of values are when facing right.
     db $00,$00,$00,$04,$04,$04,$04,$08
@@ -11655,7 +11666,7 @@ DATA_02D003:                    ;$02D003    | Low bytes of the vertical offscree
 DATA_02D005:                    ;$02D005    | High bytes of the vertical offscreen processing distances in bank 2.
     db $01,$FF
 
-DATA_02D007:                    ;$03D007    | Low bytes for offscreen processing distances in bank 2.
+DATA_02D007:                    ;$02D007    | Low bytes for offscreen processing distances in bank 2.
     db $30,$C0,$A0,$C0,$A0,$70,$60,$B0
 
 DATA_02D00F:                    ;$02D00F    | High bytes for offscreen processing distances in bank 2.
@@ -12124,9 +12135,9 @@ ADDR_02D2C7:                    ;-----------| Unused routine running the below r
 
 
 
-CODE_02D2FB:                    ;-----------| Routine to aim a sprite at Mario (specifically, used for the Boo/Swooper ceiling).
-    STA $01                     ;$02D2FB    |  Usage: A = minimum speed allowed for any particular direction.
-    PHX                         ;$02D2FD    |   Returns X speed in $00 and Y speed in $01.
+CODE_02D2FB:                    ;-----------| Aiming routine for the Boo/Swooper ceiling.
+    STA $01                     ;$02D2FB    |  Input: A = desired magnitude of the final speed vector, X = sprite slot to aim from (0).
+    PHX                         ;$02D2FD    |  Output: $00 = X speed, $01 = Y speed
     PHY                         ;$02D2FE    |
     JSR SubVertPosBnk2          ;$02D2FF    |\ $02 = horizontal side of the sprite Mario is on.
     STY $02                     ;$02D302    |/
@@ -12323,7 +12334,7 @@ CODE_02D419:                    ;-----------| Layer 3 Smash phase 0 - Waiting in
     LDA.w $18BF                 ;$02D419    |\ 
     BEQ CODE_02D422             ;$02D41C    || If sprite D2 is spawned, stop creating smashers.
     JSR OffScrEraseSprBnk2      ;$02D41E    ||
-    RTS                         ;$02D421    |/
+    RTS                         ;$02D421    |/ [NOTE: this line should be an RTL instead; as-is, it will crash]
 CODE_02D422:                    ;           |
     LDA.w $1540,X               ;$02D422    |\ Return if not time to actually make the spawner.
     BNE Return02D444            ;$02D425    |/
@@ -12509,7 +12520,7 @@ Return02D51D:                   ;           |
 
 
 
-Empty02D51E:
+Empty02D51E:                    ;$02D51E    | Empty.
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
@@ -12604,7 +12615,7 @@ CODE_02D5EA:                    ;           |
 
 
 
-BanzaiPRotating:                ;-----------| Ball 'n' Chain MAIN / Banzai Bill MAIN / Grey platform on a chain MAIN
+BanzaiPRotating:                ;-----------| Ball 'n' Chain MAIN / Banzai Bill MAIN / Gray platform on a chain MAIN
     PHB                         ;$02D617    |
     PHK                         ;$02D618    |
     PLB                         ;$02D619    |
@@ -12614,7 +12625,7 @@ BanzaiPRotating:                ;-----------| Ball 'n' Chain MAIN / Banzai Bill 
     JSR CODE_02D587             ;$02D620    | Run the actual Banzai Bill MAIN.
     BRA CODE_02D628             ;$02D623    |
 
-CODE_02D625:                    ;```````````| Grey platform on a chain or ball n' chain.
+CODE_02D625:                    ;```````````| Gray platform on a chain or ball n' chain.
     JSR CODE_02D62A             ;$02D625    | Run the actual MAIN routine for them.
 CODE_02D628:                    ;           |
     PLB                         ;$02D628    |
@@ -12622,7 +12633,7 @@ CODE_02D628:                    ;           |
 
 
 
-    ; Ball 'n' Chain / Grey Platform misc RAM:
+    ; Ball 'n' Chain / Gray Platform misc RAM:
     ; $151C - High bit of the platform's angle. 0 = right side, 1 = left side.
     ; $1528 - Number of pixels moved horizontally in the frame.
     ; $1534 - Previous X position of the actual platform/ball, for tracking how much it's moved each frame.
@@ -12630,7 +12641,7 @@ CODE_02D628:                    ;           |
     ; $160E - Flag for Mario being on the platform (set to #$03 if so).
     ; $187B - Radius of the platform.
 
-CODE_02D62A:                    ;-----------| Ball 'n' Chain and Grey platform 
+CODE_02D62A:                    ;-----------| Ball 'n' Chain and Gray platform 
     JSR SubOffscreen3Bnk2       ;$02D62A    | Process offscreen from -$50 to +$60.
     LDA $9D                     ;$02D62D    |\\ Don't rotate the sprite if game frozen.
     BNE CODE_02D653             ;$02D62F    ||/
@@ -12829,7 +12840,7 @@ CODE_02D757:                    ;```````````| Both sprites join back up.
     LDA.b #$E8                  ;$02D7A3    ||| Tile to use for the Ball 'n' Chain's chain.
     CPX.b #$9E                  ;$02D7A5    ||
     BEQ CODE_02D7AB             ;$02D7A7    ||
-    LDA.b #$A2                  ;$02D7A9    ||| Tile to use for the rotating grey platform's chain.
+    LDA.b #$A2                  ;$02D7A9    ||| Tile to use for the rotating gray platform's chain.
 CODE_02D7AB:                    ;           ||
     STA $08                     ;$02D7AB    |/
     LDX.b #$01                  ;$02D7AD    || Number of chain segments to draw.
@@ -12931,13 +12942,13 @@ CODE_02D819:                    ;           |
 
 
 
-DATA_02D840:                    ;$02D840    | X offsets for each itle of the rotating grey platform.
+DATA_02D840:                    ;$02D840    | X offsets for each itle of the rotating gray platform.
     db $00,$F0,$00,$10
 
-WoodPlatformTiles:              ;$02D844    | Tile numbers for each tile of the rotating grey platform.
+WoodPlatformTiles:              ;$02D844    | Tile numbers for each tile of the rotating gray platform.
     db $A2,$60,$61,$62
 
-CODE_02D848:                    ;-----------| Rotating Grey Platform's platform GFX routine. Note that size isn't handled here.
+CODE_02D848:                    ;-----------| Rotating Gray Platform's platform GFX routine. Note that size isn't handled here.
     JSR GetDrawInfoBnk2         ;$02D848    |
     PHX                         ;$02D84B    |
     LDX.b #$03                  ;$02D84C    || Number of tiles in the platform.
@@ -12965,7 +12976,7 @@ CODE_02D84E:                    ;           |
 
 
 
-CODE_02D870:                    ;-----------| Subroutine to get a position along a radius, for chain of the rotating grey platform / ball 'n' chain.
+CODE_02D870:                    ;-----------| Subroutine to get a position along a radius, for chain of the rotating gray platform / ball 'n' chain.
     PHP                         ;$02D870    |  Usage: distance (in just the X or Y plane) from base of the sprite to the platform/ball.
     BPL CODE_02D876             ;$02D871    |\ 
     EOR.b #$FF                  ;$02D873    ||
@@ -13265,7 +13276,7 @@ Return02DA59:                   ;           |
     ; Hammer Bro. misc RAM:
     ; $1540 - Timer to prevent throwing multiple hammers at once.
     ; $1570 - Frame counter for animation and throwing hammers.
-    ; $157C - Horizontal direction the sprite is facing.
+    ; $157C - Horizontal direction the sprite is facing. Uses 00/40 instead of 00/01.
     
 CODE_02DA5A:                    ;-----------| Actual Hammer Bro. MAIN
     STZ.w $157C,X               ;$02DA5A    |
@@ -13625,7 +13636,7 @@ CODE_02DC8A:                    ;           |
     ; $1602 - Animation frame.
     ;          0/1 = walking, 2 = unused, 3/4/5 = stomping
     
-SumoBrotherMain:                ;-----------| Sumo Bros. MAIN
+SumoBrotherMain:                ;-----------| Sumo Bro. MAIN
     PHB                         ;$02DCAF    |
     PHK                         ;$02DCB0    |
     PLB                         ;$02DCB1    |
@@ -14746,7 +14757,7 @@ CODE_02E41F:
     LDA $9D                     ;$02E423    |\ Return if game frozen.
     BNE Return02E462            ;$02E425    |/
     BRA CODE_02E42D             ;$02E427    |
-    JSL ADDR_02C0CF             ;$02E429    | [unused line, would spawn some kind of minor extended sprite]
+    JSL ADDR_02C0CF             ;$02E429    | [unused line, would spawn a now-unused minor extended sprite; see https://i.imgur.com/g68ViLN.gif]
 CODE_02E42D:                    ;           |
     LDY.b #$00                  ;$02E42D    |
     INC.w $1570,X               ;$02E42F    |
@@ -14869,19 +14880,19 @@ CODE_02E4EB:                    ;           |
     LDA.b #$08                  ;$02E4FE    ||| Y speed to give the left platform when Mario is on it.
     JSR CODE_02E559             ;$02E500    |/
 CODE_02E503:                    ;           |
-    LDA.w $185E                 ;$02E503    |\ 
-    BNE Return02E51F            ;$02E506    ||
-    LDY.b #$02                  ;$02E508    || Return if Mario isn't on either platform,
-    LDA $D8,X                   ;$02E50A    || or if the platforms are already at their equilibrium position.
-    CMP.w $1534,X               ;$02E50C    ||
-    BEQ Return02E51F            ;$02E50F    |/
-    LDA.w $14D4,X               ;$02E511    |\ 
-    SBC.w $151C,X               ;$02E514    ||
-    BMI CODE_02E51B             ;$02E517    ||
-    LDY.b #$FE                  ;$02E519    || Move the platforms towards their equilibrium position.
-CODE_02E51B:                    ;           ||
-    TYA                         ;$02E51B    ||
-    JSR CODE_02E559             ;$02E51C    |/
+    LDA.w $185E                 ;$02E503    |\\ 
+    BNE Return02E51F            ;$02E506    |||
+    LDY.b #$02                  ;$02E508    ||| Return if Mario is on either platform,
+    LDA $D8,X                   ;$02E50A    |||  or if the platforms are already at their equilibrium position.
+    CMP.w $1534,X               ;$02E50C    |||
+    BEQ Return02E51F            ;$02E50F    ||/
+    LDA.w $14D4,X               ;$02E511    ||\ 
+    SBC.w $151C,X               ;$02E514    |||
+    BMI CODE_02E51B             ;$02E517    |||
+    LDY.b #$FE                  ;$02E519    ||| Move the platforms towards their equilibrium position.
+CODE_02E51B:                    ;           |||
+    TYA                         ;$02E51B    |||
+    JSR CODE_02E559             ;$02E51C    |//
 Return02E51F:                   ;           |
     RTS                         ;$02E51F    |
 
@@ -14892,9 +14903,9 @@ MushrmScaleTiles:               ;$02E520    | Values for $9C for the mushroom pl
 
 CODE_02E524:                    ;```````````| Individual platform routine.
     LDA $D8,X                   ;$02E524    |\ 
-    AND.b #$0F                  ;$02E526    ||
-    BNE CODE_02E54E             ;$02E528    || Branch if not centered vertically on a tile or not moving.
-    LDA $AA,X                   ;$02E52A    ||  (i.e. don't modify any blocks)
+    AND.b #$0F                  ;$02E526    || Branch if not centered vertically on a tile or not moving.
+    BNE CODE_02E54E             ;$02E528    ||  (i.e. don't modify any blocks)
+    LDA $AA,X                   ;$02E52A    || Note: does not work correctly cause Y speed doesn't actually zero out.
     BEQ CODE_02E54E             ;$02E52C    |/
     LDA $AA,X                   ;$02E52E    |\ 
     BPL CODE_02E533             ;$02E530    ||
@@ -15440,7 +15451,7 @@ CODE_02E872:                    ;```````````| Done clearing out the area, handle
     BRA CODE_02E8B5             ;$02E8A0    |/
 
 CODE_02E8A2:                    ;```````````| Movement phase not finished.
-    LDA.w DATA_02E835,Y         ;$02E8A2    |\ Set Y speed for hte current phase.
+    LDA.w DATA_02E835,Y         ;$02E8A2    |\ Set Y speed for the current phase.
     STA $AA,X                   ;$02E8A5    |/
     BEQ CODE_02E8B2             ;$02E8A7    |\ 
     LDA $D8,X                   ;$02E8A9    ||
@@ -16462,7 +16473,7 @@ CODE_02EF1C:                    ;           |
     RTS                         ;$02EF66    |
 
 
-CODE_02EF67:                    ;```````````| Spawning a coin/1up.
+CODE_02EF67:                    ;```````````| Spawning a coin/1up for the coin game cloud.
     LDA.w $18E3                 ;$02EF67    |\ 
     CMP.b #$0A                  ;$02EF6A    || Brnach if Mario hasn't collected all the coins.
     BCC CODE_02EFAA             ;$02EF6C    |/
@@ -16668,7 +16679,7 @@ CODE_02F090:                    ;           ||
     JSR CODE_02FFD1             ;$02F0A9    | Set ground Y speed for the Wiggler.
     BRA CODE_02F0C3             ;$02F0AC    |
 
-CODE_02F0AE                     ;```````````| Wiggler is not on the ground.
+CODE_02F0AE:                    ;```````````| Wiggler is not on the ground.
     LDA.w $15AC,X               ;$02F0AE    |\ 
     BNE CODE_02F0C3             ;$02F0B1    ||
     LDA.w $157C,X               ;$02F0B3    ||
@@ -16704,7 +16715,7 @@ CODE_02F0DB:                    ;```````````| Subroutine for the Wiggler to move
     ADC.w #$007F                ;$02F0E9    ||
     TAY                         ;$02F0EC    ||
     LDA.w #$007D                ;$02F0ED    ||
-    MVP $7F,$7F                 ;$02F0F0    |/
+    MVP $7F7F                   ;$02F0F0    |/
     SEP #$30                    ;$02F0F3    |
     PLB                         ;$02F0F5    |
     PLX                         ;$02F0F6    |
@@ -16924,8 +16935,8 @@ CODE_02F26B:                    ;           |
     BNE Return02F295            ;$02F27A    |/
     JSL DispContactMario        ;$02F27C    |
     LDA.w $1697                 ;$02F280    |\ 
-    INC.w $1697                 ;$02F283    || Increase Mario's bounce counter and give Mario points.
-    JSL GivePoints              ;$02F286    |/
+    INC.w $1697                 ;$02F283    || Increase Mario's bounce counter and give Mario a corresponding number of points.
+    JSL GivePoints              ;$02F286    |/  [NOTE: due to this value not being capped in this instance, glitched numbers may appear]
     LDA.b #$40                  ;$02F28A    |\ 
     STA.w $1540,X               ;$02F28C    || Set the Wiggler to be angered.
     INC.w $151C,X               ;$02F28F    |/
@@ -17109,7 +17120,7 @@ CODE_02F38F:                    ;-----------| YH bird phase 1 - Pecking
     STZ $AA,X                   ;$02F38F    |\ Clear X/Y speed. 
     STZ $B6,X                   ;$02F391    |/
     STZ.w $1602,X               ;$02F393    |
-    LDA.w $1540,X               ;$02F396    |\ Branch if done with a particular peck.
+    LDA.w $1540,X               ;$02F396    |\ Branch if done with the current peck.
     BEQ CODE_02F3A3             ;$02F399    |/
     CMP.b #$08                  ;$02F39B    |\ 
     BCS Return02F3A2            ;$02F39D    || Else animate the pecking animation.
@@ -17117,9 +17128,9 @@ CODE_02F38F:                    ;-----------| YH bird phase 1 - Pecking
 Return02F3A2:                   ;           |
     RTS                         ;$02F3A2    |
 
-CODE_02F3A3:                    ;```````````| Done with a peck.
+CODE_02F3A3:                    ;```````````| Done with a single peck.
     LDA.w $1570,X               ;$02F3A3    |\ 
-    BEQ CODE_02F3B7             ;$02F3A6    || Branch if done with pecking altogether (switch to hopping).
+    BEQ CODE_02F3B7             ;$02F3A6    || Branch if done with all of the pecks (switch to hopping).
     DEC.w $1570,X               ;$02F3A8    |/
     JSL GetRand                 ;$02F3AB    |\ 
     AND.b #$1F                  ;$02F3AF    || Set a random length of time ($0A to $29 frames) for the next peck.
@@ -17127,8 +17138,8 @@ CODE_02F3A3:                    ;```````````| Done with a peck.
     STA.w $1540,X               ;$02F3B3    |/
     RTS                         ;$02F3B6    |
 
-CODE_02F3B7:                    ;```````````| Done pecking altogether.
-    STZ $C2,X                   ;$02F3B7    | Switch back to hopping.
+CODE_02F3B7:                    ;```````````| Done pecking.
+    STZ $C2,X                   ;$02F3B7    |] Switch back to hopping.
     JSL GetRand                 ;$02F3B9    |\ 
     AND.b #$01                  ;$02F3BD    || Randomly decide whether to turn immediately after finished the peck.
     BNE CODE_02F3CE             ;$02F3BF    |/
@@ -17141,7 +17152,7 @@ CODE_02F3C1:                    ;           |
 CODE_02F3CE:                    ;           |
     JSL GetRand                 ;$02F3CE    |\ 
     AND.b #$03                  ;$02F3D2    ||
-    CLC                         ;$02F3D4    || Set a random number times (between 2 and 6) to hop.
+    CLC                         ;$02F3D4    || Set a random number times (between 2 and 5) to hop.
     ADC.b #$02                  ;$02F3D5    ||
     STA.w $1570,X               ;$02F3D7    |/
     RTS                         ;$02F3DA    |
@@ -17157,7 +17168,7 @@ BirdsFlip:                      ;$02F3E0    | YXPPCCCT values for the birds, exc
 BirdsPal:                       ;$02F3E2    | Palettes (in YXPPCCCT format) for the four birds.
     db $08,$04,$06,$0A
 
-FireplaceOAM:                   ;$02F3E6    | OAM indices (from $0200) for the four birds.
+BirdsOAM:                       ;$02F3E6    | OAM indices (from $0200) for the four birds.
     db $30,$34,$48,$3C
 
 CODE_02F3EA:                    ;-----------| Yoshi House bird GFX routine.
@@ -17171,7 +17182,7 @@ CODE_02F3EA:                    ;-----------| Yoshi House bird GFX routine.
     TXA                         ;$02F3F9    |
     AND.b #$03                  ;$02F3FA    |
     TAY                         ;$02F3FC    |
-    LDA.w FireplaceOAM,Y        ;$02F3FD    |\ Get OAM index.
+    LDA.w BirdsOAM,Y            ;$02F3FD    |\ Get OAM index.
     TAY                         ;$02F400    |/
     LDA $E4,X                   ;$02F401    |\ 
     SEC                         ;$02F403    || Store X position.
@@ -18315,10 +18326,10 @@ CODE_02FB9E:                    ;           ||
     JSR CODE_02FC8D             ;$02FBAD    |
 CODE_02FBB0:                    ;           |
     TXA                         ;$02FBB0    |\ 
-    EOR $13                     ;$02FBB1    ||
-    AND.b #$03                  ;$02FBB3    ||
-    BNE Return02FBBA            ;$02FBB5    |/
-    JSR CODE_02FE71             ;$02FBB7    |
+    EOR $13                     ;$02FBB1    || Process interaction with Mario.
+    AND.b #$03                  ;$02FBB3    ||  Only process for 1/4 of the Boos at a time.
+    BNE Return02FBBA            ;$02FBB5    ||
+    JSR CODE_02FE71             ;$02FBB7    |/
 Return02FBBA:                   ;           |
     RTS                         ;$02FBBA    |
 
@@ -18742,7 +18753,7 @@ CODE_02FE77:                    ;           |
     LDA.w #$0020                ;$02FEAD    ||
 CODE_02FEB0:                    ;           ||
     STA $04                     ;$02FEB0    ||
-    LDA $96                     ;$02FEB2    || Return if Mario isn't vertically in contact, accounting for Yoshi.
+    LDA $96                     ;$02FEB2    || Return if Mario isn't vertically in contact, accounting for his powerup.
     SEC                         ;$02FEB4    ||
     SBC $02                     ;$02FEB5    ||
     CLC                         ;$02FEB7    ||
@@ -18848,9 +18859,8 @@ ADDR_02FF4A:                    ;           ||
 
 
 DATA_02FF50:                    ;$02FF50    | Cluster sprite OAM indices (from $0300).
-    db $E0,$E4,$E8,$EC,$F0,$F4,$F8,$FC
-    db $5C,$58,$54,$50,$4C,$48,$44,$40
-    db $3C,$38,$34,$30
+    db $E0,$E4,$E8,$EC,$F0,$F4,$F8,$FC,$5C,$58
+    db $54,$50,$4C,$48,$44,$40,$3C,$38,$34,$30
 
 DATA_02FF64:                    ;$02FF64    | OAM indices for the bonus game 1up cluster sprites.
     db $90,$94,$98,$9C,$A0,$A4,$A8,$AC
@@ -18948,8 +18958,19 @@ CODE_02FFDF:                    ;           ||
 
 
 
-Empty02FFE2:                    ;$02FFE2    |
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF
+Empty02FFE2:                    ;$02FFE2    | Used by PIXI as a header.
+    db $FF,$FF,$FF,$FF          ; "STSD"
+    db $FF                      ; Version number
+    db $FF                      ; Flags (currently only bit 0 used to signal per-level sprites in use).
+    db $FF,$FF                  ; Currently unused.
+    
+Empty02FFEA:                    ;$02FFEA    | Unused?
+    db $FF,$FF,$FF,$FF
+    
+Empty02FFEE:                    ;$02FFEE    | Used by PIXI for 24-bit pointers to custom sprite data.
+    dl $FFFFFF      ; pointer to global sprites
+    dl $FFFFFF      ; pointer to per-level sprites
+    dl $FFFFFF      ;\ 
+    dl $FFFFFF      ;| unused...?
+    dl $FFFFFF      ;/
+    dl $FFFFFF      ; pointer to custom statuses

@@ -1,4 +1,4 @@
-.BANK3
+org $038000
 
 DATA_038000:                    ;$038000    | Sound effects for Mario bouncing off a Rex or killing it with star power.
     db $13,$14,$15,$16,$17,$18,$19
@@ -562,11 +562,11 @@ CODE_03844B:                    ;           |
 
 
 
-    ; Falling grey platform misc RAM:
+    ; Falling gray platform misc RAM:
     ; $1528 - Unused, but would make Mario move horizontally on the platform.
     ; $1540 - Timer set after initially landing, to prevent the platform from immediately accelerating as it falls.
     
-GreyFallingPlat:                ;-----------| Grey falling platform MAIN
+GrayFallingPlat:                ;-----------| Gray falling platform MAIN
     JSR CODE_038492             ;$038454    | Draw GFX.
     LDA $9D                     ;$038457    |\ Return if game frozen.
     BNE Return038489            ;$038459    |/
@@ -827,14 +827,14 @@ CODE_0385C6:                    ;           || Store X position to OAM.
 FlyingBlockSpeedY:              ;$0385F4    | Y speeds for the flying turnblock platform.
     db $08,$F8
 
-    ; Flying Grey Turnblocks misc RAM:
+    ; Flying Gray Turnblocks misc RAM:
     ; $151C - Value indicating whether the platform flies up first (00) or down first (10)
     ; $1528 - Number of pixels moved horizontally in the frame.
     ; $1534 - Extra timer for changing the direction of vertical movement. $1602 is only decremented every odd even tick of this address.
     ; $157C - Direction of vertical movement. Even = down, odd = up.
     ; $1602 - Timer for changing the direction of vertical movement.
     
-FlyingTurnBlocks:               ;-----------| Flying Grey Turnblocks MAIN
+FlyingTurnBlocks:               ;-----------| Flying Gray Turnblocks MAIN
     JSR CODE_0386A8             ;$0385F6    | Draw GFX.
     LDA $9D                     ;$0385F9    |\ Return if game frozen.
     BNE Return038675            ;$0385FB    |/
@@ -877,7 +877,7 @@ CODE_038636:                    ;           ||
     BCC Return038675            ;$03864D    |/
     LDA.w $1B9A                 ;$03864F    |\ Return if the platform hasn't already been started.
     BNE Return038675            ;$038652    |/
-    LDA.b #$08                  ;$038654    |\\ X speed the flying grey platform flies at.
+    LDA.b #$08                  ;$038654    |\\ X speed the flying gray platform flies at.
     STA.w $1B9A                 ;$038656    |/
     LDA.b #$7F                  ;$038659    |\ Set initial timer until the platform turns around.
     STA.w $1602,X               ;$03865B    |/
@@ -900,27 +900,27 @@ Return038675:                   ;           |
 
 
 
-ForestPlatDispX:                ;$038676    | X offsets for the Flying Grey Turnblocks.
+ForestPlatDispX:                ;$038676    | X offsets for the Flying Gray Turnblocks.
     db $00,$10,$20,$F2,$2E
     db $00,$10,$20,$FA,$2E
 
-ForestPlatDispY:                ;$038680    | Y offsets for the Flying Grey Turnblocks.
+ForestPlatDispY:                ;$038680    | Y offsets for the Flying Gray Turnblocks.
     db $00,$00,$00,$F6,$F6
     db $00,$00,$00,$FE,$FE
 
-ForestPlatTiles:                ;$03868A    | Tile numbers for the Flying Grey Turnblocks.
+ForestPlatTiles:                ;$03868A    | Tile numbers for the Flying Gray Turnblocks.
     db $40,$40,$40,$C6,$C6
     db $40,$40,$40,$5D,$5D
 
-ForestPlatGfxProp:              ;$038694    | YXPPCCCT for the Flying Grey Turnblocks.
+ForestPlatGfxProp:              ;$038694    | YXPPCCCT for the Flying Gray Turnblocks.
     db $32,$32,$32,$72,$32
     db $32,$32,$32,$72,$32
 
-ForestPlatTileSize:             ;$03869E    | Tile sizes for the Flying Grey Turnblocks.
+ForestPlatTileSize:             ;$03869E    | Tile sizes for the Flying Gray Turnblocks.
     db $02,$02,$02,$02,$02
     db $02,$02,$02,$00,$00
 
-CODE_0386A8:                    ;-----------| Flying Grey Turnblocks GFX routine
+CODE_0386A8:                    ;-----------| Flying Gray Turnblocks GFX routine
     JSR GetDrawInfoBnk3         ;$0386A8    |
     LDY.w $15EA,X               ;$0386AB    |
     LDA $14                     ;$0386AE    |\ 
@@ -975,11 +975,11 @@ CODE_0386BB:                    ;           |
 
 
 
-    ; Grey lava platform misc RAM:
+    ; Gray lava platform misc RAM:
     ; $1528 - Always 0, but would move Mario horizontally when standing on the platform if non-zero.
     ; $1540 - Timer for sinking the platform.
 
-GrayLavaPlatform:               ;-----------| Grey lava platform MAIN
+GrayLavaPlatform:               ;-----------| Gray lava platform MAIN
     JSR CODE_03873A             ;$0386FF    | Draw GFX.
     LDA $9D                     ;$038702    |\ Return if game frozen.
     BNE Return038733            ;$038704    |/
@@ -1007,13 +1007,13 @@ Return038733:                   ;           |
     RTS                         ;$038733    |
 
 
-LavaPlatTiles:                  ;$038734    | Tile numbers for the grey lava platform.
+LavaPlatTiles:                  ;$038734    | Tile numbers for the gray lava platform.
     db $85,$86,$85
 
-DATA_038737:                    ;$038737    | YXPPCCCT for the grey lava platform.
+DATA_038737:                    ;$038737    | YXPPCCCT for the gray lava platform.
     db $43,$03,$03
 
-CODE_03873A:                    ;-----------| Grey lava platform GFX routine
+CODE_03873A:                    ;-----------| Gray lava platform GFX routine
     JSR GetDrawInfoBnk3         ;$03873A    |
     PHX                         ;$03873D    |
     LDX.b #$02                  ;$03873E    |
@@ -1046,7 +1046,7 @@ CODE_038740:                    ;           |
 
 
 
-MegaMoleSpeed:                  ;           |
+MegaMoleSpeed:                  ;$03876E    |
     db $10,$F0
 
     ; Mega Mole misc RAM:
@@ -2104,10 +2104,10 @@ CODE_038E49:                    ;           ||
 
 
 
-GreyMoveBlkSpeed:               ;           |
+GrayMoveBlkSpeed:               ;           |
     db $00,$F0,$00,$10
 
-GreyMoveBlkTiming:              ;           |
+GrayMoveBlkTiming:              ;           |
     db $40,$50,$40,$50
 
     ; Castle Block misc RAM:
@@ -2117,7 +2117,7 @@ GreyMoveBlkTiming:              ;           |
     ; $1558 - Unused timer set when hit from below, when $C2 is 0.
     ; $1564 - Unused timer set when hit from below.
 
-GreyCastleBlock:                ;-----------| Moving grey castle block MAIN
+GrayCastleBlock:                ;-----------| Moving gray castle block MAIN
     JSR CODE_038EB4             ;$038E79    | Draw GFX.
     LDA $9D                     ;$038E7C    |\ Return if game frozen.
     BNE Return038EA7            ;$038E7E    |/
@@ -2127,13 +2127,13 @@ GreyCastleBlock:                ;-----------| Moving grey castle block MAIN
     LDA $C2,X                   ;$038E87    || If at the end of a particular movement, increment phase pointer and set timer.
     AND.b #$03                  ;$038E89    ||
     TAY                         ;$038E8B    ||
-    LDA.w GreyMoveBlkTiming,Y   ;$038E8C    ||
+    LDA.w GrayMoveBlkTiming,Y   ;$038E8C    ||
     STA.w $1540,X               ;$038E8F    |/
 CODE_038E92:                    ;           |
     LDA $C2,X                   ;$038E92    |\ 
     AND.b #$03                  ;$038E94    ||
     TAY                         ;$038E96    || Store X speed.
-    LDA.w GreyMoveBlkSpeed,Y    ;$038E97    ||
+    LDA.w GrayMoveBlkSpeed,Y    ;$038E97    ||
     STA $B6,X                   ;$038E9A    |/
     JSL UpdateXPosNoGrvty       ;$038E9C    | Update X position.
     STA.w $1528,X               ;$038EA0    |\ Make solid.
@@ -2143,13 +2143,13 @@ Return038EA7:                   ;           |
 
 
 
-GreyMoveBlkDispX:               ;$038EA8    | Moving castle block X offsets.
+GrayMoveBlkDispX:               ;$038EA8    | Moving castle block X offsets.
     db $00,$10,$00,$10
 
-GreyMoveBlkDispY:               ;$038EAC    | Moving castle block Y offsets.
+GrayMoveBlkDispY:               ;$038EAC    | Moving castle block Y offsets.
     db $00,$00,$10,$10
 
-GreyMoveBlkTiles:               ;$038EB0    | Moving castle block tile numbers.
+GrayMoveBlkTiles:               ;$038EB0    | Moving castle block tile numbers.
     db $CC,$CE,$EC,$EE
 
 CODE_038EB4:                    ;-----------| Moving castle block GFX routine.
@@ -2159,13 +2159,13 @@ CODE_038EB4:                    ;-----------| Moving castle block GFX routine.
 CODE_038EBA:                    ;           |
     LDA $00                     ;$038EBA    |\ 
     CLC                         ;$038EBC    || Store X position to OAM.
-    ADC.w GreyMoveBlkDispX,X    ;$038EBD    ||
+    ADC.w GrayMoveBlkDispX,X    ;$038EBD    ||
     STA.w $0300,Y               ;$038EC0    |/
     LDA $01                     ;$038EC3    |\ 
     CLC                         ;$038EC5    || Store Y position to OAM.
-    ADC.w GreyMoveBlkDispY,X    ;$038EC6    ||
+    ADC.w GrayMoveBlkDispY,X    ;$038EC6    ||
     STA.w $0301,Y               ;$038EC9    |/
-    LDA.w GreyMoveBlkTiles,X    ;$038ECC    |\ Store tile number to OAM.
+    LDA.w GrayMoveBlkTiles,X    ;$038ECC    |\ Store tile number to OAM.
     STA.w $0302,Y               ;$038ECF    |/ 
     LDA.b #$03                  ;$038ED2    |\ 
     ORA $64                     ;$038ED4    || Store YXPPCCCT to OAM.
@@ -2406,7 +2406,7 @@ CODE_039037:                    ;           |
     STA.w $17FC,Y               ;$039049    ||
     LDA.w $14D4,X               ;$03904C    ||
     STA.w $1814,Y               ;$03904F    |/
-    LDA.b #$30                  ;$039052    |\ Set lifespan timer.
+    LDA.b #$30                  ;$039052    |\\ Boo stream lifespan timer.
     STA.w $1850,Y               ;$039054    |/
     LDA $B6,X                   ;$039057    |\ Transfer X speed, so that it faces the same direction.
     STA.w $182C,Y               ;$039059    |/
@@ -3251,15 +3251,15 @@ RexKilledSpeed:                 ;$039625    | X speeds to give the Rex when kill
     db $F0,$10
 
 
-    RTS                         ;$039627    |
+    RTS                         ;$039627    | (unused)
 
-RexPoints:                      ;-----------| Subroutine to give points for bounce off of a Rex.
+RexPoints:                      ;-----------| Subroutine to handle points/sfx for bouncing off of a Rex.
     PHY                         ;$039628    |
     LDA.w $1697                 ;$039629    |\ 
     CLC                         ;$03962C    ||
     ADC.w $1626,X               ;$03962D    ||
     INC.w $1697                 ;$039630    ||
-    TAY                         ;$039633    || Increase Mario's bounce counter and play an appropriate sound effect.
+    TAY                         ;$039633    || Increase Mario's bounce counter and play bounce SFX.
     INY                         ;$039634    ||
     CPY.b #$08                  ;$039635    ||
     BCS CODE_03963F             ;$039637    ||
@@ -3268,7 +3268,7 @@ RexPoints:                      ;-----------| Subroutine to give points for boun
 CODE_03963F:                    ;           |
     TYA                         ;$03963F    |\ 
     CMP.b #$08                  ;$039640    ||
-    BCC CODE_039646             ;$039642    || Give Mario an appropriate number of points.
+    BCC CODE_039646             ;$039642    || Give an appropriate number of points.
     LDA.b #$08                  ;$039644    ||
 CODE_039646:                    ;           ||
     JSL GivePoints              ;$039646    |/
@@ -3553,8 +3553,8 @@ CODE_0397BD:                    ;```````````| Tile loop for the Fishbone's tail 
 
 
 
-CODE_0397F9:                    ;-----------| Subroutine to decide where to shoot Reznor's fireballs.
-    STA $01                     ;$0397F9    |  Input: A - Minimum speed in any direction, X = sprite number to aim from
+CODE_0397F9:                    ;-----------| Aiming routine for Reznor's fireballs.
+    STA $01                     ;$0397F9    |  Input: A = desired magnitude of the final speed vector, X = sprite slot to aim from.
     PHX                         ;$0397FB    |  Output: $00 = X speed, $01 = Y speed
     PHY                         ;$0397FC    |
     JSR SubVertPosBnk3          ;$0397FD    |\ 
@@ -4214,7 +4214,7 @@ DATA_039C6E:                    ;$039C6E    | Low X position shifts to push the 
 DATA_039C71:                    ;$039C71    | High X position shifts to push the Dino Rhino/Torch out of walls.
     db $00,$FF,$00
 
-CODE_039C74:                    ;-----------| Dino Rhino/Torch rhino 3 - Jumping
+CODE_039C74:                    ;-----------| Dino Rhino/Torch phase 3 - Jumping
     LDA $AA,X                   ;$039C74    |\ 
     BMI CODE_039C89             ;$039C76    ||
     STZ $C2,X                   ;$039C78    ||
@@ -4962,10 +4962,10 @@ CODE_03A15C:                    ;```````````| Big Boo Boss redirect
     PLB                         ;$03A163    |
     RTL                         ;$03A164    |
 
-CODE_03A165:                    ;```````````| Grey falling platform redirect
+CODE_03A165:                    ;```````````| Gray falling platform redirect
     CMP.b #$C4                  ;$03A165    |
     BNE CODE_03A16E             ;$03A167    |
-    JSR GreyFallingPlat         ;$03A169    |
+    JSR GrayFallingPlat         ;$03A169    |
     PLB                         ;$03A16C    |
     RTL                         ;$03A16D    |
 
@@ -4990,7 +4990,7 @@ CODE_03A180:                    ;```````````| Flying turnblocks redirect
     PLB                         ;$03A187    |
     RTL                         ;$03A188    |
 
-CODE_03A189:                    ;```````````| Grey lava platform redirect
+CODE_03A189:                    ;```````````| Gray lava platform redirect
     CMP.b #$C0                  ;$03A189    |
     BNE CODE_03A192             ;$03A18B    |
     JSR GrayLavaPlatform        ;$03A18D    |
@@ -5049,10 +5049,10 @@ CODE_03A1CC:                    ;```````````| Timed Lift redirect
     PLB                         ;$03A1D3    |
     RTL                         ;$03A1D4    |
 
-CODE_03A1D5:                    ;```````````| Grey Castle Block redirect
+CODE_03A1D5:                    ;```````````| Gray Castle Block redirect
     CMP.b #$BB                  ;$03A1D5    |
     BNE CODE_03A1DE             ;$03A1D7    |
-    JSR GreyCastleBlock         ;$03A1D9    |
+    JSR GrayCastleBlock         ;$03A1D9    |
     PLB                         ;$03A1DC    |
     RTL                         ;$03A1DD    |
 
@@ -5435,7 +5435,7 @@ Return03A48F:                   ;           |
 
 
 
-DATA_03A490                     ;$03A490    | X speed accelerations for Bowser in Phase 1.
+DATA_03A490:                    ;$03A490    | X speed accelerations for Bowser in Phase 1.
     db $FF,$01
 
 DATA_03A492:                    ;$03A492    | Maximum X speeds for Bowser in Phase 1.
@@ -5659,7 +5659,7 @@ CODE_03A61D:                    ;-----------| Subroutine to spawn one of Bowser'
 
 
 DATA_03A64D:                    ;$03A64D    | Angles for Bowser's hurt animation.
-    db $00,$00,$00,$00,$FC,$F8,$F4,$F0      ; Positive values are 000-07F; negative are 180-1FF.
+    db $00,$00,$00,$00,$FC,$F8,$F4,$F0      ; Although it's 8-bit, positive values refer to 000-07F and negative refer to 180-1FF.
     db $F4,$F8,$FC,$00,$04,$08,$0C,$10
     db $0C,$08,$04,$00
 
@@ -6672,7 +6672,7 @@ CODE_03AD88:                    ;           ||
     STA.w $1814,Y               ;$03ADA5    |/
     LDA.b #$00                  ;$03ADA8    |\ Clear sprite Y speed (unused?).
     STA.w $1820,Y               ;$03ADAA    |/
-    LDA.b #$17                  ;$03ADAD    |\ Set lifespan timer for the sparkle.
+    LDA.b #$17                  ;$03ADAD    |\\ Lifespan timer for Peach's sparkles.
     STA.w $1850,Y               ;$03ADAF    |/
     RTS                         ;$03ADB2    |
 
@@ -6938,7 +6938,7 @@ CODE_03AF72:                    ;```````````| Tile loop for the stars.
     CMP.b #$0D                  ;$03AFAB    ||
     BCS CODE_03AFD7             ;$03AFAD    |/
     TAX                         ;$03AFAF    |
-    LDY.b #$FC                  ;$03AFB0    || OAM index (from $0300) to use for Bowser's teardrop.
+    LDY.b #$FC                  ;$03AFB0    || OAM index (from $0200/$0300) to use for Bowser's teardrop.
     LDA $04                     ;$03AFB2    |\ 
     ASL                         ;$03AFB4    ||
     ROL                         ;$03AFB5    ||
@@ -7352,7 +7352,7 @@ MechakoopaSpeed:                ;$03B2A7    | X speeds for the MechaKoopa.
     ; MechaKoopa misc RAM:
     ; $C2   - Frame counter for deciding when to turn towards Mario.
     ; $1540 - Timer to wait before returning a stunned MechaKoopa to normal.
-    ; $1570 - Frame counter for animation,
+    ; $1570 - Frame counter for animation.
     ; $157C - Horizontal direction the sprite is facing.
     ; $1602 - Animation frame. 0/1/2/3 = walking, 4 = being stunned, 5 = stunned
     ; $1FE2 - Timer set after hitting a block in its stunned state.
@@ -7525,7 +7525,7 @@ CODE_03B39F:                    ;```````````| Tile loop
     BPL CODE_03B39F             ;$03B3E0    |/
     PLX                         ;$03B3E2    |
     LDY.b #$FF                  ;$03B3E3    |\ 
-    LDA.b #$03                  ;$03B3E5    || Uplaod 4 manually-sized tiles.
+    LDA.b #$03                  ;$03B3E5    || Upload 4 manually-sized tiles.
     JSL FinishOAMWrite          ;$03B3E7    |/
     JSR MechaKoopaKeyGfx        ;$03B3EB    | Draw the MechaKoopa's key.
     RTS                         ;$03B3EE    |
@@ -7570,7 +7570,7 @@ MechaKoopaKeyGfx:               ;-----------| GFX subroutine for the MechaKoopa'
     STA.w $0302,Y               ;$03B42F    |/
     PLX                         ;$03B432    |
     LDY.b #$00                  ;$03B433    |\ 
-    LDA.b #$00                  ;$03B435    || Uplaod 1 8x8 tile.
+    LDA.b #$00                  ;$03B435    || Upload 1 8x8 tile.
     JSL FinishOAMWrite          ;$03B437    |/
     RTS                         ;$03B43B    |
 
@@ -7650,7 +7650,7 @@ BowserSceneGfx:                 ;-----------| Subroutine to set up Bowser's boss
     LDA.w $190D                 ;$03B4B1    ||
     STA $0F                     ;$03B4B4    || Get OAM index for the floor of Bowser's room.
     CMP.b #$01                  ;$03B4B6    ||  For some reason, it also has one less tile uploaded after Bowser is defeated (not sure why).
-    LDX.b #$10                  ;$03B4B8    ||
+    LDX.b #$10                  ;$03B4B8    ||  The extra tile is never seen anyway.
     BCC CODE_03B4BF             ;$03B4BA    ||
     LDY.b #$90                  ;$03B4BC    ||| OAM index (from $0300) for the floor of Bowser's room after Bowser is defeated.
     DEX                         ;$03B4BE    |/
@@ -7952,9 +7952,11 @@ CODE_03B715:                    ;           |
 
 
 
+    ; Scratch RAM usage: $0C, $0F
+    
 CheckForContact:                ;-----------| Check for contact routine. Returns carry set if so, clear if not.
     PHX                         ;$03B72B    |  Run two of the three above routines first,
-    LDX.b #$01                  ;$03B72C    |  or one of the codes at $02A519 / $02A547. 
+    LDX.b #$01                  ;$03B72C    |   or one of the codes at $02A519 / $02A547. 
 CODE_03B72E:                    ;           |
     LDA $00,X                   ;$03B72E    |\ 
     SEC                         ;$03B730    ||
@@ -8209,16 +8211,16 @@ CODE_03B8A8:                    ;           |
     LDA $00                     ;$03B8A8    |
     BPL Return03B8C2            ;$03B8AA    |
 OffScrEraseSprBnk3:             ;           |
-    LDA.w $14C8,X               ;$03B8AC    |
-    CMP.b #$08                  ;$03B8AF    |
-    BCC OffScrKillSprBnk3       ;$03B8B1    |
-    LDY.w $161A,X               ;$03B8B3    |
-    CPY.b #$FF                  ;$03B8B6    |
-    BEQ OffScrKillSprBnk3       ;$03B8B8    |
-    LDA.b #$00                  ;$03B8BA    |
-    STA.w $1938,Y               ;$03B8BC    |
-OffScrKillSprBnk3:              ;           |
-    STZ.w $14C8,X               ;$03B8BF    |
+    LDA.w $14C8,X               ;$03B8AC    |\ 
+    CMP.b #$08                  ;$03B8AF    ||
+    BCC OffScrKillSprBnk3       ;$03B8B1    ||
+    LDY.w $161A,X               ;$03B8B3    ||
+    CPY.b #$FF                  ;$03B8B6    || Erase the sprite.
+    BEQ OffScrKillSprBnk3       ;$03B8B8    ||  If it wasn't killed, set it to respawn.
+    LDA.b #$00                  ;$03B8BA    ||
+    STA.w $1938,Y               ;$03B8BC    ||
+OffScrKillSprBnk3:              ;           ||
+    STZ.w $14C8,X               ;$03B8BF    |/
 Return03B8C2:                   ;           |
     RTS                         ;$03B8C2    |
 
@@ -8315,8 +8317,7 @@ Empty03BA02:                    ;$03BA02    | Empty. LM sticks various hijacks i
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF
 
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BA50 - Used by LM as a hijack to $049199 for determining whether an overworld level is enterable.
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+Empty03BA50:                    ;$03BA50    | Used by LM as a hijack to $049199 to implement the "no entry if level beaten" flag.
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
@@ -8337,14 +8338,21 @@ Empty03BA02:                    ;$03BA02    | Empty. LM sticks various hijacks i
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF
 
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF
+    
+Empty03BB00:                    ;$03BB00    | Used by LM as a hijack to ???
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF
+    
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF
 
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BB20 - Used by LM for its level name hijack.
+Empty03BB20:                    ;$03BB20    | Used by LM for its level name hijack, to write the name into the stripe image table.
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF      ; The actual name table can be found at read3($03BB57), with 19 bytes per level.
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
@@ -8354,12 +8362,17 @@ Empty03BA02:                    ;$03BA02    | Empty. LM sticks various hijacks i
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF
+    
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF
 
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BB90 - Used by LM for its message box text hijack.
+Empty03BB90:                    ;$03BB90    | Used by LM for its message box text hijack.
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
@@ -8389,82 +8402,89 @@ Empty03BA02:                    ;$03BA02    | Empty. LM sticks various hijacks i
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF
-
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BC7F - Used by LM as a table of message box stripe headers (first 2 bytes) for each line.
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ;  With Lunar Magic's overworld level expansion, this table is shifted a bit earlier, to $03BC79.
-
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BC8F - Unused?
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+Empty03BC8F:                            ;$03BC8F    | Unused.
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF
-
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BCC0 - Used by LM for a 16-byte table related to ExAnimation.
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BCD0 - Unused?
+    
+Empty03BCA0:                            ;$03BCA0    | Used by LM for the "display level message 1" fix.
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+Empty03BCB0:                            ;$03BCB0    | Unused.
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
 
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; $03BE80 - Used by LM as 16-bit pointers to each message box's text.
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ;  Indexed by ((level * 2) + message number) * 2.
+Empty03BCC0:                            ;$03BCC0    | Used by LM for 24-bit pointers to ExGFX60-63.
+    dl $FFFFFF,$FFFFFF,$FFFFFF,$FFFFFF
+    
+Empty03BCCC:                            ;$03BCCC    | Unused.
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ; Note: if LM's overworld level expansion is applied, this table is moved to read3($03BBD9).
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ;  Instead, this table used for the initial level flags (moved from $05DDA0).
-    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ;  The remainder of the table ($03BF80 onwards) is then left unused for now.
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    
+Empty03BCDC:                            ;$03BCDC    | Used by LM v3+ as a springboard to get the screen that the player is currently on. Returns the result in X.
+    db $FF,$FF,$FF,$FF
+
+Empty03BCE0:                            ;$03BCE0    | Used by LM as a routine to implement the additional secondary entrance bytes.
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+
+Empty03BE80:                    ;$03BE80    | Used by LM as 16-bit pointers to each message box's text.
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF      ;  Indexed by ((level * 2) + message number) * 2.
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF      ; Note: if LM's overworld level expansion is applied, this table is moved to read3($03BBD9),
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF      ;  and this table is instead used for the initial level flags (moved from $05DDA0).
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF      ;  The remainder of the table ($03BF80 onwards) is then left unused for now.
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
     db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
@@ -8574,7 +8594,7 @@ CODE_03C05C:                    ;           |
     STZ.w $18AC                 ;$03C05C    |
     STZ.w $141E                 ;$03C05F    |
     LDA.b #$35                  ;$03C062    |\ 
-    STA.w $9E,X                 ;$03C064    || Make a grown Yoshi.
+    STA.w $9E,X                 ;$03C064    || Turn into a grown Yoshi.
     LDA.b #$08                  ;$03C067    ||
     STA.w $14C8,X               ;$03C069    |/
     LDA.b #$1F                  ;$03C06C    |\ SFX for Yoshi growing up.
@@ -10143,7 +10163,7 @@ Return03CC08:                   ;           |
     ; $1570 - Flag for being a dummy, used to index some tables. 00 = wendy/lemmy, 10 = dummy 1, 20 = dummy 2.
     ; $1602 - Animation frame.
     ;          0/1 = hurt, 2/3 = looking at camera, 4/5 = waving hands A, 6/7 = opening mouth, 
-    ;          8/9 = look side to side, A/B = weird face A, C/D = legs, E/F = weird face B,
+    ;          8/9 = look side to side, A/B = sticking tongue out, C/D = legs, E/F = weird face,
     ;          10/11/12 = waving hands B, 13 = dummy, 14/15/16 = dummy hurt
     ; $160E - Spawn position index, for deciding which pipes to emerge each sprite from.
 
@@ -10432,7 +10452,7 @@ CODE_03CE89:                    ;-----------| Wendy/Lemmy phase 6 - Sinking in l
     BNE CODE_03CE9E             ;$03CE8C    |/
     STZ.w $14C8,X               ;$03CE8E    | Erase the boss.
     INC.w $13C6                 ;$03CE91    |\ 
-    LDA.b #$FF                  ;$03CE94    ||| How long the fadeout is before the castle destruction scene appears.
+    LDA.b #$FF                  ;$03CE94    || End the level.
     STA.w $1493                 ;$03CE96    |/
     LDA.b #$0B                  ;$03CE99    |\ SFX for the song after Wendy/Lemmy is defeated.
     STA.w $1DFB                 ;$03CE9B    |/
@@ -10516,8 +10536,8 @@ DATA_03CF7C:                    ;$03CF7C    | X offsets for Wendy's tiles.
     db $F8,$08,$00,$00,$00,$00
     db $F8,$00,$08,$00,$00,$00
     db $F8,$00,$08,$00,$00,$00
-    db $F8,$08,$00,$06,$00,$08
-    db $F8,$08,$00,$02,$00,$08
+    db $F8,$08,$00,$06,$00,$08  ; <- change the 06 to 08 to fix Wendy's bow
+    db $F8,$08,$00,$02,$00,$08  ; <- change the 02 to 08 to fix Wendy's bow
     db $F8,$08,$00,$04,$00,$08
     db $F8,$08,$00,$00,$08,$00
     db $F8,$08,$00,$00,$00,$00
@@ -10608,7 +10628,7 @@ DATA_03D11A:                    ;$03D11A    | Lemmy (and dummies) tilemap.
     db $62,$62,$64,$00,$00,$00
 
 DATA_03D1A4:                    ;$03D1A4    | Wendy (and dummies) tilemap.
-    db $20,$20,$26,$26,$48,$00      ; [change $D1D7 to 1F 1E and $D1DD to 1E 1F to fix Wendy's bow, in conjunction with $03CF7C]
+    db $20,$20,$26,$26,$48,$00              ; [change $D1D7 to 1F 1E and $D1DD to 1E 1F to fix Wendy's bow, in conjunction with $03CF7C]
     db $2E,$2E,$24,$24,$48,$00
     db $40,$28,$42,$00,$00,$00
     db $44,$28,$52,$52,$00,$00
@@ -10616,8 +10636,8 @@ DATA_03D1A4:                    ;$03D1A4    | Wendy (and dummies) tilemap.
     db $20,$20,$48,$00,$00,$00
     db $40,$28,$42,$00,$00,$00
     db $4A,$28,$53,$00,$00,$00
-    db $20,$20,$4C,$1E,$1F,$00
-    db $20,$20,$4C,$1F,$1E,$00
+    db $20,$20,$4C,$1E,$1F,$00  ; <- change $1E,$1F to $1F,$1E to fix Wendy's bow
+    db $20,$20,$4C,$1F,$1E,$00  ; <- change $1F,$1E to $1E,$1F to fix Wendy's bow
     db $22,$22,$44,$03,$52,$52
     db $20,$20,$44,$52,$52,$00
     db $2A,$2A,$00,$00,$00,$00
@@ -10844,48 +10864,90 @@ CODE_03D4E8:                    ;           |
 
 
 DATA_03D524:                    ;$03D524    | OAM data for the "Mario's adventure is over..." message. In raw OAM format.
-    db $18,$20,$A1,$0E,$20,$20,$88,$0E      ; Ma        Mario's adventure is over.
-    db $28,$20,$AB,$0E,$30,$20,$99,$0E      ; ri        Mario,the Princess,Yoshi,
-    db $38,$20,$A8,$0E,$40,$20,$BF,$0E      ; o'        and his friends are going
-    db $48,$20,$AC,$0E,$58,$20,$88,$0E      ; sa        to take a vacation.
-    db $60,$20,$8B,$0E,$68,$20,$AF,$0E      ; dv
-    db $70,$20,$8C,$0E,$78,$20,$9E,$0E      ; en
-    db $80,$20,$AD,$0E,$88,$20,$AE,$0E      ; tu
-    db $90,$20,$AB,$0E,$98,$20,$8C,$0E      ; re
-    db $A8,$20,$99,$0E,$B0,$20,$AC,$0E      ; is
-    db $C0,$20,$A8,$0E,$C8,$20,$AF,$0E      ; ov
-    db $D0,$20,$8C,$0E,$D8,$20,$AB,$0E      ; er
-    db $E0,$20,$BD,$0E,$18,$30,$A1,$0E      ; .M
-    db $20,$30,$88,$0E,$28,$30,$AB,$0E      ; ar
-    db $30,$30,$99,$0E,$38,$30,$A8,$0E      ; io
-    db $40,$30,$BE,$0E,$48,$30,$AD,$0E      ; ,t
-    db $50,$30,$98,$0E,$58,$30,$8C,$0E      ; he
-    db $68,$30,$A0,$0E,$70,$30,$AB,$0E      ; Pr
-    db $78,$30,$99,$0E,$80,$30,$9E,$0E      ; in
-    db $88,$30,$8A,$0E,$90,$30,$8C,$0E      ; ce
-    db $98,$30,$AC,$0E,$A0,$30,$AC,$0E      ; ss
-    db $A8,$30,$BE,$0E,$B0,$30,$B0,$0E      ; ,Y
-    db $B8,$30,$A8,$0E,$C0,$30,$AC,$0E      ; os
-    db $C8,$30,$98,$0E,$D0,$30,$99,$0E      ; hi
-    db $D8,$30,$BE,$0E,$18,$40,$88,$0E      ; ,a
-    db $20,$40,$9E,$0E,$28,$40,$8B,$0E      ; nd
-    db $38,$40,$98,$0E,$40,$40,$99,$0E      ; hi
-    db $48,$40,$AC,$0E,$58,$40,$8D,$0E      ; sf
-    db $60,$40,$AB,$0E,$68,$40,$99,$0E      ; ri
-    db $70,$40,$8C,$0E,$78,$40,$9E,$0E      ; en
-    db $80,$40,$8B,$0E,$88,$40,$AC,$0E      ; ds
-    db $98,$40,$88,$0E,$A0,$40,$AB,$0E      ; ar
-    db $A8,$40,$8C,$0E,$B8,$40,$8E,$0E      ; eg
-    db $C0,$40,$A8,$0E,$C8,$40,$99,$0E      ; oi
-    db $D0,$40,$9E,$0E,$D8,$40,$8E,$0E      ; ng
-    db $18,$50,$AD,$0E,$20,$50,$A8,$0E      ; to
-    db $30,$50,$AD,$0E,$38,$50,$88,$0E      ; ta
-    db $40,$50,$9B,$0E,$48,$50,$8C,$0E      ; ke
-    db $58,$50,$88,$0E,$68,$50,$AF,$0E      ; av
-    db $70,$50,$88,$0E,$78,$50,$8A,$0E      ; ac
-    db $80,$50,$88,$0E,$88,$50,$AD,$0E      ; at
-    db $90,$50,$99,$0E,$98,$50,$A8,$0E      ; io
-    db $A0,$50,$9E,$0E,$A8,$50,$BD,$0E      ; n.
+    db $18,$20,$A1,$0E  ; M      Mario's adventure is over.
+    db $20,$20,$88,$0E  ; a      Mario,the Princess,Yoshi,
+    db $28,$20,$AB,$0E  ; r      and his friends are going
+    db $30,$20,$99,$0E  ; i      to take a vacation.
+    db $38,$20,$A8,$0E  ; o
+    db $40,$20,$BF,$0E  ; '
+    db $48,$20,$AC,$0E  ; s
+    db $58,$20,$88,$0E  ; a
+    db $60,$20,$8B,$0E  ; d
+    db $68,$20,$AF,$0E  ; v
+    db $70,$20,$8C,$0E  ; e
+    db $78,$20,$9E,$0E  ; n
+    db $80,$20,$AD,$0E  ; t
+    db $88,$20,$AE,$0E  ; u
+    db $90,$20,$AB,$0E  ; r
+    db $98,$20,$8C,$0E  ; e
+    db $A8,$20,$99,$0E  ; i
+    db $B0,$20,$AC,$0E  ; s
+    db $C0,$20,$A8,$0E  ; o
+    db $C8,$20,$AF,$0E  ; v
+    db $D0,$20,$8C,$0E  ; e
+    db $D8,$20,$AB,$0E  ; r
+    db $E0,$20,$BD,$0E  ; .
+    db $18,$30,$A1,$0E  ; M
+    db $20,$30,$88,$0E  ; a
+    db $28,$30,$AB,$0E  ; r
+    db $30,$30,$99,$0E  ; i
+    db $38,$30,$A8,$0E  ; o
+    db $40,$30,$BE,$0E  ; ,
+    db $48,$30,$AD,$0E  ; t
+    db $50,$30,$98,$0E  ; h
+    db $58,$30,$8C,$0E  ; e
+    db $68,$30,$A0,$0E  ; P
+    db $70,$30,$AB,$0E  ; r
+    db $78,$30,$99,$0E  ; i
+    db $80,$30,$9E,$0E  ; n
+    db $88,$30,$8A,$0E  ; c
+    db $90,$30,$8C,$0E  ; e
+    db $98,$30,$AC,$0E  ; s
+    db $A0,$30,$AC,$0E  ; s
+    db $A8,$30,$BE,$0E  ; ,
+    db $B0,$30,$B0,$0E  ; Y
+    db $B8,$30,$A8,$0E  ; o
+    db $C0,$30,$AC,$0E  ; s
+    db $C8,$30,$98,$0E  ; h
+    db $D0,$30,$99,$0E  ; i
+    db $D8,$30,$BE,$0E  ; ,
+    db $18,$40,$88,$0E  ; a
+    db $20,$40,$9E,$0E  ; n
+    db $28,$40,$8B,$0E  ; d
+    db $38,$40,$98,$0E  ; h
+    db $40,$40,$99,$0E  ; i
+    db $48,$40,$AC,$0E  ; s
+    db $58,$40,$8D,$0E  ; f
+    db $60,$40,$AB,$0E  ; r
+    db $68,$40,$99,$0E  ; i
+    db $70,$40,$8C,$0E  ; e
+    db $78,$40,$9E,$0E  ; n
+    db $80,$40,$8B,$0E  ; d
+    db $88,$40,$AC,$0E  ; s
+    db $98,$40,$88,$0E  ; a
+    db $A0,$40,$AB,$0E  ; r
+    db $A8,$40,$8C,$0E  ; e
+    db $B8,$40,$8E,$0E  ; g
+    db $C0,$40,$A8,$0E  ; o
+    db $C8,$40,$99,$0E  ; i
+    db $D0,$40,$9E,$0E  ; n
+    db $D8,$40,$8E,$0E  ; g
+    db $18,$50,$AD,$0E  ; t
+    db $20,$50,$A8,$0E  ; o
+    db $30,$50,$AD,$0E  ; t
+    db $38,$50,$88,$0E  ; a
+    db $40,$50,$9B,$0E  ; k
+    db $48,$50,$8C,$0E  ; e
+    db $58,$50,$88,$0E  ; a
+    db $68,$50,$AF,$0E  ; v
+    db $70,$50,$88,$0E  ; a
+    db $78,$50,$8A,$0E  ; c
+    db $80,$50,$88,$0E  ; a
+    db $88,$50,$AD,$0E  ; t
+    db $90,$50,$99,$0E  ; i
+    db $98,$50,$A8,$0E  ; o
+    db $A0,$50,$9E,$0E  ; n
+    db $A8,$50,$BD,$0E  ; .
 
 CODE_03D674:                    ;-----------| Routine to write the "Mario's adventure is over..." message.
     PHX                         ;$03D674    |
@@ -11318,8 +11380,7 @@ DATA_03DBBE:                    ;$03DBBE    | Bowser's Mode 7 tilemap, indexed f
 
 KoopaPalPtrLo:                  ;$03DD6E    | Low byte for the pointers to Morton, Roy, Ludwig, Bowser, and Reznor's wheel palettes.
     db $BC,$A4,$98,$78,$6C
-
-KoopaPalPtrHi:                  ;$03DD73    | High byte for the pointers to Morton, Roy, Bowser, and Reznor's wheel palettes.
+KoopaPalPtrHi:                  ;$03DD73    | High byte for the pointers to Morton, Roy, Ludwig, Bowser, and Reznor's wheel palettes.
     db $B2,$B2,$B2,$B3,$B3
 
 DATA_03DD78:                    ;$03DD78    | Graphics files used for Morton, Roy, Ludwig, and Bowser. Last byte is unused.
@@ -11405,7 +11466,7 @@ CODE_03DDFB:                    ;           |||
     LDA.w $1BA3,X               ;$03DDFB    |||
     ASL                         ;$03DDFE    |||
     ROL                         ;$03DDFF    |||
-    ROL                         ;$03DE00    ||| Write each pixels's data to VRAM.
+    ROL                         ;$03DE00    ||| Write each pixel's data to VRAM, and preserve the data to reuse for the tile's mirror.
     ROL                         ;$03DE01    |||
     AND.b #$07                  ;$03DE02    |||
     STA.w $1BA3,X               ;$03DE04    |||
@@ -11413,16 +11474,16 @@ CODE_03DDFB:                    ;           |||
     INX                         ;$03DE0A    |||
     DEY                         ;$03DE0B    |||
     BNE CODE_03DDFB             ;$03DE0C    ||/
-    PLY                         ;$03DE0E    ||\ 
-    DEC $05                     ;$03DE0F    ||| Loop for remaining rows.
-    BNE CODE_03DDEC             ;$03DE11    |//
+    PLY                         ;$03DE0E    ||
+    DEC $05                     ;$03DE0F    ||
+    BNE CODE_03DDEC             ;$03DE11    |/
     LDA.b #$07                  ;$03DE13    |\ 
 CODE_03DE15:                    ;           || Upload another 8x8 of the GFX file to VRAM (the "mirrored" tile).
     TAX                         ;$03DE15    ||
     LDY.b #$08                  ;$03DE16    ||\ 
     STY $05                     ;$03DE18    |||
 CODE_03DE1A:                    ;           |||
-    LDY.w $1BA3,X               ;$03DE1A    ||| Write each pixel's data to VRAM, in reverse.
+    LDY.w $1BA3,X               ;$03DE1A    ||| Write each pixel's data to VRAM in reverse.
     STY.w $2119                 ;$03DE1D    |||
     DEX                         ;$03DE20    |||
     DEC $05                     ;$03DE21    |||
@@ -11442,13 +11503,13 @@ CODE_03DE1A:                    ;           |||
 
 CODE_03DE39:                    ;```````````| Subroutine to get two bits of each pixel's data in a row.
     JSR CODE_03DE3C             ;$03DE39    |
-CODE_03DE3C:                    ;```````````| Subroutine to get one bit of each pixel's data in a row.
+CODE_03DE3C:                    ;```````````| Subroutine to get one bit of each pixel's data in a row, for 3bpp->8bpp conversion.
     PHX                         ;$03DE3C    |
     LDA [$00],Y                 ;$03DE3D    |\ 
     PHY                         ;$03DE3F    ||
     LDY.b #$08                  ;$03DE40    ||
 CODE_03DE42:                    ;           ||
-    ASL                         ;$03DE42    || Get one bit for each pixel... backwards, for some reason.
+    ASL                         ;$03DE42    || Get one bit for each pixel.
     ROR.w $1BA3,X               ;$03DE43    ||
     INX                         ;$03DE46    ||
     DEY                         ;$03DE47    ||
