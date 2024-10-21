@@ -14,14 +14,14 @@ endif
     ;  The first two contain the ID the GFX list to use, +1. 00 indicates the list is not bypassed.
     ;  The AN2 one just contains the file ID directly, +1.
 
+!RAM_Unknown            =   $FA
+    ; this one is unknown. set alongside the AN2 file.
+
 !RAM_ExLevelHeight      =   $13D7|!addr
     ; 2 bytes, from ExLevel patch: height of the level, in pixels.
 
 !RAM_DM16Flags          =   $7FC060
     ; 16 bytes; bitwise flags for each direct Map16 slot
-
-!RAM_Unknown            =   $FA
-    ; this one is unknown. set alongside the AN2 file.
 
 ;=======================================================================
 

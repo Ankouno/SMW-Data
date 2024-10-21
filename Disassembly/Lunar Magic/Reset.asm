@@ -1,4 +1,4 @@
-; Code used for ExAnimation in both levels and the overworld.
+; Code to clean ExAnimation data on reset.
 ;=======================================================================
 if read1($00FFD5) == $23
     sa1rom
@@ -10,23 +10,23 @@ endif
 
 ;=======================================================================
 
-org $008A4E     ; reset
+org $008A4E         ; cleaning RAM on reset
     autoclean JSL ResetExAnimation
     NOP
 
 freecode
-ResetExAnimation:
+ResetExAnimation:   ; clean up ExAnimation data as well
     REP #$30
     LDA #$0000
-    STA !RAM_UpdateData+(7*0)
-    STA !RAM_UpdateData+(7*1)
-    STA !RAM_UpdateData+(7*2)
-    STA !RAM_UpdateData+(7*3)
-    STA !RAM_UpdateData+(7*4)
-    STA !RAM_UpdateData+(7*5)
-    STA !RAM_UpdateData+(7*6)
-    STA !RAM_UpdateData+(7*7)
-    LDX #$1FFE
+    STA.l !RAM_UpdateData+(7*0)
+    STA.l !RAM_UpdateData+(7*1)
+    STA.l !RAM_UpdateData+(7*2)
+    STA.l !RAM_UpdateData+(7*3)
+    STA.l !RAM_UpdateData+(7*4)
+    STA.l !RAM_UpdateData+(7*5)
+    STA.l !RAM_UpdateData+(7*6)
+    STA.l !RAM_UpdateData+(7*7)
+    LDX #$1FFE      ; (restore code)
     RTL
 
   .version:

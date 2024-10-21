@@ -1,4 +1,5 @@
 ; Implements code for scrolling Layer 2.
+;  Also bundled with some additional code for the primary level header.
 ;=======================================================================
 !addr = $0000
 !sa1 = 0
@@ -36,9 +37,9 @@ endif
     ; 2 bytes. Copy of $17BE/$17BF (distance Layer 2/3 moved) for the "previous" frame.
     ;  Used to help with syncing the movement of Layer 2/3 with their sprite interaction.
 
-!RAM_UnknownB       =   $F9
-    ; 1 byte. Unknown purpose.
-    ; Set to either 40 or C0 depending on L bit of header byte 8.
+!RAM_ShootSlantedXSpeed =   $F9
+    ; 1 byte, used as the X speed that the "shoot from slanted pipe right" entrance action fires Mario with.
+    ;  Set to either 40 or C0 depending on if the "Face left direction" flag was set.
 
 ;=======================================================================
 
@@ -63,6 +64,9 @@ org $05BCA5 ; scroll sprite MAIN
     
 org $00E966 ; post mario interaction with layer 2, to fix a scroll sync issue with sprites
     JML SpriteSyncFix
+
+org $00D2B2 ; fix for the "shoot from slanted pipe right" entrance action when using "face left direction"
+    LDA !RAM_ShootSlantedXSpeed
 
 ;=======================================================================
 
@@ -424,7 +428,6 @@ LoadSecondaryHeader_version:
     db "LM" : dw $0101
 
 ;=======================================================================
-; not entirely sure what this code is doing
 
 LoadPrimaryHeader:
     LDA [$65]   ; get number of screens in the level
@@ -440,7 +443,7 @@ LoadPrimaryHeader:
     LDA #$C0
     PLP
   .noFaceLeft:
-    STA !RAM_UnknownB   ; = set 40 or C0 depending on if entrance faces left?
+    STA !RAM_ShootSlantedXSpeed   ; = set 40 or C0 depending on if entrance faces left
     BPL .nonRelativeFgBg
   .relativeFgBg:
     REP #$21
