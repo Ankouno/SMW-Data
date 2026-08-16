@@ -11,7 +11,7 @@ This format should be accurate as of Lunar Magic v3.63.
 
 The file begins with a 0x40 byte header.  
 
-The first four bytes are the characters "LM" followed by the Lunar Magic version used to create the MWL, as a two-byte value.
+The first four bytes are the characters "LM" followed by the Lunar Magic version used to create the MWL, as a two-byte value (e.g. v3.63 would be ``63 03``).
 
 The next four bytes are a 32-bit offset (little endian) within the file to the data pointer list.
 4 more bytes after this form a 32-bit value (little endian) for the number of bytes used by the data pointers.
@@ -20,7 +20,7 @@ After this are four bytes for special information flags:
 &nbsp;&nbsp;&nbsp;&nbsp;Bit 0 of byte 0 indicates the current level is exported from SMA2.  
 &nbsp;&nbsp;&nbsp;&nbsp;All other bits are currently unknown/unused (U/J/SMAS are not indicated, nor is FastROM, SA-1, or SuperFX).  
 
-Finally, there is the following 48-byte string (vertical bars used for spacing):
+Finally, there is a 48-byte block reserved for comments. This data can be anything and has no impact on the actual MWL, although Lunar Magic writes the following string there (vertical bars used for spacing):
 
 ```text
 |Lunar Magic x.xx|
